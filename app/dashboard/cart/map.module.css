@@ -1,0 +1,19 @@
+.selected-booth {
+  animation: blink 1s ease-in-out infinite;
+}
+
+.occupied-booth {
+  fill: #e0e0e0;
+}
+
+@keyframes blink {
+  0% {
+    fill: rgb(0, 122, 255);
+  }
+  50% {
+    fill: rgb(102, 178, 255);
+  }
+  100% {
+    fill: rgb(0, 122, 255);
+  }
+}
