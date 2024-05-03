@@ -5,6 +5,8 @@ import "./globals.css";
 import { TopMenuDesktop } from "@/app/navmenu";
 import FileHandler from '@tiptap-pro/extension-file-handler'
 import Image from '@tiptap/extension-image'
+import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/react"
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,15 +22,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={inter.className}><ThemeProvider
-        attribute="class"
-        defaultTheme="light"
-        enableSystem
-        disableTransitionOnChange
-      >
-      <TopMenuDesktop/>
-        {children}
-      </ThemeProvider></body>
+      <body className={inter.className}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TopMenuDesktop />
+          {children}
+        </ThemeProvider>
+        <Analytics />
+        <SpeedInsights />
+      </body>
     </html>
   );
 }
