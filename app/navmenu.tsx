@@ -26,7 +26,7 @@ export function TopMenuDesktop() {
   const isSticky = pathname === '/';
   const { theme, setTheme } = useTheme()
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (theme !== 'system') {
       setTheme('system')
     }
@@ -52,7 +52,16 @@ export function TopMenuDesktop() {
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
-          <NavigationMenuItem>
+          <NavigationMenuItem className="flex gap-1 hidden">
+            <Button onClick={() => setTheme('light')}>
+              라이트
+            </Button>
+            <Button onClick={() => setTheme('dark')}>
+              다크
+            </Button>
+            <Button onClick={() => setTheme('system')}>
+              시스템
+            </Button>
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
