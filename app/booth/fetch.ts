@@ -2,7 +2,6 @@
 import { createClient } from "@/utils/supabase/server";
 import Vibrant from "node-vibrant";
 import sharp from "sharp";
-export const runtime = 'edge';
 export default async function SearchResult({
 	searchParams,
     page = 1,
