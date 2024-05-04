@@ -11,10 +11,10 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { BoothMenu, BoothMenu2 } from "../buttons/booth-menu";
+import { BoothMenu, BoothMenu2, LikeButton } from "../buttons/booth-menu";
 import { Suspense, useMemo, useRef, useEffect } from "react";
+import { Circle, Ticket, Truck } from "lucide-react";
 import { useInView } from 'react-intersection-observer';
-import { ImageOff } from "lucide-react";
 
 export default function BoothProfile({ data, color }: { data: any, color: string }) {
 
@@ -71,8 +71,8 @@ export default function BoothProfile({ data, color }: { data: any, color: string
                                         priority={true}
                                     />
                                 ) : (
-                                    <div className="bg-muted flex justify-center items-center w-full h-full">
-                                        <ImageOff className="w-12 h-12 text-muted-foreground" />
+                                    <div className="bg-gray-200 flex justify-center items-center w-full h-full">
+                                        <span>No Image</span>
                                     </div>
                                 )}
                             </div>
@@ -109,7 +109,7 @@ export default function BoothProfile({ data, color }: { data: any, color: string
                 </div>
             </Card>
             <div
-                className={`py-2 fixed z-20 top-0 left-1/2 transform -translate-x-1/2 bg-background/70 backdrop-blur-md w-full transition-all duration-300 ${buttonInView ? 'opacity-0 -translate-y-full' : 'opacity-100 translate-y-0'}`}
+                className={`py-2 fixed z-40 top-0 left-1/2 transform -translate-x-1/2 bg-background/70 backdrop-blur-md w-full transition-all duration-300 ${buttonInView ? 'opacity-0 -translate-y-full' : 'opacity-100 translate-y-0'}`}
             >
                 <div className="flex gap-2 items-center justify-between px-4 xl:px-96">
                     <div className="flex flex-col">

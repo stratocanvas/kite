@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useEffect } from 'react';
 import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from 'next/navigation';
-export const runtime = 'edge';
+
 const supabase = createClient()
 
 async function SignIn() {

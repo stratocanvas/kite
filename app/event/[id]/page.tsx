@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Home, Map, Ticket, Heart } from "lucide-react"
 import sharp from "sharp";
 import Vibrant from "node-vibrant";
-export const runtime = 'edge';
+
 export default async function EventInfo({ params }) {
   const supabase = createClient();
 

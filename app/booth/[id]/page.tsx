@@ -10,9 +10,8 @@ import sharp from "sharp";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Skeleton } from "@/components/ui/skeleton";
 import { notFound } from "next/navigation";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 
+export const revalidate = 0
 export async function GetBoothData(boothId: string) {
     const supabase = createClient()
     const { data: booth } = await supabase
@@ -58,7 +57,7 @@ export default async function Home({ params }: { params: { id: string } }) {
                         <Suspense>
                             <BoothDescription data={booth} />
                         </Suspense>
-                        <Suspense fallback={<ProductsSkeleton />}>
+                        <Suspense fallback={<div>Loading...</div>}>
                             <BoothProducts params={params} />
                         </Suspense>
                     </div>
@@ -70,43 +69,5 @@ export default async function Home({ params }: { params: { id: string } }) {
                 </div>
             </div>
         </>
-    );
-}
-
-function ProductsSkeleton() {
-    return (
-        <Card className="h-[100%] flex flex-col border-none shadow-none">
-            <CardContent className="flex-grow mt-6 flex items-center overflow-x-auto">
-                <Label className="text-xl font-bold">
-                    <Skeleton className="w-20 h-6" />
-                </Label>
-            </CardContent>
-            <CardContent className="-mt-1 pl-6 pr-0 overflow-x-auto">
-                <div className="flex space-x-4">
-                    <Card className="w-[290px] h-[100%] flex flex-col">
-                        <AspectRatio ratio={1 / 1}>
-                            <div className="rounded-t-md bg-muted flex justify-center items-center w-full h-full">
-                                <Skeleton className="w-full h-full" />
-                            </div>
-                        </AspectRatio>
-                        <CardHeader>
-                            <CardDescription>
-                                <Skeleton className="w-32 h-4" />
-                            </CardDescription>
-                            <CardTitle className="break-words overflow-hidden text-ellipsis">
-                                <Skeleton className="w-48 h-6" />
-                            </CardTitle>
-                            <Skeleton className="w-24 h-4" />
-                        </CardHeader>
-                        <CardContent className="flex-grow -mt-2 flex items-start justify-start overflow-x-auto">
-                            <Skeleton className="w-32 h-10" />
-                        </CardContent>
-                        <CardFooter className="flex items-center overflow-x-auto mt-auto">
-                            <Skeleton className="w-24 h-10" />
-                        </CardFooter>
-                    </Card>
-                </div>
-            </CardContent>
-        </Card>
     );
 }

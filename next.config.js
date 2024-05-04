@@ -6,7 +6,7 @@ module.exports = nextConfig;
 module.exports = {
 	experimental: {
 		serverActions: {
-			bodySizeLimit: "4.5mb",
+			bodySizeLimit: "100mb",
 		},
 	},
 	eslint: {

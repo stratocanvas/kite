@@ -2,6 +2,7 @@
 import { createClient } from "@/utils/supabase/server";
 import Vibrant from "node-vibrant";
 import sharp from "sharp";
+
 export default async function SearchResult({
 	searchParams,
     page = 1,
