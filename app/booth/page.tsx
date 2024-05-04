@@ -15,7 +15,6 @@ import SearchResult from "./fetch";
 import { SearchBarSmall } from "@/components/search/search"
 import { Badge } from '@/components/ui/badge';
 import MoreBooth from "./load-more";
-import { useMemo } from "react";
 async function getBoothData(searchParams: { character?: string; category?: string; genre?: string; author?: string } = {}) {
 
   const { booth } = await SearchResult({ searchParams });
