@@ -1,6 +1,5 @@
 "use server";
 import { createClient } from "@/utils/supabase/server";
-export const runtime = 'edge';
 export async function ConnectAuthor(search: string) {
 	const supabase = createClient();
 	const { data: userData, error: userError } = await supabase.auth.getUser();
