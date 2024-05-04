@@ -78,13 +78,15 @@ export function Block({ type, attrs, content, marks }: { type: string; attrs?: a
                     return <Separator className="my-2" />;
                 case 'image':
                     return (
-                        <div className="relative min-h-96 w-full h-full my-2 lg:my-4">
+                        <div className="relative w-full h-full my-2 lg:my-4">
                             <Image
                                 className="object-cover rounded-md"
                                 loading="lazy"
                                 src={attrs?.src}
                                 alt=""
                                 fill
+                                priority={false}
+                                unoptimized
                                 style={{ objectFit: "cover" }}
                             />
                         </div>

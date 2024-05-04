@@ -10,7 +10,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Image from "next/image"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
-import { Heart, ImageOff } from "lucide-react";
+import { ImageOff } from "lucide-react";
 import SearchResult from "./fetch";
 import { SearchBarSmall } from "@/components/search/search"
 import { Badge } from '@/components/ui/badge';
