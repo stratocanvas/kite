@@ -12,14 +12,13 @@ import sharp from "sharp"
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button"
 export const runtime = 'edge';
+
 export interface Artwork {
   artist: string
   art: string
 }
 
 export default async function Home() {
-  await new Promise((resolve) => setTimeout(resolve, 5000)); // 2초 지연
-
   const supabase = createClient();
 
   const { data: booth } = await supabase.from("booth").select(`

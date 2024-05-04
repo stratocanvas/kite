@@ -12,7 +12,6 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { useEffect, useMemo } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { LikeButton } from './likebutton';
 
 export default function MoreBooth({ initialBoothIds, searchParams }: { initialBoothIds: string[], searchParams: any }) {
 

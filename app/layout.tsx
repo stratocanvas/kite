@@ -35,18 +35,14 @@ export default function RootLayout({
           enableSystem
         >
           <TopMenuDesktop />
-          {maintenanceMode ? (
+
             <div className="flex justify-center items-center mt-20">
               <h1 className="text-2xl font-bold flex flex-col items-center gap-4">
                 <Construction className="w-12 h-12" />
                 서비스 점검 중
               </h1>
             </div>
-          ) : (
-            <>
-              {children}
-            </>
-          )}
+
           <Analytics />
           <SpeedInsights />
         </ThemeProvider>

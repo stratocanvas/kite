@@ -16,7 +16,7 @@ module.exports = withBundleAnalyzer(nextConfig);
 module.exports = {
 	experimental: {
 		serverActions: {
-			bodySizeLimit: "100mb",
+			bodySizeLimit: "4.5mb",
 		},
 	},
 	eslint: {
