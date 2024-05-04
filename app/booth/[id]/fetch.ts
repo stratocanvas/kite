@@ -1,8 +1,6 @@
 "use server";
 import { createClient } from "@/utils/supabase/server";
-
-export const revalidate = 0;
-
+export const runtime = 'edge';
 export async function GetBoothData(boothId: string) {
 	const supabase = createClient();
 

@@ -1,7 +1,7 @@
 "use server";
 import { createClient } from "@/utils/supabase/server";
 
-
+export const runtime = 'edge';
 export async function GetUser() {
 	const supabase = createClient();
 	const {

@@ -15,7 +15,7 @@ export interface Artwork {
   artist: string
   art: string
 }
-
+export const runtime = 'edge';
 export default async function Home() {
   const supabase = createClient();
 
