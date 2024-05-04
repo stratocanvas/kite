@@ -85,8 +85,6 @@ export function Block({ type, attrs, content, marks }: { type: string; attrs?: a
                                 src={attrs?.src}
                                 alt=""
                                 fill
-                                priority={false}
-                                unoptimized
                                 style={{ objectFit: "cover" }}
                             />
                         </div>

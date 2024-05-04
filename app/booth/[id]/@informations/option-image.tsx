@@ -18,7 +18,7 @@ export default function OptionImage({ productId, options }: { productId: string,
                             alt="Image"
                             fill
                             className="rounded-t-md object-cover"
-                            priority={true}
+                            loading="lazy"
                         />
                     ) : (
                         <div className="rounded-t-md bg-muted flex justify-center items-center w-full h-full">
@@ -31,7 +31,7 @@ export default function OptionImage({ productId, options }: { productId: string,
                         alt="Image"
                         fill
                         className="rounded-t-md object-cover"
-                        priority={true}
+                        loading="lazy"
                     />
                 ) : (
                     <div className="rounded-t-md bg-muted flex justify-center items-center w-full h-full">

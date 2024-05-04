@@ -1,4 +1,4 @@
-
+import dynamic from 'next/dynamic';
 import Link from 'next/link'
 import {
   Card,
@@ -12,9 +12,10 @@ import Image from "next/image"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { ImageOff } from "lucide-react";
 import SearchResult from "./fetch";
-import { SearchBarSmall } from "@/components/search/search"
+const SearchBarSmall = dynamic(() => import('@/components/search/search').then((module) => module.SearchBarSmall));
 import { Badge } from '@/components/ui/badge';
-import MoreBooth from "./load-more";
+const MoreBooth = dynamic(() => import('./load-more'));
+export const runtime = 'edge';
 async function getBoothData(searchParams: { character?: string; category?: string; genre?: string; author?: string } = {}) {
 
   const { booth } = await SearchResult({ searchParams });

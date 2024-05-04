@@ -1,6 +1,5 @@
 import { ThemeProvider } from "@/components/theme-provider"
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { TopMenuDesktop } from "@/app/navmenu";
 import FileHandler from '@tiptap-pro/extension-file-handler'
@@ -8,9 +7,15 @@ import Image from '@tiptap/extension-image'
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
 import { Construction } from "lucide-react";
+import localFont from "next/font/local";
 
-const inter = Inter({ subsets: ["latin"] });
-const maintenanceMode = process.env.UNDER_MAINTENANCE === 'true'
+const Pretendard = localFont({
+  src: "./fonts/PretendardVariable.woff2",
+  display: "swap",
+  variable: "--font-pretendard",
+})
+
+const maintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true'
 export const metadata: Metadata = {
   title: "Kite",
   description: "Kite Booth",
@@ -23,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={inter.className}>
+      <body className={Pretendard.className}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

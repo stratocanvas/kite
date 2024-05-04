@@ -7,7 +7,7 @@ import { Suspense } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dot, Loader2 } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-
+export const runtime = 'edge';
 export default function Result() {
     const [nextUrl, setNextUrl] = useState('/');
     const [authorInfo, setAuthorInfo] = useState<{ isAuthor: boolean; name?: string; sns_x?: string } | null>(null);

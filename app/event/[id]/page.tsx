@@ -12,10 +12,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Image from "next/image"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Button } from "@/components/ui/button"
-import { Home, Map, Ticket, Heart } from "lucide-react"
+import { Home, Map as MapIcon, Ticket, Heart } from "lucide-react"
 import sharp from "sharp";
 import Vibrant from "node-vibrant";
-
+export const runtime = 'edge';
 export default async function EventInfo({ params }) {
   const supabase = createClient();
 
@@ -99,13 +99,13 @@ export default async function EventInfo({ params }) {
           {event?.map_data ? (
             <Button asChild variant="secondary" className="w-full lg:w-auto">
               <Link href={`/event/map?id=${event?.event_id}`}>
-                <Map className="w-4 h-4 mr-2" />
+                <MapIcon className="w-4 h-4 mr-2" />
                 지도
               </Link>
             </Button>
           ) : (
             <Button disabled variant="secondary" className="w-full lg:w-auto">
-              <Map className="w-4 h-4 mr-2" />
+              <MapIcon className="w-4 h-4 mr-2" />
               지도
             </Button>
           )}
