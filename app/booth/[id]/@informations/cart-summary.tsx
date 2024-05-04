@@ -79,7 +79,7 @@ export default function CartSummary({ boothId }: CartSummaryProps) {
             {totalItems > 0 && (
                 <>
                     {isOpen ? (
-                        <Card className='z-20 backdrop-blur bg-white/80 dark:bg-neutral-800/80 border-none shadow-[0_20px_50px_rgba(0,0,0,0.2)] w-full h-full md:h-auto md:w-[310px] fixed bottom-0 md:bottom-10 left-1/2 -translate-x-1/2'>
+                        <Card className='z-50 backdrop-blur bg-white/80 dark:bg-neutral-800/80 border-none shadow-[0_20px_50px_rgba(0,0,0,0.2)] w-full h-full md:h-auto md:w-[310px] fixed bottom-0 md:bottom-10 left-1/2 -translate-x-1/2'>
                             <CardHeader>
                                 <div className="flex justify-between">
                                     <CardDescription>이 부스에서 담은 굿즈</CardDescription>

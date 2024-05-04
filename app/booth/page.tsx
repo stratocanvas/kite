@@ -10,12 +10,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Image from "next/image"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
-import { Heart, ImageOff } from "lucide-react";
+import { ImageOff } from "lucide-react";
 import SearchResult from "./fetch";
 import { SearchBarSmall } from "@/components/search/search"
 import { Badge } from '@/components/ui/badge';
 import MoreBooth from "./load-more";
-import { useMemo } from "react";
 async function getBoothData(searchParams: { character?: string; category?: string; genre?: string; author?: string } = {}) {
 
   const { booth } = await SearchResult({ searchParams });
@@ -29,7 +28,7 @@ export default async function BoothList({ searchParams }: { searchParams: { [key
 
   return (
     <>
-      <div className="w-full flex justify-center items-center mx-auto px-8 sticky top-12 z-10 bg-background/80 py-2 backdrop-blur-md">
+      <div className="w-full flex justify-center items-center mx-auto px-8 sticky top-0 z-10 bg-background/80 py-2 backdrop-blur-md">
         <SearchBarSmall params={searchParams} />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-5 gap-6 p-8">
