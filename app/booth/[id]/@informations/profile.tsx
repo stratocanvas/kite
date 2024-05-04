@@ -11,10 +11,10 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { BoothMenu, BoothMenu2, LikeButton } from "../buttons/booth-menu";
+import { BoothMenu, BoothMenu2 } from "../buttons/booth-menu";
 import { Suspense, useMemo, useRef, useEffect } from "react";
-import { Circle, Ticket, Truck } from "lucide-react";
 import { useInView } from 'react-intersection-observer';
+import { ImageOff } from "lucide-react";
 
 export default function BoothProfile({ data, color }: { data: any, color: string }) {
 
@@ -71,8 +71,8 @@ export default function BoothProfile({ data, color }: { data: any, color: string
                                         priority={true}
                                     />
                                 ) : (
-                                    <div className="bg-gray-200 flex justify-center items-center w-full h-full">
-                                        <span>No Image</span>
+                                    <div className="bg-muted flex justify-center items-center w-full h-full">
+                                        <ImageOff className="w-12 h-12 text-muted-foreground" />
                                     </div>
                                 )}
                             </div>
