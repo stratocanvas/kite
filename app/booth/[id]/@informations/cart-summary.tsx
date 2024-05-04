@@ -5,11 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Plus, Minus, X, Trash } from "lucide-react";
-import { animate, AnimatePresence, motion } from "framer-motion";
 import useSWR, { mutate } from 'swr';
-import { AddCart, DeleteCart, GetCart, AddOrUpdateCart } from '../actions';
+import { DeleteCart, GetCart, AddOrUpdateCart } from '../actions';
 import CountUp from 'react-countup'
-import { LikeButton } from '../buttons/booth-menu';
 
 // Props 타입 정의
 interface CartSummaryProps {
