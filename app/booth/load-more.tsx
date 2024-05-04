@@ -1,5 +1,4 @@
 'use client'
-import { useSearchParams } from 'next/navigation';
 import useSWRInfinite from 'swr/infinite';
 import SearchResult from './fetch';
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -7,12 +6,10 @@ import { AspectRatio } from '@/components/ui/aspect-ratio';
 import Image from 'next/image';
 import { ImageOff, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Heart } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { useEffect, useMemo } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { LikeButton } from './likebutton';
 
 export default function MoreBooth({ initialBoothIds, searchParams }: { initialBoothIds: string[], searchParams: any }) {
 
