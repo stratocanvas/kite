@@ -13,15 +13,25 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-
+import { useTheme } from "next-themes"
+import { useEffect } from "react"
 import { User } from "lucide-react"
 import { useRouter } from 'next/navigation'
 import { usePathname } from 'next/navigation';
+import { Button } from "@/components/ui/button"
 export function TopMenuDesktop() {
   const [user, setUser] = React.useState(null)
   const router = useRouter()
   const pathname = usePathname();
   const isSticky = pathname === '/';
+  const { theme, setTheme } = useTheme()
+
+  React.useEffect(() => {
+    if (theme !== 'system') {
+      setTheme('system')
+    }
+  }, [theme])
+
   return (
     <div className={cn("bg-background py-1 border-none", {
       "sticky top-0 z-50": isSticky,
@@ -43,9 +53,6 @@ export function TopMenuDesktop() {
             </Link>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuTrigger><User className="w-4 h-4" /></NavigationMenuTrigger>
-            <NavigationMenuContent>
-            </NavigationMenuContent>
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
