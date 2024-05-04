@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Plus, Minus, X, Trash } from "lucide-react";
+import { animate, AnimatePresence, motion } from "framer-motion";
 import useSWR, { mutate } from 'swr';
-import { DeleteCart, GetCart, AddOrUpdateCart } from '../actions';
+import { AddCart, DeleteCart, GetCart, AddOrUpdateCart } from '../actions';
 import CountUp from 'react-countup'
+import { LikeButton } from '../buttons/booth-menu';
 
 // Props 타입 정의
 interface CartSummaryProps {
@@ -77,7 +79,7 @@ export default function CartSummary({ boothId }: CartSummaryProps) {
             {totalItems > 0 && (
                 <>
                     {isOpen ? (
-                        <Card className='z-30 backdrop-blur bg-white/80 dark:bg-neutral-800/80 border-none shadow-[0_20px_50px_rgba(0,0,0,0.2)] w-full h-full md:h-auto md:w-[310px] fixed bottom-0 md:bottom-10 left-1/2 -translate-x-1/2'>
+                        <Card className='z-20 backdrop-blur bg-white/80 dark:bg-neutral-800/80 border-none shadow-[0_20px_50px_rgba(0,0,0,0.2)] w-full h-full md:h-auto md:w-[310px] fixed bottom-0 md:bottom-10 left-1/2 -translate-x-1/2'>
                             <CardHeader>
                                 <div className="flex justify-between">
                                     <CardDescription>이 부스에서 담은 굿즈</CardDescription>

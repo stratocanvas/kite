@@ -1,3 +1,4 @@
+
 import {
     Card,
     CardHeader,
@@ -6,8 +7,11 @@ import {
     CardContent,
     CardFooter,
 } from "@/components/ui/card";
-import { Suspense } from "react";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import Image from "next/image";
 import { Label } from "@/components/ui/label";
+import OptionPrice from "./option-price";
+import SelectOptionsButton from "../buttons/select-options";
 import * as React from "react"
 import {
     Carousel,
@@ -16,16 +20,16 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "@/components/ui/carousel"
+import AddCart from "../buttons/add-cart";
 import { createClient } from '@/utils/supabase/server'
-import dynamic from "next/dynamic";
-import { Skeleton } from "@/components/ui/skeleton";
-const OptionPrice = dynamic(() => import("./option-price"));
-const SelectOptionsButton = dynamic(() => import("../buttons/select-options"));
-const AddCart = dynamic(() => import("../buttons/add-cart"));
-const OptionImage = dynamic(() => import("./option-image"))
+import OptionImage from "./option-image";
+
+export const revalidate = 0
 
 
 export async function GetProductData(boothId: string) {
+
+
     const supabase = createClient();
     const { data: product } = await supabase
         .from("product")
@@ -63,9 +67,8 @@ export default async function BoothProducts({ params }: { params: { id: string }
 
                                             className="w-[290px] h-[100%] flex flex-col"
                                         >
-                                            <Suspense fallback={<Skeleton className="w-full h-full rounded-t-md" />}>
-                                                <OptionImage productId={product.product_id} options={product.p_option} />
-                                            </Suspense>                                            
+
+                                            <OptionImage productId={product.product_id} options={product.p_option} />
                                             <CardHeader>
                                                 <CardDescription>
                                                     {product.author.length > 2
