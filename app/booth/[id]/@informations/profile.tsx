@@ -109,7 +109,7 @@ export default function BoothProfile({ data, color }: { data: any, color: string
                 </div>
             </Card>
             <div
-                className={`py-2 fixed z-40 top-0 left-1/2 transform -translate-x-1/2 bg-background/70 backdrop-blur-md w-full transition-all duration-300 ${buttonInView ? 'opacity-0 -translate-y-full' : 'opacity-100 translate-y-0'}`}
+                className={`py-2 fixed z-20 top-0 left-1/2 transform -translate-x-1/2 bg-background/70 backdrop-blur-md w-full transition-all duration-300 ${buttonInView ? 'opacity-0 -translate-y-full' : 'opacity-100 translate-y-0'}`}
             >
                 <div className="flex gap-2 items-center justify-between px-4 xl:px-96">
                     <div className="flex flex-col">
