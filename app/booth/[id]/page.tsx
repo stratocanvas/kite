@@ -13,7 +13,6 @@ import { notFound } from "next/navigation";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
-export const revalidate = 0
 export async function GetBoothData(boothId: string) {
     const supabase = createClient()
     const { data: booth } = await supabase
