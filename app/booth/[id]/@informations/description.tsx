@@ -28,44 +28,6 @@ type BlockProps = {
     data: z.infer<typeof contentSchema>;
 };
 
-function DescriptionSkeleton() {
-    return (
-        <>
-            <CardContent className="flex-grow mt-6 flex items-center overflow-x-auto">
-                <Skeleton className="h-6 w-20" />
-            </CardContent>
-            <CardContent className="flex-grow -mt-2 flex items-center overflow-hidden">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-full" />
-            </CardContent>
-        </>
-    );
-}
-
-function AuthorSkeleton() {
-    return (
-        <>
-            <CardContent className="flex-grow mt-6 flex items-center overflow-x-auto">
-                <Skeleton className="h-6 w-20" />
-            </CardContent>
-            <CardContent className="flex-grow -mt-2 pl-0 pr-0 flex overflow-x-hidden">
-                <ScrollArea className="w-full whitespace-nowrap rounded-md overflow-y-hidden">
-                    <div className="flex flex-row items-start justify-start space-x-4 pl-6 pr-6">
-                        {Array.from({ length: 3 }).map((_, index) => (
-                            <div key={index} className="flex flex-col items-center justify-center">
-                                <Skeleton className="h-28 w-28 rounded-full" />
-                                <Skeleton className="mt-2 h-4 w-16" />
-                            </div>
-                        ))}
-                    </div>
-                    <ScrollBar orientation="horizontal" />
-                </ScrollArea>
-            </CardContent>
-        </>
-    );
-}
-
 export function Block({ type, attrs, content, marks }: { type: string; attrs?: any; content?: any[]; marks?: any[] }) {
     const renderChildren = (content: any[]) => {
         return content.map((child) => {
@@ -78,14 +40,15 @@ export function Block({ type, attrs, content, marks }: { type: string; attrs?: a
                     return <Separator className="my-2" />;
                 case 'image':
                     return (
-                        <div className="relative min-h-96 w-full h-full my-2 lg:my-4">
+                        <div className="responsive flex gap-2 w-full h-auto my-2 lg:my-4 overflow-hidden">
                             <Image
                                 className="object-cover rounded-md"
                                 loading="lazy"
                                 src={attrs?.src}
                                 alt=""
-                                fill
-                                style={{ objectFit: "cover" }}
+                                width={1080}
+                                height={1920}
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             />
                         </div>
 
@@ -147,7 +110,7 @@ export default function BoothDescription({ data }: { data: any }) {
                 key={data?.booth_id}
                 className="h-[100%] flex flex-col border-none shadow-none"
             >
-                <Suspense fallback={<DescriptionSkeleton />}>
+                <Suspense fallback={<Skeleton />}>
 
                     {jsonbData && jsonbData !== "null" && (
                         <>
@@ -162,7 +125,7 @@ export default function BoothDescription({ data }: { data: any }) {
                         </>
                     )}
                 </Suspense>
-                <Suspense fallback={<AuthorSkeleton />}>
+                <Suspense fallback={<Skeleton />}>
 
                     {data?.author.length > 0 && (
                         <>

@@ -1,14 +1,12 @@
 import { SearchBar } from "../components/search/search";
 import * as React from "react"
 import Image from "next/image"
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import Link from "next/link"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { createClient } from "@/utils/supabase/server";
-import { cookies } from 'next/headers'
-import { ChevronRight, Heart } from "lucide-react"
+import { ChevronRight } from "lucide-react"
 import Vibrant from "node-vibrant";
 import sharp from "sharp"
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
@@ -127,7 +125,6 @@ export default async function Home() {
                                   </div>
                                 ))}
                               </div>
-                              <Heart className="w-6 h-6 text-white" />
                             </CardContent>
                           </div>
                         </div>
