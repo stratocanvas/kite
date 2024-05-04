@@ -386,6 +386,7 @@ export default function RequestForm() {
                                                                                                             id="name"
                                                                                                             name="name"
                                                                                                             placeholder="작가 활동명 입력"
+                                                                                                            autoComplete="off"
                                                                                                             required
                                                                                                         />
                                                                                                     </div>
@@ -396,6 +397,8 @@ export default function RequestForm() {
                                                                                                         <Input
                                                                                                             id="sns_x"
                                                                                                             name="sns_x"
+                                                                                                            autoComplete="off"
+
                                                                                                             placeholder="X(Twitter) 아이디 입력"
                                                                                                             required
                                                                                                         />
@@ -521,6 +524,8 @@ export default function RequestForm() {
                                                                     className="border-none m-0 h-8"
                                                                     placeholder="A00..."
                                                                     value={inputValue}
+                                                                    autoComplete="off"
+
                                                                     onChange={(e) => setInputValue(e.target.value)}
 
                                                                 />
@@ -529,6 +534,8 @@ export default function RequestForm() {
                                                                     className="border-none m-0 h-8"
                                                                     placeholder="A00..."
                                                                     value={inputValue}
+                                                                    autoComplete="off"
+
                                                                     onChange={(e) => setInputValue(e.target.value)}
                                                                     disabled
                                                                 />
@@ -628,6 +635,8 @@ export default function RequestForm() {
                                                     <FormControl>
                                                         <Input {...field}
                                                             required
+                                                            autoComplete="off"
+
                                                             className="w-full md:w-[400px]"
                                                             onChange={(e) => { setName(true); field.onChange(e.target.value) }}
                                                         />
@@ -887,6 +896,8 @@ export default function RequestForm() {
                                                                                 <Input
                                                                                     id={`prodName-${index}`}
                                                                                     value={product.name}
+                                                                                    autoComplete="off"
+
                                                                                     onChange={(e) => {
                                                                                         const newProducts = [...field.value];
                                                                                         newProducts[index] = {
@@ -1044,6 +1055,8 @@ export default function RequestForm() {
                                                                                                                             id="name"
                                                                                                                             name="name"
                                                                                                                             required
+                                                                                                                            autoComplete="off"
+
                                                                                                                         />
                                                                                                                     </div>
                                                                                                                     <div className="flex flex-col gap-2">
@@ -1053,6 +1066,8 @@ export default function RequestForm() {
                                                                                                                         <Input
                                                                                                                             id="sns_x"
                                                                                                                             name="sns_x"
+                                                                                                                            autoComplete="off"
+
                                                                                                                             required
                                                                                                                         />
                                                                                                                     </div>
@@ -1214,6 +1229,8 @@ export default function RequestForm() {
                                                                                                                     newProducts[index].options[optionIndex].name = e.target.value;
                                                                                                                     field.onChange(newProducts);
                                                                                                                 }}
+                                                                                                                autoComplete="off"
+
                                                                                                             />
                                                                                                         </div>
                                                                                                         <div className="w-auto h-auto flex flex-col gap-1">
@@ -1221,6 +1238,9 @@ export default function RequestForm() {
                                                                                                             <Input
                                                                                                                 id={`products.${index}.options.${optionIndex}.price`}
                                                                                                                 type="text"
+                                                                                                                autoComplete="off"
+                                                                                                                inputMode="numeric"
+                                                                                                                pattern="[0-9]*"
                                                                                                                 value={option.price ? new Intl.NumberFormat('ko-KR').format(option.price) + '원' : ''}
                                                                                                                 onChange={(e) => {
                                                                                                                     const newProducts = [...field.value];
@@ -1313,6 +1333,8 @@ export default function RequestForm() {
                                                                                                                                                         id="name"
                                                                                                                                                         name="name"
                                                                                                                                                         required
+                                                                                                                                                        autoComplete="off"
+
                                                                                                                                                     />
                                                                                                                                                 </div>
                                                                                                                                                 <div className="flex flex-col gap-2">
@@ -1323,6 +1345,8 @@ export default function RequestForm() {
                                                                                                                                                         id="sns_x"
                                                                                                                                                         name="sns_x"
                                                                                                                                                         required
+                                                                                                                                                        autoComplete="off"
+
                                                                                                                                                     />
                                                                                                                                                 </div>
                                                                                                                                             </div>
@@ -1580,6 +1604,8 @@ export default function RequestForm() {
                                                                                         newPreorders[index].title = e.target.value;
                                                                                         field.onChange(newPreorders);
                                                                                     }}
+                                                                                    autoComplete="off"
+
                                                                                 />
                                                                             </div>
                                                                             <div className="flex flex-col gap-1">
@@ -1641,6 +1667,8 @@ export default function RequestForm() {
                                                                                         newPreorders[index].url = e.target.value;
                                                                                         field.onChange(newPreorders);
                                                                                     }}
+                                                                                    autoComplete="off"
+
                                                                                 />
                                                                             </div>
                                                                         </CardContent>
@@ -1872,6 +1900,8 @@ export function DatePickerWithRange({
                                     className="w-full"
                                     value={startTime}
                                     onChange={(e) => handleStartTimeChange(e.target.value)}
+                                    autoComplete="off"
+
                                 />
                             </div>
                             <div className="w-full">
@@ -1884,6 +1914,8 @@ export function DatePickerWithRange({
                                     className="w-full"
                                     value={endTime}
                                     onChange={(e) => handleEndTimeChange(e.target.value)}
+                                    autoComplete="off"
+
                                 />
                             </div>
                         </div>
