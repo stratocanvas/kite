@@ -10,7 +10,7 @@ import { Analytics } from "@vercel/analytics/react"
 import { Construction } from "lucide-react";
 
 const inter = Inter({ subsets: ["latin"] });
-const maintenanceMode = process.env.UNDER_MAINTENANCE === 'true'
+const maintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true'
 export const metadata: Metadata = {
   title: "Kite",
   description: "Kite Booth",
