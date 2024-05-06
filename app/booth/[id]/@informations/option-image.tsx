@@ -8,7 +8,7 @@ export default function OptionImage({ productId, options }: { productId: string,
     const selectedOption = selectedOptions[productId];
 
     return (
-        <AspectRatio ratio={1 / 1}>
+        <AspectRatio ratio={1 / 1} style={{ backgroundColor: `#${options[0]?.thumbnail.split('-c(')[1].split(')')[0]}` }}>
             {selectedOption ? (
                 selectedOption.thumbnail ? (
                     <Image
@@ -24,6 +24,7 @@ export default function OptionImage({ productId, options }: { productId: string,
                     </div>
                 )
             ) : options[0]?.thumbnail ? (
+            
                 <Image
                     src={options[0].thumbnail}
                     alt="Image"

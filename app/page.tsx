@@ -40,23 +40,6 @@ export default async function Home() {
     return acc;
   }, {} as Record<string, typeof booth>);
 
-  for (const booths of Object.values(groupedBooths)) {
-    for (const booth of booths) {
-      if (booth.thumbnail) {
-        const response = await fetch(booth.thumbnail);
-        const arrayBuffer = await response.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-
-        const convertedImage = await sharp(buffer).toFormat('png').toBuffer();
-        const palette = await Vibrant.from(convertedImage).getPalette();
-
-        booth.darkMutedColor = palette.DarkMuted?.hex;
-      } else {
-        booth.darkMutedColor = "#797979";
-      }
-    }
-  }
-
   return (
     <div>
       <div className="flex mx-10 mt-10 justify-center">
@@ -89,7 +72,7 @@ export default async function Home() {
                 <CarouselItem key={booth.booth_id} className="basis-auto pl-4">
                   <Link href={`/booth/${booth.booth_id}`}>
                     <Card className="w-[300px] lg:w-[350px] h-full mx-auto">
-                      <AspectRatio ratio={21 / 27} className="relative rounded-md">
+                      <AspectRatio ratio={21 / 27} className="relative rounded-md" style={{ background: `#${booth.thumbnail.split('-c(')[1].split(')')[0]}` }}>
                         {booth.thumbnail ? (
                           <Image src={booth.thumbnail} alt="Image" fill className="rounded-md object-cover" priority={true} />
                         ) : (
@@ -99,7 +82,7 @@ export default async function Home() {
                           </div>
                         )}
                         <div className="absolute bottom-0 w-full h-2/3 rounded-md">
-                          <div className="absolute top-0 left-0 w-full h-full rounded-md" style={{ background: `linear-gradient(to top, ${booth.darkMutedColor} 15%, transparent)`, mask: 'linear-gradient(to top, white, white, transparent)', backdropFilter: 'blur(12px)' }} />
+                          <div className="absolute top-0 left-0 w-full h-full rounded-md" style={{ background: `linear-gradient(to top, #${booth.thumbnail.split('-c(')[1].split(')')[0]} 15%, transparent)`, mask: 'linear-gradient(to top, white, white, transparent)', backdropFilter: 'blur(12px)' }} />
                           <div className="absolute bottom-0 rounded-md w-full">
                             <CardHeader>
                               <CardTitle className="text-white">{booth.name}</CardTitle>
@@ -118,8 +101,7 @@ export default async function Home() {
                               <div className="flex overflow-x-auto">
                                 {booth.author.map((author, index) => (
                                   <div className={`relative z-${booth.author.length - index} ${index !== booth.author.length - 1 ? '-mr-3' : ''}`} key={author.name}>
-                                    <Avatar className="border-2" style={{ borderColor: booth.darkMutedColor }}>
-                                      <AvatarImage src={author.thumbnail} />
+                                    <Avatar className="border-2" style={{ borderColor: `#${booth.thumbnail.split('-c(')[1].split(')')[0]}` }}>
                                       <AvatarFallback>{author.name.slice(0, 1)}</AvatarFallback>
                                     </Avatar>
                                   </div>

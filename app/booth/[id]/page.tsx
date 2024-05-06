@@ -31,26 +31,14 @@ export default async function Home({ params }: { params: { id: string } }) {
     if (!booth) {
         notFound();
     }
-    let darkMutedColor = "#797979"; // Default color
-
-    if (booth?.thumbnail) {
-        const response = await fetch(booth.thumbnail);
-        const arrayBuffer = await response.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-
-        const convertedImage = await sharp(buffer).toFormat('png').toBuffer();
-        const palette = await Vibrant.from(convertedImage).getPalette();
-
-        darkMutedColor = palette.DarkMuted?.hex || "#797979";
-    }
-
+    
     return (
         <>
             <div className="container m-0 p-0 pb-[160px] mx-auto">
                 <div className="flex flex-col gap-4 justify-center relative xl:mx-24">
                     <div className="p-0 m-0 w-full mx-auto relative">
                         <Suspense fallback={<AspectRatio ratio={3 / 4} className="bg-muted w-full"><Skeleton className="h-full" /></AspectRatio>}>
-                            <BoothProfile data={booth} color={darkMutedColor} />
+                            <BoothProfile data={booth} color={`#${booth.thumbnail.split('-c(')[1].split(')')[0]}`} />
                         </Suspense>
                     </div>
                     <div className="p-0 m-0 w-full mx-auto flex flex-col gap-4">

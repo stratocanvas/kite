@@ -113,21 +113,21 @@ export async function DeleteCart(productId: string, optionId: string) {
 		.eq("option_id", optionId);
 }
 
-export async function GetBookmark(boothId: string) {
+export async function GetBookmarks() {
 	const supabase = createClient();
 	const user = await GetUser();
 	const { data: wishlist, error: wishlistError } = await supabase
-		.from("b_wishlists")
-		.select("booth_id")
-		.eq("users_id", user)
-		.eq("booth_id", boothId)
-		.limit(1)
-		.maybeSingle();
-	if (!wishlist) {
-		return false;
+	  .from("b_wishlists")
+	  .select("booth_id, booth(name, locations, event(event_id, name), date)")
+	  .eq("users_id", user);
+	if (wishlistError) {
+	  throw new Error(wishlistError.message);
 	}
-	return true;
-}
+	if (!wishlist) {
+	  return [];
+	}
+	return wishlist;
+  }
 
 export async function SetBookmark(boothId: string, action: boolean) {
 	const supabase = createClient();

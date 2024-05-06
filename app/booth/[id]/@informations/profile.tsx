@@ -11,9 +11,8 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { BoothMenu, BoothMenu2, LikeButton } from "../buttons/booth-menu";
+import { BoothMenu, BoothMenu2 } from "../buttons/booth-menu";
 import { Suspense, useMemo, useRef, useEffect } from "react";
-import { Circle, Ticket, Truck } from "lucide-react";
 import { useInView } from 'react-intersection-observer';
 
 export default function BoothProfile({ data, color }: { data: any, color: string }) {

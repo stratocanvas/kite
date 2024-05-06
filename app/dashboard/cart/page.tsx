@@ -7,7 +7,7 @@ import {
     CardFooter,
     CardHeader
 } from "@/components/ui/card";
-import { useMemo, useCallback, useState, useEffect } from "react";
+import { useMemo, useCallback, useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Carousel,
@@ -18,14 +18,14 @@ import {
 } from "@/components/ui/carousel"
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, Trash } from "lucide-react";
 import useSWR from 'swr';
-import { GetCart, AddOrUpdateCart, DeleteCart } from '../actions';
+import { GetCart, AddOrUpdateCart, DeleteCart, GetBookmarks } from '../actions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
-
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react"
+import { LikeButton } from "@/app/booth/[id]/buttons/booth-menu";
 import { cn } from "@/lib/utils"
 import {
     Command,
@@ -40,18 +40,27 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
-
+import { usePathname, useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 import IndoorMap from "./map"
-import { Suspense } from "react";
+import { Suspense, memo } from "react";
+import CountUp from 'react-countup'
 
 interface Event {
     value: string;
     label: string;
 }
 
+const MemoizedIndoorMap = memo(IndoorMap, (prevProps, nextProps) => {
+    return prevProps.eventId === nextProps.eventId &&
+        prevProps.boothLocations.length === nextProps.boothLocations.length &&
+        prevProps.boothLocations.every((loc, index) => loc === nextProps.boothLocations[index]);
+});
 export default function Cart() {
-    const { data: items, mutate } = useSWR('cart', GetCart);
+    const { data: items, mutate } = useSWR('cart', GetCart, { revalidateOnMount: true, revalidateOnFocus: true, revalidateOnReconnect: true });
+    const { data: wishlist } = useSWR('wishlist', () => GetBookmarks(), { revalidateOnMount: true, revalidateOnFocus: true, revalidateOnReconnect: true });
+
+
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState("");
     const [events, setEvents] = useState<Event[]>([]);
@@ -89,6 +98,7 @@ export default function Cart() {
                 if (!acc[boothId]) {
                     acc[boothId] = {
                         boothName: item.boothName,
+                        date: item.date,
                         products: [],
                         boothLocation: item.boothLocation[0],
                         boothLocationAll: item.boothLocation
@@ -128,24 +138,47 @@ export default function Cart() {
 
     //부스 위치 전달
     const allBoothLocations = useMemo(() => {
-        return Object.values(booths).reduce((acc: any[], booth: any) => {
-            acc.push(...booth.boothLocationAll);
+        const cartBoothLocations = Object.values(booths).reduce((acc: any[], booth: any) => {
+            acc.push(...booth.boothLocationAll.map((location: string) => ({
+                id: location,
+                color: 'red',
+                type: 'cart'
+            })));
             return acc;
         }, []);
-    }, [booths]);
+
+        const wishlistBoothLocations = wishlist?.reduce((acc: any[], item: any) => {
+            if (item.booth?.event?.event_id === value) {
+                acc.push(...item.booth.locations.map((location: string) => ({
+                    id: location,
+                    color: 'blue',
+                    type: 'wishlist'
+                })));
+            }
+            return acc;
+        }, []) || [];
+
+        return [...cartBoothLocations, ...wishlistBoothLocations];
+    }, [booths, wishlist, value]);
 
     useEffect(() => {
-        if (items) {
-            const uniqueEvents = Array.from(new Set(items.map(item => ({
-                value: item.eventId,
-                label: item.eventName
-            })).map(e => JSON.stringify(e)))).map(e => JSON.parse(e));
+        if (items && wishlist) {
+            const uniqueEvents = Array.from(new Set([
+                ...items.map(item => ({
+                    value: item.eventId,
+                    label: item.eventName
+                })),
+                ...wishlist.map(item => ({
+                    value: item.booth?.event?.event_id ?? '',
+                    label: item.booth?.event?.name ?? ''
+                }))
+            ].map(e => JSON.stringify(e)))).map(e => JSON.parse(e)).filter(e => e.value);
             setEvents(uniqueEvents);
             if (uniqueEvents.length > 0 && !value) {
                 setValue(uniqueEvents[0].value);
             }
         }
-    }, [items, value]);
+    }, [items, wishlist, value]);
 
 
 
@@ -155,12 +188,23 @@ export default function Cart() {
     // searchParams with a provided key/value pair
     useEffect(() => {
         if (value) {
-          const params = new URLSearchParams();
-          params.set('id', value);
-          const newUrl = `${window.location.pathname}?${params.toString()}`;
-          router.replace(newUrl, undefined, { shallow: true });
+            const params = new URLSearchParams();
+            params.set('id', value);
+            const newUrl = `${window.location.pathname}?${params.toString()}`;
+            router.replace(newUrl, undefined, { shallow: true });
         }
-      }, [value, router]);
+    }, [value, router]);
+
+    //카운트(전체 부스)
+    const prevTotalPrice = useRef(0);
+    const totalPrice = useMemo(() => items?.reduce((acc, item) => acc + (item.price * item.quantity), 0) || 0, [items]);
+
+    useEffect(() => {
+        const newPrevTotal = totalPrice;
+        setTimeout(() => {
+            prevTotalPrice.current = newPrevTotal;
+        }, 100);
+    }, [totalPrice]);
 
 
     return (
@@ -196,13 +240,13 @@ export default function Cart() {
                                             <CommandGroup>
                                                 {events.map((event) => (
                                                     <CommandItem
-                                                    key={event.value}
-                                                    value={event.value}
-                                                    onSelect={() => {
-                                                      setValue(event.value === value ? "" : event.value);
-                                                      setOpen(false);
-                                                    }}
-                                                  >
+                                                        key={event.value}
+                                                        value={event.value}
+                                                        onSelect={() => {
+                                                            setValue(event.value === value ? "" : event.value);
+                                                            setOpen(false);
+                                                        }}
+                                                    >
                                                         <Check
                                                             className={cn(
                                                                 "mr-2 h-4 w-4",
@@ -222,19 +266,39 @@ export default function Cart() {
                             <Card className="w-[calc(100%-3rem)] ml-6 mb-3 lg:w-1/2 h-[330px] lg:h-[700px]">
                                 <CardContent className="w-full h-full p-0 m-0">
                                     <Suspense>
-                                        <IndoorMap eventId={value} boothLocations={allBoothLocations} />
+                                        <MemoizedIndoorMap eventId={value} boothLocations={allBoothLocations} />
                                     </Suspense>
                                 </CardContent>
                             </Card>
-                            <Tabs defaultValue="cart" className="w-full lg:w-1/2">
+                            <Tabs defaultValue="wishlist" className="w-full lg:w-1/2">
                                 <TabsList className="w-[calc(100%-3rem)] mx-6">
                                     <TabsTrigger value="wishlist">위시리스트</TabsTrigger>
                                     <TabsTrigger value="cart">장바구니</TabsTrigger>
                                 </TabsList>
-                                <TabsContent value="wishlist">Make changes to your account here.</TabsContent>
+                                <TabsContent value="wishlist">
+                                    <TabsContent value="wishlist">
+                                        <ul className="list-disc pl-5">
+                                            {wishlist?.filter((item) => item.booth?.event?.event_id === value).map((item) => (
+                                                <li key={item.booth_id}>
+                                                    <>
+                                                        {JSON.stringify(item)}
+                                                    </>
+                                                </li>
+                                            )) ?? <li>Loading...</li>}
+                                        </ul>
+                                    </TabsContent>
+                                </TabsContent>
                                 <TabsContent value="cart">
+                                    <Card className="w-[calc(100%-3rem)] mx-6">
+                                        <CardContent className="flex flex-col gap-2">
+                                            <Label className="mt-6 text-muted-foreground">총 금액</Label>
+                                            <Label className="text-3xl font-bold mt-1">
+                                                <CountUp suffix="원" start={prevTotalPrice.current} end={totalPrice} duration={1} />
+                                            </Label>
+                                        </CardContent>
+                                    </Card>
                                     <Suspense>
-                                        <Carousel className="w-full"
+                                        <Carousel className="w-full mt-2"
                                             opts={{
                                                 align: 'start',
                                                 dragFree: true
@@ -248,7 +312,14 @@ export default function Cart() {
                                                         <Card className="w-[290px] h-[100%] flex flex-col">
                                                             <CardHeader>
                                                                 <CardTitle className="break-words overflow-hidden text-ellipsis font-bold">
-                                                                    {booth.boothLocation}
+                                                                    <div className="flex gap-2 items-center">
+                                                                        {booth.boothLocation}
+                                                                        {booth.date.some(date => [0, 6].includes(new Date(date).getDay())) && (
+                                                                            <Badge variant="secondary">
+                                                                                {booth.date.length === 2 ? "양일" : new Date(booth.date[0]).toLocaleDateString('ko-KR', { weekday: 'long' })}
+                                                                            </Badge>
+                                                                        )}
+                                                                    </div>
                                                                 </CardTitle>
                                                                 <CardDescription className="text-md text-foreground">
                                                                     {booth.boothName}
@@ -256,12 +327,12 @@ export default function Cart() {
                                                                 <Separator />
                                                             </CardHeader>
                                                             <CardContent className="flex flex-col gap-4">
-                                                                {booth.products.map(product => (
+                                                                {booth.products.sort((a, b) => a.productName.localeCompare(b.productName)).map(product => (
                                                                     <div key={product.productId}>
                                                                         <Label className="text-md text-muted-foreground">
                                                                             {product.productName}
                                                                         </Label>
-                                                                        {product.options.map(option => (
+                                                                        {product.options.sort((a, b) => a.optionName.localeCompare(b.optionName)).map(option => (
                                                                             <div key={option.optionId} className="flex justify-between mb-2">
                                                                                 <div className="flex flex-col">
                                                                                     <Label className="text-lg font-bold">
@@ -273,7 +344,7 @@ export default function Cart() {
                                                                                 </div>
                                                                                 <div className="flex justify-end items-center">
                                                                                     <Button variant="secondary" className="w-8 h-8 p-0" onClick={() => handleQuantityChange(product.productId, option.optionId, option.quantity, false)}>
-                                                                                        <Minus className="h-4 w-4 m-0 p-0" />
+                                                                                        {option.quantity > 1 ? <Minus className="h-4 w-4 m-0 p-0" /> : <Trash className="h-4 w-4 m-0 p-0" />}
                                                                                     </Button>
                                                                                     <Label className="mx-3 text-md">
                                                                                         {option.quantity}

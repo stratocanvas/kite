@@ -34,10 +34,10 @@ export default function RootLayout({ children }) {
             disableTransitionOnChange
           >
             <TopMenuDesktop />
-            {/*
+            
             {children}
-            */}
-            <h1>점검 중</h1>
+            
+
           </ThemeProvider>
           <Analytics />
           <SpeedInsights />

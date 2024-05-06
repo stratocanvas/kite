@@ -10,12 +10,13 @@ import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { cn } from "@/lib/utils"
 import React, { useCallback, useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
-import { ImagePlus, Frown, Trash, RefreshCcw } from "lucide-react"
+import { ImagePlus, Frown, Trash, RefreshCcw, Loader2 } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { useResizeDetector } from 'react-resize-detector';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import imageCompression from 'browser-image-compression';
 
 
 interface FileUploadProps {
@@ -31,6 +32,7 @@ interface FileUploadProps {
 function FileUpload({ name, maxSize, maxFiles, ratio, onChange, value }: FileUploadProps) {
     const { width, ref } = useResizeDetector();
     const [previewUrl, setPreviewUrl] = useState<string | null>(value || null);
+    const [isCompressing, setIsCompressing] = useState(false);
 
     useEffect(() => {
         if (value !== previewUrl) {
@@ -38,16 +40,29 @@ function FileUpload({ name, maxSize, maxFiles, ratio, onChange, value }: FileUpl
         }
     }, [value, previewUrl]);
 
-    const onDrop = useCallback((uploadedFiles: File[]) => {
+    const onDrop = useCallback(async (uploadedFiles: File[]) => {
         const file = uploadedFiles[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64String = reader.result as string;
-                onChange(base64String);
-                setPreviewUrl(base64String);
-            };
-            reader.readAsDataURL(file);
+            setIsCompressing(true);
+            const options = {
+                maxSizeMB: 1,
+                useWebWorker: true,
+                fileType: 'image/webp',
+            }
+            try {
+                const compressedFile = await imageCompression(file, options);
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64String = reader.result as string;
+                    onChange(base64String);
+                    setPreviewUrl(base64String);
+                    setIsCompressing(false);
+                };
+                reader.readAsDataURL(compressedFile);
+            } catch (error) {
+                console.log(error);
+                setIsCompressing(false);
+            }
         }
     }, [onChange]);
 
@@ -70,6 +85,11 @@ function FileUpload({ name, maxSize, maxFiles, ratio, onChange, value }: FileUpl
                         <AspectRatio ratio={ratio} className="m-0">
                             <CardContent className={`p-0 flex flex-col justify-center h-full ${isDragActive ? "bg-accent text-accent-foreground" : ""}`}>
                                 <input {...getInputProps()} />
+                                {isCompressing && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+                                        <Loader2 className="animate-spin h-10 w-10 text-white" />
+                                    </div>
+                                )}
                                 {previewUrl ? (
                                     <div>
                                         <AspectRatio ratio={ratio}>
@@ -137,6 +157,11 @@ function FileUpload({ name, maxSize, maxFiles, ratio, onChange, value }: FileUpl
                         <AspectRatio ratio={ratio} className="m-0">
                             <CardContent className={`p-0 flex flex-col w-full justify-center h-full ${isDragActive ? "bg-accent text-accent-foreground" : ""}`}>
                                 <input {...getInputProps()} />
+                                {isCompressing && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+                                        <Loader2 className="animate-spin h-8 w-8 text-white" />
+                                    </div>
+                                )}
                                 {previewUrl ? (
                                     <div >
                                         <DropdownMenu>
