@@ -60,7 +60,7 @@ export default function BoothProfile({ data, color }: { data: any, color: string
 
                     <AspectRatio ratio={3 / 4} className="relative rounded">
                         <div className="absolute inset-0 overflow-hidden">
-                            <div ref={parallaxImageRef} className="absolute inset-0">
+                            <div ref={parallaxImageRef} className="absolute inset-0 rounded-t-lg" style={{ backgroundColor: `#${data?.thumbnail.split('-c(')[1].split(')')[0]}` }}>
                                 {data?.thumbnail ? (
                                     <Image
                                         src={data?.thumbnail}
