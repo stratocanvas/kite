@@ -275,7 +275,7 @@ export default function RequestForm() {
             // 제출되는 이미지들 처리
             if (values.thumbnail) {
                 // 색상 추출 (darkmuted)
-                const darkMutedHex = await extractColor(values.thumbnail);
+                const darkMutedHex = await extractColor(values.thumbnail, 'thumbnail');
                 // 너비, 높이 추출
                 const thumbnailDimensions = await getImageDimensions(values.thumbnail);
                 // 파일명 변경 
@@ -304,7 +304,7 @@ export default function RequestForm() {
                 for (const item of values.boothinfo.content) {
                     if (item.type === "image") {
                         // 색상 추출 (muted)
-                        const mutedHex = await extractColor(item.attrs?.src);
+                        const mutedHex = await extractColor(item.attrs?.src, 'article');
 
                         // 너비, 높이 추출
                         const imageDimensions = await getImageDimensions(item.attrs?.src);
@@ -342,7 +342,7 @@ export default function RequestForm() {
                         for (const option of product.options) {
                             if (option.thumbnail) {
                                 // 색상 추출 (muted)
-                                const mutedHex = await extractColor(option.thumbnail);
+                                const mutedHex = await extractColor(option.thumbnail, 'option');
 
                                 // 너비, 높이 추출
                                 const optionDimensions = await getImageDimensions(option.thumbnail);
@@ -398,7 +398,7 @@ export default function RequestForm() {
         });
     }
 
-    async function extractColor(imageUrl: string) {
+    async function extractColor(imageUrl: string, type: 'thumbnail' | 'article' | 'option') {
         try {
             // 이미지 URL을 사용하여 Vibrant 객체 생성
             const vibrant = new Vibrant(imageUrl);
@@ -406,10 +406,17 @@ export default function RequestForm() {
             // 색상 팔레트 추출
             const palette = await vibrant.getPalette();
 
-            // DarkMuted 색상 가져오기
-            const darkMutedColor = palette.DarkMuted?.hex;
+            let color: string | undefined;
 
-            return darkMutedColor?.replace('#', '') || '797979'; // #을 제거하고 색상이 없는 경우 기본값으로 회색 사용
+            if (type === 'thumbnail') {
+                // thumbnail인 경우 DarkMuted 색상 가져오기
+                color = palette.DarkMuted?.hex;
+            } else {
+                // boothinfo나 option인 경우 Muted 색상 가져오기
+                color = palette.Muted?.hex;
+            }
+
+            return color?.replace('#', '') || '797979'; // #을 제거하고 색상이 없는 경우 기본값으로 회색 사용
         } catch (error) {
             console.error('Error extracting color:', error);
             return '797979'; // 오류 발생 시 기본값으로 회색 사용

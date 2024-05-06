@@ -35,7 +35,7 @@ export default async function BoothList({ searchParams }: { searchParams: { [key
           <div key={booth.booth_id}>
             <Link href={`/booth/${booth.booth_id}`}>
               <Card key={booth.booth_id} className="w-full mx-auto h-full">
-                <AspectRatio ratio={21 / 27} className="relative rounded-b-md" style={{ backgroundColor: `#${booth.thumbnail.split('-c(')[1].split(')')[0]}` }}>
+                <AspectRatio ratio={21 / 27} className="relative rounded-md" style={{ backgroundColor: `#${booth.thumbnail.split('-c(')[1].split(')')[0]}` }}>
                   {booth.thumbnail ? (
                     <Image src={booth.thumbnail} alt="Image" fill className="rounded-md object-cover" priority={true} />
                   ) : (
@@ -73,7 +73,7 @@ export default async function BoothList({ searchParams }: { searchParams: { [key
                         <div className="flex overflow-x-auto">
                           {booth.author.map((author, index) => (
                             <div className={`relative z-${booth.author.length - index} ${index !== booth.author.length - 1 ? '-mr-3' : ''}`} key={author.name}>
-                              <Avatar className="border-2" style={{ borderColor: booth.colors.darkMuted }}>
+                              <Avatar className="border-2" style={{ borderColor: `#${booth.thumbnail.split('-c(')[1].split(')')[0]}` }}>
                                 <AvatarImage src={author.thumbnail} />
                                 <AvatarFallback>{author.name.slice(0, 1)}</AvatarFallback>
                               </Avatar>

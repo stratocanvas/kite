@@ -40,14 +40,14 @@ export function Block({ type, attrs, content, marks }: { type: string; attrs?: a
                     return <Separator className="my-2" />;
                 case 'image':
                     return (
-                        <div className="responsive flex gap-2 w-full h-auto my-2 lg:my-4 overflow-hidden" style={{ backgroundColor: `#${attrs?.src.split('-c(')[1].split(')')[0]}` }}>
+                        <div className="relative rounded-md flex gap-2 w-full h-auto my-2 lg:my-4 overflow-hidden" style={{ backgroundColor: `#${attrs?.src.split('-c(')[1].split(')')[0]}` }}>
                             <Image
-                                className="object-cover rounded-md"
+                                className="rounded-md"
                                 loading="lazy"
                                 src={attrs?.src}
                                 alt=""
-                                width={`${attrs?.src.split('-w(')[1].split(')')[0]}`}
-                                height={`${attrs?.src.split('-h(')[1].split(')')[0]}`}
+                                width={1200}
+                                height={1200}
                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             />
                         </div>
