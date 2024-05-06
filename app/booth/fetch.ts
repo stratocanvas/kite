@@ -73,42 +73,7 @@ export default async function SearchResult({
 		// Handle the error or return an appropriate response
 		return { booth: [] };
 	}
-	const boothWithColors = await Promise.all(
-		booth.map(async (booth) => {
-			if (booth.thumbnail) {
-				const response = await fetch(booth.thumbnail);
-				const arrayBuffer = await response.arrayBuffer();
-				const buffer = Buffer.from(arrayBuffer);
-
-				const convertedImage = await sharp(buffer).toFormat("png").toBuffer();
-				const palette = await Vibrant.from(convertedImage).getPalette();
-
-				return {
-					...booth,
-					colors: {
-						darkMuted: palette.DarkMuted?.hex,
-						vibrant: palette.Vibrant?.hex,
-						lightVibrant: palette.LightVibrant?.hex,
-						darkVibrant: palette.DarkVibrant?.hex,
-						muted: palette.Muted?.hex,
-						lightMuted: palette.LightMuted?.hex,
-					},
-				};
-			}
-			return {
-				...booth,
-				colors: {
-					darkMuted: "#797979",
-					vibrant: "#797979",
-					lightVibrant: "#797979",
-					darkVibrant: "#797979",
-					muted: "#797979",
-					lightMuted: "#797979",
-				},
-			};
-		}),
-	);
 	return {
-		booth: boothWithColors,
+		booth: booth,
 	};
 }

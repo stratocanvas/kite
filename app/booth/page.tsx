@@ -16,15 +16,14 @@ import { SearchBarSmall } from "@/components/search/search"
 import { Badge } from '@/components/ui/badge';
 import MoreBooth from "./load-more";
 async function getBoothData(searchParams: { character?: string; category?: string; genre?: string; author?: string } = {}) {
-
   const { booth } = await SearchResult({ searchParams });
-  return booth
+  return booth;
 }
 
 
 export default async function BoothList({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
-  const boothWithColors = await getBoothData(searchParams);
-  const initialBoothIds = boothWithColors.map((booth) => booth.booth_id);
+  const booth = await getBoothData(searchParams);
+  const initialBoothIds = booth.map((booth) => booth.booth_id);
 
   return (
     <>
@@ -32,11 +31,11 @@ export default async function BoothList({ searchParams }: { searchParams: { [key
         <SearchBarSmall params={searchParams} />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-5 gap-6 p-8">
-        {boothWithColors?.map((booth) => (
+        {booth?.map((booth) => (
           <div key={booth.booth_id}>
             <Link href={`/booth/${booth.booth_id}`}>
               <Card key={booth.booth_id} className="w-full mx-auto h-full">
-                <AspectRatio ratio={21 / 27} className="relative rounded-b-md">
+                <AspectRatio ratio={21 / 27} className="relative rounded-b-md" style={{ backgroundColor: `#${booth.thumbnail.split('-c(')[1].split(')')[0]}` }}>
                   {booth.thumbnail ? (
                     <Image src={booth.thumbnail} alt="Image" fill className="rounded-md object-cover" priority={true} />
                   ) : (
@@ -46,15 +45,15 @@ export default async function BoothList({ searchParams }: { searchParams: { [key
                     </div>
                   )}
                   <div className='absolute left-4 top-4 flex gap-2'>
-                    <Badge className="rounded-md h-6 text-white" style={{ backgroundColor: booth.colors.darkMuted }}>
+                    <Badge className="rounded-md h-6 text-white" style={{ backgroundColor: `#${booth.thumbnail.split('-c(')[1].split(')')[0]}` }}>
                       선입금
                     </Badge>
-                    <Badge className="rounded-md h-6 text-white" style={{ backgroundColor: booth.colors.darkMuted }}>
+                    <Badge className="rounded-md h-6 text-white" style={{ backgroundColor: `#${booth.thumbnail.split('-c(')[1].split(')')[0]}` }}>
                       통판
                     </Badge>
                   </div>
                   <div className="absolute bottom-0 w-full h-2/3 rounded-b-md">
-                    <div className="absolute top-0 left-0 w-full h-full rounded-b-md" style={{ background: `linear-gradient(to top, ${booth.colors.darkMuted} 15%, transparent)`, mask: 'linear-gradient(to top, white, white, transparent)', backdropFilter: 'blur(12px)' }} />
+                    <div className="absolute top-0 left-0 w-full h-full rounded-b-md" style={{ background: `linear-gradient(to top, #${booth.thumbnail.split('-c(')[1].split(')')[0]} 15%, transparent)`, mask: 'linear-gradient(to top, white, white, transparent)', backdropFilter: 'blur(12px)' }} />
                     <div className="absolute bottom-0 rounded-b-md w-full">
                       <CardHeader>
                         <CardDescription className="font-bold text-white text-opacity-70">{booth.event.name}</CardDescription>

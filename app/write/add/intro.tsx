@@ -68,11 +68,12 @@ import {
 } from "@/components/ui/tabs"
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
-import { select } from "d3"
 import { CommandSeparator } from "cmdk"
 import { DropdownMenu, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu"
 import { useRouter } from 'next/navigation';
-import { toast } from "sonner"
+import Vibrant from "node-vibrant"
+import { v4 as uuidv4 } from "uuid";
+
 const supabase = createClient()
 
 const contentSchema: z.ZodType<any> = z.lazy(() =>
@@ -266,12 +267,115 @@ export default function RequestForm() {
         mode: "all"
     });
 
-    const { dirtyFields, errors, isSubmitting, isSubmitted, isSubmitSuccessful, isValid, validatingFields } = useFormState(form);
+    const { isSubmitting, isSubmitted, isSubmitSuccessful, isValid } = useFormState(form);
 
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-
         try {
+            // 제출되는 이미지들 처리
+            if (values.thumbnail) {
+                // 색상 추출 (darkmuted)
+                const darkMutedHex = await extractColor(values.thumbnail);
+                // 너비, 높이 추출
+                const thumbnailDimensions = await getImageDimensions(values.thumbnail);
+                // 파일명 변경 
+                const thumbnailUuid = uuidv4();
+                const thumbnailFileName = `${thumbnailUuid}-c(${darkMutedHex})-w(${thumbnailDimensions.width})-h(${thumbnailDimensions.height}).webp`;
+                // 이미지 파일 가져오기
+                const thumbnailFile = await fetch(values.thumbnail).then(r => r.blob());
+                console.log(thumbnailFileName);
+                const { data, error } = await supabase.storage
+                    .from("booth")
+                    .upload(`thumbnails/${thumbnailFileName}`, thumbnailFile, {
+                        contentType: "image/webp",
+                    });
+
+                if (error) {
+                    throw error;
+                }
+
+                const publicUrlData = await supabase.storage
+                    .from("booth")
+                    .getPublicUrl(data.path);
+
+                values.thumbnail = publicUrlData.data.publicUrl;
+            }
+            if (values.boothinfo?.content) {
+                for (const item of values.boothinfo.content) {
+                    if (item.type === "image") {
+                        // 색상 추출 (muted)
+                        const mutedHex = await extractColor(item.attrs?.src);
+
+                        // 너비, 높이 추출
+                        const imageDimensions = await getImageDimensions(item.attrs?.src);
+
+                        // 파일명 변경
+                        const imageUuid = uuidv4();
+                        const imageFileName = `${imageUuid}-c(${mutedHex})-w(${imageDimensions.width})-h(${imageDimensions.height}).webp`;
+
+                        // 이미지 파일 가져오기
+                        const imageFile = await fetch(item.attrs?.src).then(r => r.blob());
+
+                        // Supabase에 업로드  
+                        const { data, error } = await supabase.storage
+                            .from("booth")
+                            .upload(`article/${imageFileName}`, imageFile, {
+                                contentType: "image/webp",
+                            });
+
+                        if (error) {
+                            throw error;
+                        }
+
+                        const publicUrlData = await supabase.storage
+                            .from("booth")
+                            .getPublicUrl(data.path);
+
+                        item.attrs.src = publicUrlData.data.publicUrl;
+                    }
+                }
+            }
+
+            if (values.products) {
+                for (const product of values.products) {
+                    if (product.options) {
+                        for (const option of product.options) {
+                            if (option.thumbnail) {
+                                // 색상 추출 (muted)
+                                const mutedHex = await extractColor(option.thumbnail);
+
+                                // 너비, 높이 추출
+                                const optionDimensions = await getImageDimensions(option.thumbnail);
+
+                                // 파일명 변경
+                                const optionUuid = uuidv4();
+                                const optionFileName = `${optionUuid}-c(${mutedHex})-w(${optionDimensions.width})-h(${optionDimensions.height}).webp`;
+
+                                // 이미지 파일 가져오기
+                                const optionFile = await fetch(option.thumbnail).then(r => r.blob());
+
+                                // Supabase에 업로드
+                                const { data, error } = await supabase.storage
+                                    .from("product")
+                                    .upload(`option/${optionFileName}`, optionFile, {
+                                        contentType: "image/webp",
+                                    });
+
+                                if (error) {
+                                    throw error;
+                                }
+
+                                const publicUrlData = await supabase.storage
+                                    .from("product")
+                                    .getPublicUrl(data.path);
+
+                                option.thumbnail = publicUrlData.data.publicUrl;
+                            }
+                        }
+                    }
+                }
+            }
+
             const result = await SubmitBooth(values);
             console.log("Booth created successfully:", result.booth_id);
             router.push(`/booth/${result.booth_id}`);
@@ -279,8 +383,39 @@ export default function RequestForm() {
             console.error("Error creating booth:", error);
             // TODO: 오류 처리 로직 추가
         }
-
     }
+    async function getImageDimensions(imageUrl: string) {
+        return new Promise<{ width: number; height: number }>((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                resolve({
+                    width: img.width,
+                    height: img.height
+                });
+            };
+            img.onerror = reject;
+            img.src = imageUrl;
+        });
+    }
+
+    async function extractColor(imageUrl: string) {
+        try {
+            // 이미지 URL을 사용하여 Vibrant 객체 생성
+            const vibrant = new Vibrant(imageUrl);
+
+            // 색상 팔레트 추출
+            const palette = await vibrant.getPalette();
+
+            // DarkMuted 색상 가져오기
+            const darkMutedColor = palette.DarkMuted?.hex;
+
+            return darkMutedColor?.replace('#', '') || '797979'; // #을 제거하고 색상이 없는 경우 기본값으로 회색 사용
+        } catch (error) {
+            console.error('Error extracting color:', error);
+            return '797979'; // 오류 발생 시 기본값으로 회색 사용
+        }
+    }
+
     const selectedEvent = eventOptions.find((event) => event.value === form.watch('event'));
     const dateOptions = selectedEvent
         ? eachDayOfInterval({
@@ -1215,6 +1350,9 @@ export default function RequestForm() {
                                                                                                                 newProducts[index].options[optionIndex].thumbnail = file;
                                                                                                                 field.onChange(newProducts);
                                                                                                             }}
+                                                                                                            ratio={1}
+                                                                                                            maxSize={10000000}
+                                                                                                            maxFiles={1}
                                                                                                             value={option.thumbnail}
                                                                                                         />
                                                                                                     </div>

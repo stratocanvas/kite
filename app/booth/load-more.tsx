@@ -13,8 +13,6 @@ import { useInView } from 'react-intersection-observer';
 
 
 export default function MoreBooth({ initialBoothIds, searchParams }: { initialBoothIds: string[], searchParams: any }) {
-
-
     const getKey = (pageIndex: number, previousPageData: { booth: any[] } | null) => {
         if (previousPageData && !previousPageData.booth.length) return null;
         return { searchParams, page: pageIndex + 1, limit: 5 };
@@ -53,7 +51,7 @@ export default function MoreBooth({ initialBoothIds, searchParams }: { initialBo
                 <div key={booth.booth_id}>
                     <Link href={`/booth/${booth.booth_id}`}>
                         <Card key={booth.booth_id} className="w-full mx-auto h-full">
-                            <AspectRatio ratio={21 / 27} className="relative rounded-b-md">
+                            <AspectRatio ratio={21 / 27} className="relative rounded-b-md"style={{ backgroundColor: `#${booth.thumbnail.split('-c(')[1].split(')')[0]}` }}>
                                 {booth.thumbnail ? (
                                     <Image src={booth.thumbnail} alt="Image" fill className="rounded-md object-cover" priority={true} />
                                 ) : (
@@ -62,15 +60,15 @@ export default function MoreBooth({ initialBoothIds, searchParams }: { initialBo
                                     </div>
                                 )}
                                 <div className='absolute left-4 top-4 flex gap-2'>
-                                    <Badge className="rounded-md h-6" style={{ backgroundColor: booth.colors.darkMuted }}>
+                                    <Badge className="rounded-md h-6" style={{ backgroundColor: `#${booth.thumbnail.split('-c(')[1].split(')')[0]}` }}>
                                         선입금
                                     </Badge>
-                                    <Badge className="rounded-md h-6" style={{ backgroundColor: booth.colors.darkMuted }}>
+                                    <Badge className="rounded-md h-6" style={{ backgroundColor: `#${booth.thumbnail.split('-c(')[1].split(')')[0]}` }}>
                                         통판
                                     </Badge>
                                 </div>
                                 <div className="absolute bottom-0 w-full h-2/3 rounded-b-md">
-                                    <div className="absolute top-0 left-0 w-full h-full rounded-b-md" style={{ background: `linear-gradient(to top, ${booth.colors.darkMuted} 15%, transparent)`, mask: 'linear-gradient(to top, white, white, transparent)', backdropFilter: 'blur(12px)' }} />
+                                    <div className="absolute top-0 left-0 w-full h-full rounded-b-md" style={{ background: `linear-gradient(to top, #${booth.thumbnail.split('-c(')[1].split(')')[0]} 15%, transparent)`, mask: 'linear-gradient(to top, white, white, transparent)', backdropFilter: 'blur(12px)' }} />
                                     <div className="absolute bottom-0 rounded-b-md w-full">
                                         <CardHeader>
                                             <CardDescription className="font-bold text-white text-opacity-70">{booth.event.name}</CardDescription>

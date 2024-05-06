@@ -10,6 +10,32 @@ import { Separator } from "@/components/ui/separator";
 import FileHandler from '@tiptap-pro/extension-file-handler'
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
+import imageCompression from 'browser-image-compression';
+
+
+const compressImage = async (file: File): Promise<string> => {
+  const options = {
+    maxSizeMB: 1,
+    useWebWorker: true,
+    fileType: 'image/webp',
+  };
+
+  try {
+    const compressedFile = await imageCompression(file, options);
+    const reader = new FileReader();
+    reader.readAsDataURL(compressedFile);
+
+    console.log("compressed");
+    return new Promise((resolve) => {
+      reader.onload = () => {
+        resolve(reader.result as string);
+      };
+    });
+  } catch (error) {
+    console.error('Error compressing image:', error);
+    return '';
+  }
+};
 
 interface TiptapProps {
   onChange?: (jsonData: any) => void;
@@ -65,36 +91,35 @@ const Tiptap = ({ onChange, initValue }: TiptapProps) => {
       }),
       FileHandler.configure({
         allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
-        onDrop: (currentEditor, files, pos) => {
+        onDrop: async (currentEditor, files, pos) => {
           for (const file of files) {
-            const fileReader = new FileReader();
-            fileReader.readAsDataURL(file);
-            fileReader.onload = () => {
+            const compressedImageUrl = await compressImage(file);
+            if (compressedImageUrl) {
               currentEditor.chain().insertContentAt(pos, {
                 type: 'image',
                 attrs: {
-                  src: fileReader.result,
+                  src: compressedImageUrl,
                 },
               }).focus().run();
-            };
+            }
           }
         },
-        onPaste: (currentEditor, files, htmlContent) => {
+
+        onPaste: async (currentEditor, files, htmlContent) => {
+          console.log('onPaste called with files:', files);
           for (const file of files) {
             if (htmlContent) {
-              console.log(htmlContent);
               return false;
             }
-            const fileReader = new FileReader();
-            fileReader.readAsDataURL(file);
-            fileReader.onload = () => {
+            const compressedImageUrl = await compressImage(file);
+            if (compressedImageUrl) {
               currentEditor.chain().insertContentAt(currentEditor.state.selection.anchor, {
                 type: 'image',
                 attrs: {
-                  src: fileReader.result,
+                  src: compressedImageUrl,
                 },
               }).focus().run();
-            };
+            }
           }
         },
       }),
@@ -116,16 +141,22 @@ const Tiptap = ({ onChange, initValue }: TiptapProps) => {
   );
 };
 
-const addImage = (editor: Editor, event: React.ChangeEvent<HTMLInputElement>) => {
-  const file = event.target.files?.[0];
+const addImage = async (editor: Editor, event: React.ChangeEvent<HTMLInputElement>) => {
+  const files = event.target.files;
 
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const imageUrl = reader.result as string;
-      editor.chain().focus().setImage({ src: imageUrl }).run();
-    };
-    reader.readAsDataURL(file);
+  if (files) {
+    const pos = editor.state.selection.anchor;
+    for (const file of files) {
+      const compressedImageUrl = await compressImage(file);
+      if (compressedImageUrl) {
+        editor.chain().insertContentAt(pos, {
+          type: 'image',
+          attrs: {
+            src: compressedImageUrl,
+          },
+        }).focus().run();
+      }
+    }
   }
 
   // 이미지 선택 후 input 요소의 값을 초기화
@@ -203,6 +234,7 @@ const RichTextEditorToolbar = ({ editor }: { editor: Editor }) => {
           id="file-input"
           type="file"
           accept="image/*"
+          multiple
           style={{ display: 'none' }}
           onChange={(event) => addImage(editor, event)}
         />

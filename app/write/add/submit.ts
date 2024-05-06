@@ -1,9 +1,5 @@
 "use server";
 import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
-import { v4 as uuidv4 } from "uuid";
-import sharp from "sharp";
-
 interface FormData {
 	event: number;
 	name: string;
@@ -40,78 +36,6 @@ export async function RegisterAuthor(values: AuthorData) {
 }
 
 export async function SubmitBooth(formData: FormData) {
-	const uuid = uuidv4();
-	//convert image to webp
-
-	let publicUrlData;
-
-	if (formData.thumbnail) {
-		const isWebP = formData.thumbnail.startsWith("data:image/webp;base64,");
-		let thumbnailBuffer: Buffer;
-		if (isWebP) {
-			// If the thumbnail is already in WebP format, convert the base64 string to a buffer
-			thumbnailBuffer = Buffer.from(formData.thumbnail.split(",")[1], "base64");
-		} else {
-			// If the thumbnail is not in WebP format, convert it to WebP using sharp
-			const base64Data = formData.thumbnail.split(",")[1];
-			const imageBuffer = Buffer.from(base64Data, "base64");
-			thumbnailBuffer = await sharp(imageBuffer).webp().toBuffer();
-		}
-
-		//upload thumbnail
-		const { data, error } = await supabase.storage
-			.from("booth")
-			.upload(`thumbnails/${uuid}.webp`, thumbnailBuffer, {
-				contentType: "image/webp",
-			});
-		if (error) {
-			throw error;
-		}
-		publicUrlData = await supabase.storage
-			.from("booth")
-			.getPublicUrl(data.path);
-	}
-
-	if (formData.boothinfo?.content) {
-		for (const item of formData.boothinfo.content) {
-			if (item.type === "image") {
-				const isItemWebP = item.attrs?.src?.startsWith(
-					"data:image/webp;base64,",
-				);
-				let itemBuffer: Buffer;
-
-				if (isItemWebP) {
-					itemBuffer = Buffer.from(
-						item.attrs?.src?.split(",")[1] ?? "",
-						"base64",
-					);
-				} else {
-					const base64Data = item.attrs?.src?.split(",")[1] ?? "";
-					const imageBuffer = Buffer.from(base64Data, "base64");
-					itemBuffer = await sharp(imageBuffer).webp().toBuffer();
-				}
-
-				const itemUuid = uuidv4();
-				const { data, error } = await supabase.storage
-					.from("booth")
-					.upload(`article/${itemUuid}.webp`, itemBuffer, {
-						contentType: "image/webp",
-					});
-				if (error) {
-					throw error;
-				}
-				const { data: itemPublicUrlData } = await supabase.storage
-					.from("booth")
-					.getPublicUrl(data.path);
-
-				item.attrs = {
-					...item.attrs,
-					src: itemPublicUrlData.publicUrl,
-				};
-			}
-		}
-	}
-
 	const { data: boothData, error: boothError } = await supabase
 		.from("booth")
 		.insert({
@@ -119,7 +43,7 @@ export async function SubmitBooth(formData: FormData) {
 			name: formData.name,
 			date: formData.dates,
 			locations: formData.locations,
-			thumbnail: publicUrlData?.data.publicUrl ?? null,
+			thumbnail: formData.thumbnail ?? null,
 			article: JSON.stringify(formData.boothinfo),
 		})
 		.select("booth_id")
@@ -191,49 +115,13 @@ export async function SubmitBooth(formData: FormData) {
 
 			if (product.options) {
 				for (const option of product.options) {
-					let thumbnailUrl = null;
-					if (option.thumbnail) {
-						const isOptionWebP = option.thumbnail.startsWith(
-							"data:image/webp;base64,",
-						);
-						let optionThumbnailBuffer: Buffer;
-
-						if (isOptionWebP) {
-							optionThumbnailBuffer = Buffer.from(
-								option.thumbnail.split(",")[1],
-								"base64",
-							);
-						} else {
-							const base64Data = option.thumbnail.split(",")[1];
-							const imageBuffer = Buffer.from(base64Data, "base64");
-							optionThumbnailBuffer = await sharp(imageBuffer)
-								.webp()
-								.toBuffer();
-						}
-
-						const optionUuid = uuidv4();
-						const { data, error } = await supabase.storage
-							.from("product")
-							.upload(`option/${optionUuid}.webp`, optionThumbnailBuffer, {
-								contentType: "image/webp",
-							});
-						if (error) {
-							console.log("error occured in product option thumbnail insert");
-							throw error;
-						}
-						const { data: thumbnailData } = await supabase.storage
-							.from("product")
-							.getPublicUrl(data.path);
-						thumbnailUrl = thumbnailData.publicUrl;
-					}
-
 					const { data: optionData, error: optionError } = await supabase
 						.from("p_option")
 						.insert({
 							name: option.name,
 							price: option.price,
 							product_id: productData.product_id,
-							thumbnail: thumbnailUrl,
+							thumbnail: option.thumbnail,
 						})
 						.select("option_id")
 						.single();
