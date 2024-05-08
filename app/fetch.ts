@@ -1,4 +1,4 @@
-'use server'
+"use server";
 import { createClient } from "@/utils/supabase/server";
 
 const supabase = createClient();
@@ -22,15 +22,17 @@ export async function GetUser() {
 		error: getUserError,
 	} = await supabase.auth.getUser();
 
+	if (getUserError) {
+		return null;
+	}
 	const { data } = await supabase
 		.from("users")
 		.select("name, n_name")
 		.eq("id", user?.id)
 		.limit(1)
 		.single();
-
-	if (getUserError) {
-		return null;
-	}
-	return data;
+	return {
+		...data,
+		providers: user?.app_metadata?.providers || [],
+	};
 }

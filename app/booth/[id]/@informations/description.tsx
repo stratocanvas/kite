@@ -141,21 +141,26 @@ export default function BoothDescription({ data }: { data: any }) {
                                             <div
                                                 className="flex flex-col items-center justify-center"
                                             >
-                                                <Avatar className="h-28 w-28 relative rounded-full overflow-hidden">
-                                                    <AvatarImage asChild src={author?.thumbnail}>
-                                                    <Image
-                                                        src={author?.thumbnail || ''}
-                                                        alt={author?.name}
-                                                        fill
-                                                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 50vw, 33vw"
-                                                        style={{ objectFit: "cover" }}
-                                                        className="rounded-full"
-                                                    />
-                                                    </AvatarImage>
-                                                    <AvatarFallback className="text-4xl text-muted-foreground">
-                                                        {author.name[0]}
-                                                    </AvatarFallback>
-                                                </Avatar>
+                                                <Link href={`https://x.com/${author?.sns_x}`}>
+
+                                                    <Avatar className="h-28 w-28 relative rounded-full overflow-hidden">
+                                                        <AvatarImage asChild src={author?.thumbnail}>
+                                                            <Image
+                                                                src={author?.thumbnail || ''}
+                                                                alt={author?.name}
+                                                                fill
+                                                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 50vw, 33vw"
+                                                                style={{ objectFit: "cover" }}
+                                                                className="rounded-full"
+                                                            />
+                                                        </AvatarImage>
+
+                                                        <AvatarFallback className="text-4xl text-muted-foreground">
+                                                            {author.name[0]}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                </Link>
+
                                                 <Label className="mt-2 text-center w-16 break-words whitespace-normal max-h-12 overflow-y-hidden">
                                                     {author.name}
                                                 </Label>
@@ -169,7 +174,7 @@ export default function BoothDescription({ data }: { data: any }) {
                     )}
                 </Suspense>
 
-            </Card>
+            </Card >
         </>
     )
 }

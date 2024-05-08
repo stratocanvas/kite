@@ -71,8 +71,11 @@ import { useRouter, redirect } from 'next/navigation';
 import Vibrant from "node-vibrant"
 import { v4 as uuidv4 } from "uuid";
 import { GetUser } from "@/app/fetch"
-import { toast } from "sonner"
+import { useToast } from "@/components/ui/use-toast"
 import { UserStateContext } from "@/providers"
+import { fetchTwitterUser } from "./fetch"
+import imageCompression from 'browser-image-compression';
+import { RegisterTwitterAuthor } from "./submit";
 
 const supabase = createClient()
 
@@ -118,7 +121,14 @@ const formSchema = z.object({
     genre: z.array(z.number()).optional().nullable()
 });
 
+const authorFormSchema = z.object({
+    authorname: z.string().min(1, { message: "부스 이름을 입력해 주세요" }),
+    authorprofile: z.string().optional(),
+    authorsns_x: z.string().min(1, { message: "SNS 아이디를 입력해 주세요" }),
+});
+
 export default function RequestForm() {
+    const { toast } = useToast()
 
     const router = useRouter();
     const { userData } = React.useContext(UserStateContext);
@@ -180,6 +190,28 @@ export default function RequestForm() {
     const [productAuthorOpen, setProductAuthorOpen] = useState<boolean[]>([]);
     const [selectedProductAuthors, setSelectedProductAuthors] = useState<{ value: string, label: string, thumbnail: string, sns_x: string }[]>([]);
     const [preorderType, setPreorderType] = useState('')
+    const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
+    const [twitterProfile, setTwitterProfile] = useState(false)
+    //twitter user fetch
+    useEffect(() => {
+        const fetchOptions = async () => {
+            const data = await fetchTwitterUser()
+            twitterAuthorForm.reset(
+                {
+                    authorname: data?.name,
+                    authorsns_x: data?.preferred_username,
+                    authorprofile: data?.picture,
+                }
+            );
+            setTwitterProfile(true)
+        };
+
+        if (authorDialogOpen && !twitterProfile && userData.providers.includes('twitter')) {
+            fetchOptions();
+        }
+    }, [authorDialogOpen]);
+
+
 
     //이벤트 fetch
     useEffect(() => {
@@ -245,7 +277,6 @@ export default function RequestForm() {
         };
 
         if ((authorOpen || (productAuthorOpen.length > 0 && productAuthorOpen.some(open => open))) && !authorFetched) {
-            console.log("FETCH")
             fetchOptions();
         }
     }, [authorOpen, authorFetched, productAuthorOpen]);
@@ -313,7 +344,127 @@ export default function RequestForm() {
         mode: "all"
     });
 
+    const authorForm = useForm({
+        resolver: zodResolver(authorFormSchema),
+        defaultValues: {
+            authorname: "",
+            authorsns_x: "",
+            authorprofile: "",
+        },
+        mode: "all"
+    });
+
+    const twitterAuthorForm = useForm({
+        resolver: zodResolver(authorFormSchema),
+        defaultValues: {
+            authorname: "",
+            authorsns_x: "",
+            authorprofile: "",
+        },
+        mode: "all"
+    });
+
+
+
     const { isSubmitting, isSubmitted, isSubmitSuccessful, isValid } = useFormState(form);
+
+    async function onSubmitAuthor(authorFormValues: z.infer<typeof authorFormSchema>) {
+        const { authorname, authorsns_x, authorprofile } = authorFormValues;
+
+        try {
+            let profileImageUrl = null;
+
+            if (authorprofile) {
+                // 1. browser-image-compression으로 webp로 변환
+                const uuid = uuidv4();
+                const fileName = `${uuid}.webp`;
+                // 2. 클라이언트단에서 supabase로 업로드
+                const imageFile = await fetch(authorprofile).then(r => r.blob());
+                const { data, error } = await supabase.storage
+                    .from("author")
+                    .upload(`thumbnail/${fileName}`, imageFile);
+                if (error) {
+                    throw error;
+                }
+
+                // 3. 업로드한 사진의 publicurl 획득 
+                const { data: urlData } = await supabase.storage
+                    .from("author")
+                    .getPublicUrl(data.path);
+
+                profileImageUrl = urlData.publicUrl;
+            }
+
+            // 4. publicurl과 나머지 정보를 함께 registerAuthor로 보냄
+            const data = await RegisterAuthor({ name: authorname, sns_x: authorsns_x, thumbnail: profileImageUrl });
+            const { author_id, name, sns_x, thumbnail } = data;
+
+            // setSelectedAuthors 관련 작업은 반드시 실행되어야 함
+            setSelectedAuthors([...selectedAuthors, { value: author_id, label: name, sns_x: sns_x, thumbnail: thumbnail }]);
+            form.setValue("authors", [...(form.getValues("authors") || []), author_id]);
+            setAuthorFetched(false);
+            setAuthorDialogOpen(false);
+
+            toast({ title: "작가 등록 완료!" });
+        } catch (error) {
+            toast({ variant: "destructive", title: "작가 등록에 실패했어요.", description: error.message });
+        }
+    }
+
+    async function onSubmitTwitterAuthor(twitterAuthorFormValues: z.infer<typeof authorFormSchema>) {
+        console.log("START");
+        const { authorname, authorsns_x, authorprofile } = twitterAuthorFormValues;
+
+        try {
+            let profileImageUrl = null;
+
+            if (authorprofile) {
+                // 1. browser-image-compression으로 webp로 변환
+                const uuid = uuidv4();
+                const fileName = `${uuid}.webp`;
+
+                const imageFile = await fetch(authorprofile).then(r => r.blob());
+
+                const compressedFile = await imageCompression(imageFile, {
+                    maxSizeMB: 1,
+                    maxWidthOrHeight: 1024,
+                    useWebWorker: true,
+                    initialQuality: 0.8,
+                    fileType: 'webp'
+                });
+
+                // 2. 클라이언트단에서 supabase로 업로드
+                const { data, error } = await supabase.storage
+                    .from("author")
+                    .upload(`thumbnail/${fileName}`, compressedFile);
+
+                if (error) {
+                    throw error;
+                }
+
+                // 3. 업로드한 사진의 publicurl 획득 
+                const { data: urlData } = await supabase.storage
+                    .from("author")
+                    .getPublicUrl(data.path);
+
+                profileImageUrl = urlData.publicUrl;
+            }
+
+            // 4. publicurl과 나머지 정보를 함께 registerAuthor로 보냄
+            const data = await RegisterTwitterAuthor({ name: authorname, sns_x: authorsns_x, thumbnail: profileImageUrl });
+            const { author_id, name, sns_x, thumbnail } = data;
+
+            // setSelectedAuthors 관련 작업은 반드시 실행되어야 함
+            setSelectedAuthors([...selectedAuthors, { value: author_id, label: name, sns_x: sns_x, thumbnail: thumbnail }]);
+            form.setValue("authors", [...(form.getValues("authors") || []), author_id]);
+            setAuthorFetched(false);
+            setAuthorDialogOpen(false);
+
+            toast({ title: "작가 등록 완료!" });
+        } catch (error) {
+            toast({ variant: "destructive", title: "작가 등록에 실패했어요.", description: error.message });
+        }
+    }
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
@@ -328,7 +479,6 @@ export default function RequestForm() {
                 const thumbnailFileName = `${thumbnailUuid}-c(${darkMutedHex})-w(${thumbnailDimensions.width})-h(${thumbnailDimensions.height}).webp`;
                 // 이미지 파일 가져오기
                 const thumbnailFile = await fetch(values.thumbnail).then(r => r.blob());
-                console.log(thumbnailFileName);
                 const { data, error } = await supabase.storage
                     .from("booth")
                     .upload(`thumbnails/${thumbnailFileName}`, thumbnailFile, {
@@ -420,12 +570,18 @@ export default function RequestForm() {
                     }
                 }
             }
-            console.log(values)
             const result = await SubmitBooth(values);
-            console.log("Booth created successfully:", result.booth_id);
+            toast({
+                title: "부스 등록 성공!",
+                description: "등록된 부스 페이지로 이동합니다.",
+            })
             router.push(`/booth/${result.booth_id}`);
         } catch (error) {
-            console.error("Error creating booth:", error);
+            toast({
+                variant: "destructive",
+                title: "부스 등록에 실패했어요.",
+                description: error.message,
+            })
             // TODO: 오류 처리 로직 추가
         }
     }
@@ -442,7 +598,6 @@ export default function RequestForm() {
             img.src = imageUrl;
         });
     }
-
     async function extractColor(imageUrl: string, type: 'thumbnail' | 'article' | 'option') {
         try {
             // 이미지 URL을 사용하여 Vibrant 객체 생성
@@ -463,11 +618,9 @@ export default function RequestForm() {
 
             return color?.replace('#', '') || '797979'; // #을 제거하고 색상이 없는 경우 기본값으로 회색 사용
         } catch (error) {
-            console.error('Error extracting color:', error);
             return '797979'; // 오류 발생 시 기본값으로 회색 사용
         }
     }
-
     const selectedEvent = eventOptions.find((event) => event.value === form.watch('event'));
     const dateOptions = selectedEvent
         ? eachDayOfInterval({
@@ -495,7 +648,7 @@ export default function RequestForm() {
     }, [selectedCharacters]);
 
     return (
-        <Card className="sm:w-full lg:w-[600px] mx-auto border-none shadow-none">
+        <Card className="sm:w-full lg:w-[800px] mx-auto border-none shadow-none">
             <CardHeader>
                 <CardTitle>부스 직접 등록</CardTitle>
             </CardHeader>
@@ -512,7 +665,7 @@ export default function RequestForm() {
                     </div>
 
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 mt-4">
+                        <form key={1} onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 mt-4">
                             <TabsContent value="basic" asChild>
                                 <>
                                     {location && (
@@ -561,54 +714,127 @@ export default function RequestForm() {
                                                                                             <DialogHeader>
                                                                                                 <DialogTitle>작가 등록</DialogTitle>
                                                                                             </DialogHeader>
-                                                                                            <form onSubmit={(e) => {
+
+                                                                                            {userData?.providers.includes("twitter") && (
+                                                                                                <>
+                                                                                                    <form key={3} onSubmit={(e) => {
+                                                                                                        e.preventDefault();
+                                                                                                        e.stopPropagation();
+                                                                                                        twitterAuthorForm.handleSubmit(onSubmitTwitterAuthor)(e);
+                                                                                                    }}>
+                                                                                                        <FormLabel>내 X(Twitter) 프로필</FormLabel>
+                                                                                                        <div className="flex justify-between mt-2 items-center">
+                                                                                                            <div className="flex flex-row gap-3 items-center">
+                                                                                                                <FormField
+                                                                                                                    control={twitterAuthorForm.control}
+                                                                                                                    name="authorprofile"
+                                                                                                                    render={({ field }) => (
+                                                                                                                        <Avatar>
+                                                                                                                            <AvatarImage src={field.value} />
+
+                                                                                                                        </Avatar>
+                                                                                                                    )}
+                                                                                                                />
+                                                                                                                <div>
+                                                                                                                    <FormField
+                                                                                                                        control={twitterAuthorForm.control}
+                                                                                                                        name="authorname"
+                                                                                                                        render={({ field }) => (
+                                                                                                                            <p>{field.value}</p>
+                                                                                                                        )}
+                                                                                                                    />
+                                                                                                                    <FormField
+                                                                                                                        control={twitterAuthorForm.control}
+                                                                                                                        name="authorsns_x"
+                                                                                                                        render={({ field }) => (
+                                                                                                                            <p className="text-sm text-muted-foreground">@{field.value}</p>
+                                                                                                                        )}
+                                                                                                                    />
+                                                                                                                </div>
+                                                                                                            </div>
+                                                                                                            <Button type="submit">
+                                                                                                                등록
+                                                                                                            </Button>
+                                                                                                        </div>
+                                                                                                    </form>
+                                                                                                    <Separator />
+                                                                                                </>
+                                                                                            )}
+
+                                                                                            <form key={2} onSubmit={(e) => {
                                                                                                 e.preventDefault();
                                                                                                 e.stopPropagation();
-                                                                                                const form = e.target as HTMLFormElement;
-                                                                                                const formData = new FormData(form);
-                                                                                                const name = formData.get('name') as string;
-                                                                                                const sns_x = formData.get('sns_x') as string;
-                                                                                                RegisterAuthor({ name, sns_x })
-                                                                                                    .then((data) => {
-                                                                                                        const { author_id, name, sns_x } = data;
-                                                                                                        setSelectedAuthors([...selectedAuthors, { value: author_id, label: name, sns_x: sns_x }]);
-                                                                                                        field.onChange([...(field.value || []), author_id]);
-                                                                                                        setAuthorFetched(false);
-                                                                                                        setAuthorDialogOpen(false)
-                                                                                                    })
-                                                                                                    .catch((error) => {
-                                                                                                        console.error('Failed to register author:', error);
-                                                                                                    });
+                                                                                                authorForm.handleSubmit(onSubmitAuthor)(e);
                                                                                             }}>
                                                                                                 <div className="flex flex-col gap-6 py-4 justify-start">
-                                                                                                    <div className="flex flex-col gap-2">
-                                                                                                        <Label htmlFor="name">
-                                                                                                            이름
-                                                                                                        </Label>
-                                                                                                        <Input
-                                                                                                            id="name"
-                                                                                                            name="name"
-                                                                                                            placeholder="작가 활동명 입력"
-                                                                                                            autoComplete="off"
-                                                                                                            required
-                                                                                                        />
-                                                                                                    </div>
-                                                                                                    <div className="flex flex-col gap-2">
-                                                                                                        <Label htmlFor="sns_x">
-                                                                                                            SNS 아이디
-                                                                                                        </Label>
-                                                                                                        <Input
-                                                                                                            id="sns_x"
-                                                                                                            name="sns_x"
-                                                                                                            autoComplete="off"
 
-                                                                                                            placeholder="X(Twitter) 아이디 입력"
-                                                                                                            required
-                                                                                                        />
-                                                                                                    </div>
+                                                                                                    <FormField
+                                                                                                        control={authorForm.control}
+                                                                                                        name="authorprofile"
+                                                                                                        render={({ field }) => (
+                                                                                                            <FormItem className="flex flex-col">
+                                                                                                                <FormLabel>프로필 사진</FormLabel>
+                                                                                                                <FormControl>
+                                                                                                                    <div className="w-20">
+                                                                                                                        <FileUpload
+                                                                                                                            name="profileimage"
+                                                                                                                            onChange={(file) => {
+                                                                                                                                authorForm.setValue("authorprofile", file);
+                                                                                                                                setProfileImagePreview(file);
+                                                                                                                            }}
+                                                                                                                            ratio={1}
+                                                                                                                            maxSize={10000000}
+                                                                                                                            maxFiles={1}
+                                                                                                                            value={profileImagePreview}
+                                                                                                                        />
+                                                                                                                    </div>
+                                                                                                                </FormControl>
+                                                                                                                <FormMessage />
+                                                                                                            </FormItem>
+                                                                                                        )}
+                                                                                                    />
+                                                                                                    <FormField
+                                                                                                        control={authorForm.control}
+                                                                                                        name="authorname"
+                                                                                                        render={({ field }) => (
+                                                                                                            <FormItem className="flex flex-col">
+                                                                                                                <FormLabel>이름</FormLabel>
+                                                                                                                <FormControl>
+                                                                                                                    <Input {...field}
+                                                                                                                        required
+                                                                                                                        autoComplete="off"
+                                                                                                                        placeholder="작가 활동명 입력"
+                                                                                                                        className="w-full"
+                                                                                                                        onChange={(e) => { field.onChange(e.target.value) }}
+                                                                                                                    />
+                                                                                                                </FormControl>
+                                                                                                                <FormMessage />
+                                                                                                            </FormItem>
+                                                                                                        )}
+                                                                                                    />
+                                                                                                    <FormField
+                                                                                                        control={authorForm.control}
+                                                                                                        name="authorsns_x"
+                                                                                                        render={({ field }) => (
+                                                                                                            <FormItem className="flex flex-col">
+                                                                                                                <FormLabel>SNS 아이디</FormLabel>
+                                                                                                                <FormControl>
+                                                                                                                    <Input {...field}
+                                                                                                                        required
+                                                                                                                        autoComplete="off"
+                                                                                                                        placeholder="X(Twitter) 아이디 입력"
+                                                                                                                        className="w-full"
+                                                                                                                        onChange={(e) => { field.onChange(e.target.value) }}
+                                                                                                                    />
+                                                                                                                </FormControl>
+                                                                                                                <FormMessage />
+                                                                                                            </FormItem>
+                                                                                                        )}
+                                                                                                    />
                                                                                                 </div>
                                                                                                 <DialogFooter>
-                                                                                                    <Button type="submit" onClick={() => setAuthorFetched(false)}>등록</Button>
+                                                                                                    <Button type="submit">등록
+                                                                                                    </Button>
                                                                                                 </DialogFooter>
                                                                                             </form>
                                                                                         </DialogContent>
@@ -643,12 +869,12 @@ export default function RequestForm() {
                                                                                                 <Avatar>
                                                                                                     <AvatarImage src={author.thumbnail} />
                                                                                                     <AvatarFallback>
-                                                                                                        <p>{author.label[0]}</p>
+                                                                                                        <p>{author?.label[0]}</p>
                                                                                                     </AvatarFallback>
                                                                                                 </Avatar>
                                                                                                 <div className="flex flex-col">
-                                                                                                    <p>{author.label}</p>
-                                                                                                    <p className="text-muted-foreground">{author.sns_x}</p>
+                                                                                                    <p>{author?.label}</p>
+                                                                                                    <p className="text-muted-foreground">{author?.sns_x}</p>
                                                                                                 </div>
                                                                                             </div>
                                                                                         </CommandItem>
@@ -662,18 +888,18 @@ export default function RequestForm() {
                                                         </CardHeader>
                                                         <CardContent>
                                                             {selectedAuthors.map((author) => (
-                                                                <div key={author.value} className="my-2">
+                                                                <div key={author?.value} className="my-2">
                                                                     <div className="flex flex-row gap-2 items-center justify-between">
                                                                         <div className="flex flex-row gap-2 items-center">
                                                                             <Avatar>
-                                                                                <AvatarImage src={author.thumbnail} />
+                                                                                <AvatarImage src={author?.thumbnail} />
                                                                                 <AvatarFallback>
-                                                                                    <p>{author.label[0]}</p>
+                                                                                    <p>{author?.label[0]}</p>
                                                                                 </AvatarFallback>
                                                                             </Avatar>
                                                                             <div className="flex flex-col">
-                                                                                <p>{author.label}</p>
-                                                                                <p className="text-muted-foreground">{author.sns_x}</p>
+                                                                                <p>{author?.label}</p>
+                                                                                <p className="text-muted-foreground">{author?.sns_x}</p>
                                                                             </div>
                                                                         </div>
                                                                         <Button
@@ -914,16 +1140,7 @@ export default function RequestForm() {
                                             </FormItem>
                                         )}
                                     />
-                                    <div className="sticky bottom-0 bg-gradient-to-t from-background via-background/70 to-transparent pb-6 pt-6">
-                                        <TabsList asChild className="p-4">
-                                            <TabsTrigger asChild value="info">
-                                                <Button type="button" variant="secondary" className="text-foreground w-full lg:w-auto" size="lg">
-                                                    인포 입력
-                                                    <ChevronRight className="ml-2 h-4 w-4" />
-                                                </Button>
-                                            </TabsTrigger>
-                                        </TabsList>
-                                    </div>
+
                                 </>
 
                             </TabsContent>
@@ -970,16 +1187,7 @@ export default function RequestForm() {
                                             </FormItem>
                                         )}
                                     />
-                                    <div className="sticky bottom-0 bg-gradient-to-t from-background via-background/70 to-transparent pb-6 pt-6">
-                                        <TabsList asChild className="p-4">
-                                            <TabsTrigger asChild value="goods">
-                                                <Button type="button" variant="secondary" className="text-foreground w-full lg:w-auto" size="lg">
-                                                    굿즈 입력
-                                                    <ChevronRight className="ml-2 h-4 w-4" />
-                                                </Button>
-                                            </TabsTrigger>
-                                        </TabsList>
-                                    </div>
+
                                 </>
                             </TabsContent>
                             <TabsContent value="goods" asChild>
@@ -1271,15 +1479,17 @@ export default function RequestForm() {
                                                                                             <CommandInput placeholder="작가 검색..." />
                                                                                             <CommandList>
                                                                                                 <CommandEmpty>
+
                                                                                                     <Dialog open={authorDialogOpen} onOpenChange={() => setAuthorDialogOpen(!authorDialogOpen)}>
                                                                                                         <div className="flex flex-col gap-2 items-center">
                                                                                                             검색된 작가 없음
                                                                                                             <DialogTrigger asChild>
-                                                                                                                <Button variant="secondary" onClick={() => setAuthorDialogOpen(true)}>
+                                                                                                                {/*<Button variant="secondary" onClick={() => setAuthorDialogOpen(true)}>
                                                                                                                     작가 등록
-                                                                                                                </Button>
+                                                                                            </Button> */}
                                                                                                             </DialogTrigger>
                                                                                                         </div>
+                                                                                                        {/*
                                                                                                         <DialogContent className="sm:max-w-[425px]">
                                                                                                             <DialogHeader>
                                                                                                                 <DialogTitle>작가 등록</DialogTitle>
@@ -1292,7 +1502,6 @@ export default function RequestForm() {
                                                                                                                 const name = formData.get('name') as string;
                                                                                                                 const sns_x = formData.get('sns_x') as string;
                                                                                                                 const isBoothAuthor = formData.get('isBoothAuthor') as boolean;
-                                                                                                                console.log(isBoothAuthor)
                                                                                                                 RegisterAuthor({ name, sns_x })
                                                                                                                     .then((data) => {
                                                                                                                         const { author_id } = data;
@@ -1304,10 +1513,13 @@ export default function RequestForm() {
                                                                                                                         }
                                                                                                                         setAuthorFetched(false);
                                                                                                                         setAuthorDialogOpen(false);
+                                                                                                                        toast({ title: "작가 등록 완료!" })
+
 
                                                                                                                     })
                                                                                                                     .catch((error) => {
-                                                                                                                        console.error('Failed to register author:', error);
+                                                                                                                        toast({ variant: "destructive", title: "작가 등록에 실패했어요.", description: "잠시 후 다시 시도해 주세요." })
+
                                                                                                                     });
                                                                                                             }}>
                                                                                                                 <div className="flex flex-col gap-6 py-4 justify-start">
@@ -1351,6 +1563,7 @@ export default function RequestForm() {
                                                                                                                 </DialogFooter>
                                                                                                             </form>
                                                                                                         </DialogContent>
+                                                                                                        */}
                                                                                                     </Dialog>
                                                                                                 </CommandEmpty>
                                                                                                 <CommandGroup heading="이 부스의 작가">
@@ -1775,24 +1988,15 @@ export default function RequestForm() {
                                                                     </Card>
                                                                 </CarouselItem>
                                                             ))}
-
                                                         </CarouselContent>
+                                                        <CarouselPrevious className="ml-14" />
+                                                        <CarouselNext className="mr-14" />
                                                     </Carousel>
                                                 </FormControl>
                                             </FormItem>
                                         )}
                                     />
 
-                                    <div className="sticky bottom-0 bg-gradient-to-t from-background via-background/70 to-transparent pb-6 pt-6">
-                                        <TabsList asChild className="p-4">
-                                            <TabsTrigger asChild value="etc">
-                                                <Button type="button" variant="secondary" className="text-foreground w-full lg:w-auto" size="lg">
-                                                    기타 정보 입력
-                                                    <ChevronRight className="ml-2 h-4 w-4" />
-                                                </Button>
-                                            </TabsTrigger>
-                                        </TabsList>
-                                    </div>
                                 </>
                             </TabsContent>
 
@@ -1971,6 +2175,8 @@ export default function RequestForm() {
                                                                 </CarouselItem>
                                                             ))}
                                                         </CarouselContent>
+                                                        <CarouselPrevious className="ml-14" />
+                                                        <CarouselNext className="mr-14" />
                                                     </Carousel>
                                                 </FormControl>
                                             </FormItem>
@@ -2153,7 +2359,6 @@ export default function RequestForm() {
                                                     variant="default"
                                                     className="w-full lg:w-auto"
                                                     size="lg"
-                                                    onClick={() => toast.success("부스 등록 완료", { description: "부스 페이지로 이동합니다." })}
                                                 >
                                                     제출
                                                 </Button>

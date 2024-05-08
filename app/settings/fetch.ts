@@ -43,3 +43,12 @@ export async function SubmitData(
 		.eq("id", user.id)
 		.single();
 }
+
+export async function DeleteUser() {
+	const {
+		data: { user },
+		error: userError,
+	} = await supabase.auth.getUser();
+	await supabase.auth.deleteUser();
+}
+
