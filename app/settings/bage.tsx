@@ -20,8 +20,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { UserStateContext } from "@/providers"
 import { useRouter } from "next/navigation";
 
-
-
 const formSchema = z.object({
     id: z.string().min(2).max(24).regex(/^[a-zA-Z0-9_]+$/),
     nickname: z.string().min(1).max(24),

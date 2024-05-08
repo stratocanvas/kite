@@ -24,33 +24,70 @@ interface CategoryData {
 
 const supabase = createClient();
 export async function RegisterAuthor(values: AuthorData) {
-	console.log(values);
 	// sns_x 맨 앞글자가 '@'로 시작하지 않는 경우 '@' 추가
-	if (!values.sns_x.startsWith("@")) {
+	if (!values.sns_x?.startsWith("@")) {
 		values.sns_x = `@${values.sns_x}`;
 	}
 
 	const { data, error } = await supabase
 		.from("author")
-		.insert({ name: values.name, sns_x: values.sns_x })
-		.select("author_id, name, sns_x")
+		.insert({
+			name: values.name,
+			sns_x: values.sns_x,
+			thumbnail: values.thumbnail,
+		})
+		.select("author_id, name, sns_x, thumbnail")
 		.single();
 	if (error) {
-		throw error;
+		throw `${error.message}(${error.code})`;
 	}
 	return data;
 }
 
-export async function RegisterCategory(values: CategoryData) {
-	console.log(values);
+export async function RegisterTwitterAuthor(values: AuthorData) {
+	// sns_x 맨 앞글자가 '@'로 시작하지 않는 경우 '@' 추가
+	if (!values.sns_x?.startsWith("@")) {
+		values.sns_x = `@${values.sns_x}`;
+	}
+	const { data: authorData, error: authorError } = await supabase
+		.from("author")
+		.insert({
+			name: values.name,
+			sns_x: values.sns_x,
+			thumbnail: values.thumbnail,
+		})
+		.select("author_id, name, sns_x, thumbnail")
+		.single();
+	if (authorError) {
+		throw `${authorError.message}(${authorError.code})`;
+	}
+	const { data: seller, error: sellerError } = await supabase
+		.from("seller")
+		.insert({ author_id: authorData.author_id })
+		.select("users_id")
+		.single();
+	if (sellerError) {
+		throw `${sellerError.message}(${sellerError.code})`;
+	}
+	const { data: users, error: usersError } = await supabase
+		.from("users")
+		.update({ seller: true })
+		.eq("id", seller.users_id)
+		.single();
+	if (usersError) {
+		throw `${usersError.message}(${usersError.code})`;
+	}
+	return authorData;
+}
 
+export async function RegisterCategory(values: CategoryData) {
 	const { data, error } = await supabase
 		.from("category")
 		.insert({ name: values.name })
 		.select("category_id, name")
 		.single();
 	if (error) {
-		throw error;
+		throw `${error.message}(${error.code})`;
 	}
 	return data;
 }
@@ -112,7 +149,6 @@ export async function SubmitBooth(formData: FormData) {
 				.single();
 
 			if (productError) {
-				console.log("error occured in product insert");
 				throw productError;
 			}
 
@@ -127,7 +163,6 @@ export async function SubmitBooth(formData: FormData) {
 					.insert(productAuthorData);
 
 				if (productAuthorError) {
-					console.log("error occured in product author insert");
 					throw productAuthorError;
 				}
 			}
@@ -141,7 +176,6 @@ export async function SubmitBooth(formData: FormData) {
 					});
 
 				if (productCategoryError) {
-					console.log("error occured in product category insert");
 					throw productCategoryError;
 				}
 			}
@@ -160,7 +194,6 @@ export async function SubmitBooth(formData: FormData) {
 						.single();
 
 					if (optionError) {
-						console.log("error occured in product option insert");
 						throw optionError;
 					}
 
@@ -173,7 +206,6 @@ export async function SubmitBooth(formData: FormData) {
 							});
 
 						if (optionCharacterError) {
-							console.log("error occured in product option character insert");
 							throw optionCharacterError;
 						}
 					}
@@ -195,7 +227,6 @@ export async function SubmitBooth(formData: FormData) {
 				});
 
 			if (preorderError) {
-				console.log("Error occurred in preorder insert");
 				throw preorderError;
 			}
 		}

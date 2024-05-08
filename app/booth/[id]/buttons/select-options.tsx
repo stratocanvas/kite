@@ -31,7 +31,6 @@ export default function SelectOptionsButton({ product, options }: { product: any
                         </div>
                     ))}
                 </ToggleGroup>
-
             </div>
         </>
     );

@@ -12,7 +12,7 @@ import { GetUser } from "@/app/fetch"
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast"
 import { UserStateContext } from "@/providers"
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useLayoutEffect } from "react";
 
 const supabase = createClient()
 export function TopMenuDesktop() {
@@ -55,9 +55,9 @@ export function TopMenuDesktop() {
     setUserData(data);
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     fetchUser();
-  }, [])
+  }, [userData])
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -115,6 +115,7 @@ export function TopMenuDesktop() {
                         </div>
                       </Link>
                     </DropdownMenuItem>
+                    {/*
                     <DropdownMenuItem className="flex justify-between">
                       <Link href="/settings" className="w-full">
                         <div className="flex justify-between items-center">
@@ -123,6 +124,7 @@ export function TopMenuDesktop() {
                         </div>
                       </Link>
                     </DropdownMenuItem>
+                     */ }
                     <DropdownMenuSeparator />
                   </DropdownMenuGroup>
                   <DropdownMenuItem onClick={() => {
