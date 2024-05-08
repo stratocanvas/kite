@@ -26,9 +26,6 @@ export default function Intro() {
                                 <CardTitle>
                                     부스 직접 등록
                                 </CardTitle>
-                                <CardDescription className="whitespace-normal break-words">
-                                    부스를 직접 추가해요.
-                                </CardDescription>
                             </CardHeader>
                         </Card>
                     </Button>
@@ -42,9 +39,6 @@ export default function Intro() {
                                 <CardTitle>
                                     부스 추가 요청
                                 </CardTitle>
-                                <CardDescription className="whitespace-normal break-words">
-                                    다른 작가님의 부스를 대신 추가해요. 한 번 추가하면 작가님만 수정할 수 있어요.
-                                </CardDescription>
                             </CardHeader>
                         </Card>
                     </Button>

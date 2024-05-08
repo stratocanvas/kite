@@ -1,20 +1,17 @@
 "use server";
 import { createClient } from "@/utils/supabase/server";
 
-export const revalidate = 0;
-
 export async function GetBoothData(boothId: string) {
-	const supabase = createClient();
-
-	const { data: booth } = await supabase
-		.from("booth")
-		.select(`booth_id, name, locations, thumbnail, date,
-                 author(name, thumbnail),
-                 event(name)`)
-		.eq("booth_id", boothId)
-		.limit(1)
-		.single();
-	return booth;
+    const supabase = createClient()
+    const { data: booth } = await supabase
+        .from("booth")
+        .select(`booth_id, name, locations, thumbnail, date,
+                 author(author_id, name, thumbnail, sns_x),
+                 event(name), article, product(count), preorder(type, date), genre(name)`)
+        .eq("booth_id", boothId)
+        .limit(1)
+        .single();
+    return booth;
 }
 
 export async function GetProductData(boothId: string) {

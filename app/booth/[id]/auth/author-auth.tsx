@@ -10,15 +10,10 @@ import {
     DialogTrigger,
     DialogClose
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-import { ArrowLeft } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation';
-
+import { fetchUser } from "./fetch";
 
 
 export default function AuthorAuth({ dialogOpen, setDialogOpen }: { dialogOpen: any, setDialogOpen: any }) {
@@ -48,10 +43,7 @@ export default function AuthorAuth({ dialogOpen, setDialogOpen }: { dialogOpen: 
     //경고. 이 부분은 server side로 보내야 함.
     useEffect(() => {
         async function checkProvider() {
-            const {
-                data: { user },
-                error,
-            } = await supabase.auth.getUser();
+            const user = await fetchUser();
             if (user) {
                 setUser(true);
                 if (user.app_metadata.providers.includes('twitter')) {
@@ -61,7 +53,6 @@ export default function AuthorAuth({ dialogOpen, setDialogOpen }: { dialogOpen: 
         }
         checkProvider();
     }, []);
-
     return (
         <>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

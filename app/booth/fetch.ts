@@ -14,6 +14,7 @@ export default async function SearchResult({
 		genre?: string;
 		author?: string;
 		page?: number;
+		event?:number;
 	};
 }) {
 	const supabase = createClient();
@@ -22,7 +23,8 @@ export default async function SearchResult({
         character_id,
         category_id,
         genre_id,
-        author_id
+        author_id,
+		event_id
     `);
 	if (searchParams?.character) {
 		query = query.in("character_id", searchParams.character.split(","));
@@ -35,6 +37,9 @@ export default async function SearchResult({
 	}
 	if (searchParams?.author) {
 		query = query.in("author_id", searchParams.author.split(","));
+	}
+	if (searchParams?.event) {
+		query = query.eq("event_id", searchParams.event);
 	}
 
 	const { data: queryResult, error: queryError } = await query;
@@ -58,7 +63,9 @@ export default async function SearchResult({
       author(author_id, name, thumbnail),
       event(name),
       date,
-      thumbnail
+      thumbnail,
+	  genre(name),
+	  preorder(type,date)
     `,
 			{ count: "exact" },
 		)

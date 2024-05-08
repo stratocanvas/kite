@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { LikeButton } from '../../booth/[id]/buttons/booth-menu';
+import { LikeButton } from '../booth/[id]/buttons/booth-menu';
 import { X } from 'lucide-react';
 import { ShoppingCart, Heart } from 'lucide-static';
 
@@ -44,9 +44,10 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
 
 
     const searchParams = useSearchParams();
-    const search = searchParams.get('id');
+    const search = searchParams.get('event');
 
     useEffect(() => {
+        console.log(search)
         const fetchMapData = async () => {
             const { data: eventMap, error: eventError } = await supabase
                 .from("event")
@@ -122,7 +123,7 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                         .append("path")
                         .attr("d", pathGenerator)
                         .attr("fill", (d) => {
-                            const location = boothLocations.find(loc => loc.id === d.properties.id);
+                            const location = boothLocations?.find(loc => loc.id === d.properties.id);
                             const boothExists = boothData.some((booth: any) => booth.locations.includes(d.properties.id));
 
                             if (location) {
@@ -143,7 +144,7 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                                 .duration(1000)
                                 .attr("fill", function (d) {
                                     if (selectedBooth && boothData.some((booth: any) => booth.locations.includes(selectedBooth) && booth.locations.includes(d.properties.id))) {
-                                        const location = boothLocations.find(loc => loc.id === d.properties.id);
+                                        const location = boothLocations?.find(loc => loc.id === d.properties.id);
                                         if (location) {
                                             return d3.hsl(location.color).brighter(1).toString();
                                         }
@@ -156,7 +157,7 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                                 .duration(1000)
                                 .attr("fill", function (d) {
                                     if (selectedBooth && boothData.some((booth: any) => booth.locations.includes(selectedBooth) && booth.locations.includes(d.properties.id))) {
-                                        const location = boothLocations.find(loc => loc.id === d.properties.id);
+                                        const location = boothLocations?.find(loc => loc.id === d.properties.id);
                                         if (location) {
                                             return location.color;
                                         }
@@ -183,7 +184,7 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                         .attr("font-weight", "bold")
                         .attr("font-size", "6px")
                         .attr("fill", d => {
-                            const location = boothLocations.find(loc => loc.id === d.properties.id);
+                            const location = boothLocations?.find(loc => loc.id === d.properties.id);
                             if (location) {
                                 return "white";
                             }
@@ -260,7 +261,9 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                                                     </CardDescription>
                                                 </CardHeader>
                                                 <CardFooter className="flex gap-2 justify-between items-center">
-                                                    <LikeButton booth={booth} preventMapReset={preventMapReset} />                                                    <div className='flex gap-2'>
+                                                    <LikeButton booth={booth}
+                                                    />
+                                                    <div className='flex gap-2'>
                                                         <Link href={`/booth/${booth.booth_id}`}>
                                                             <Button >자세히 보기</Button>
                                                         </Link>

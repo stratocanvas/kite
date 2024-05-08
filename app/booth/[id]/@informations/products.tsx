@@ -1,4 +1,3 @@
-
 import {
     Card,
     CardHeader,
@@ -7,8 +6,7 @@ import {
     CardContent,
     CardFooter,
 } from "@/components/ui/card";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import Image from "next/image";
+
 import { Label } from "@/components/ui/label";
 import OptionPrice from "./option-price";
 import SelectOptionsButton from "../buttons/select-options";
@@ -17,14 +15,12 @@ import {
     Carousel,
     CarouselContent,
     CarouselItem,
-    CarouselNext,
-    CarouselPrevious,
 } from "@/components/ui/carousel"
 import AddCart from "../buttons/add-cart";
 import { createClient } from '@/utils/supabase/server'
 import OptionImage from "./option-image";
 
-export const revalidate = 0
+//export const revalidate = 0
 
 
 export async function GetProductData(boothId: string) {
@@ -46,7 +42,7 @@ export default async function BoothProducts({ params }: { params: { id: string }
     const product = await GetProductData(params.id);
     return (
         <>
-            {product.length > 0 && (
+            {product && product.length > 0 && (
                 <Card key={product?.product_id} className="h-[100%] flex flex-col border-none shadow-none" id="goods">
                     <CardContent className="flex-grow mt-6 flex items-center overflow-x-auto">
                         <Label className="text-xl font-bold">굿즈</Label>
@@ -98,8 +94,6 @@ export default async function BoothProducts({ params }: { params: { id: string }
                                     </CarouselItem>
                                 ))}
                             </CarouselContent>
-                            <CarouselPrevious className="ml-16 w-10 h-10" />
-                            <CarouselNext className="mr-16 w-10 h-10" />
                         </Carousel>
                     </CardContent>
                 </Card >

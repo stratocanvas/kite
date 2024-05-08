@@ -129,7 +129,7 @@ export async function GetBookmarks() {
 	  .select("booth_id, booth(name, locations, event(event_id, name), date)")
 	  .eq("users_id", user);
 	if (wishlistError) {
-	  throw new Error(wishlistError.message);
+		return [];
 	}
 	if (!wishlist) {
 	  return [];

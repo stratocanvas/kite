@@ -1,3 +1,4 @@
+'use server'
 import { createClient } from "@/utils/supabase/server";
 
 const supabase = createClient();
@@ -10,7 +11,26 @@ export async function fetchOptionsFromSupabase() {
 	if (error) {
 		console.error("error", error);
 		return [];
-	} else {
-		return data;
 	}
+	return data;
+}
+
+export async function GetUser() {
+	const supabase = createClient();
+	const {
+		data: { user },
+		error: getUserError,
+	} = await supabase.auth.getUser();
+
+	const { data } = await supabase
+		.from("users")
+		.select("name, n_name")
+		.eq("id", user?.id)
+		.limit(1)
+		.single();
+
+	if (getUserError) {
+		return null;
+	}
+	return data;
 }

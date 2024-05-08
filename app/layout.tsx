@@ -5,6 +5,8 @@ import { TopMenuDesktop } from "@/app/navmenu";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
 import localFont from "next/font/local";
+import { Toaster } from "@/components/ui/toaster"
+import UserStateProvider from "@/providers";
 
 const Pretendard = localFont({
   src: "./fonts/PretendardVariable.woff2",
@@ -18,8 +20,8 @@ export const metadata: Metadata = {
   description: "부스 인포 모음",
 };
 
+export default function RootLayout({ children }: { children: React.ReactNode }) {
 
-export default function RootLayout({ children }) {
   return (
     <>
       <html lang="ko" suppressHydrationWarning>
@@ -33,11 +35,11 @@ export default function RootLayout({ children }) {
             enableSystem
             disableTransitionOnChange
           >
-            <TopMenuDesktop />
-            
-            {children}
-            
-
+            <UserStateProvider>
+              <TopMenuDesktop />
+              {children}
+              <Toaster />
+            </UserStateProvider>
           </ThemeProvider>
           <Analytics />
           <SpeedInsights />
@@ -46,3 +48,4 @@ export default function RootLayout({ children }) {
     </>
   );
 }
+
