@@ -8,7 +8,7 @@ export default function OptionImage({ productId, options }: { productId: string,
     const selectedOption = selectedOptions[productId];
 
     return (
-        <AspectRatio ratio={1 / 1} style={{ backgroundColor: `#${options[0]?.thumbnail.split('-c(')[1].split(')')[0]}` }}>
+        <AspectRatio ratio={1 / 1} style={{ backgroundColor: selectedOption?.thumbnail ? `#${selectedOption.thumbnail.split('-c(')[1].split(')')[0]}` : 'transparent' }}>
             {selectedOption ? (
                 selectedOption.thumbnail ? (
                     <Image
@@ -16,11 +16,11 @@ export default function OptionImage({ productId, options }: { productId: string,
                         alt="Image"
                         fill
                         className="rounded-t-md object-cover"
-                        priority={true}
+                        loading="lazy"
                     />
                 ) : (
-                    <div className="rounded-t-md bg-gray-200 flex justify-center items-center w-full h-full">
-                        <span>No Image</span>
+                    <div className="rounded-t-md bg-muted flex justify-center items-center w-full h-full">
+                        <ImageOff className="text-muted-foreground"/>
                     </div>
                 )
             ) : options[0]?.thumbnail ? (
@@ -30,11 +30,11 @@ export default function OptionImage({ productId, options }: { productId: string,
                     alt="Image"
                     fill
                     className="rounded-t-md object-cover"
-                    priority={true}
+                    loading="lazy"
                 />
             ) : (
-                <div className="rounded-t-md bg-gray-200 flex justify-center items-center w-full h-full">
-                    <span>No Image</span>
+                <div className="rounded-t-md bg-muted flex justify-center items-center w-full h-full">
+                    <ImageOff className="text-muted-foreground"/>
                 </div>
             )}
         </AspectRatio>

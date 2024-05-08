@@ -84,9 +84,6 @@ export default function RequestForm() {
                                     <FormControl>
                                         <Textarea className="resize-none" {...field} />
                                     </FormControl>
-                                    <FormDescription>
-                                        추가 요청 사항이 있다면 입력해 주세요.
-                                    </FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}

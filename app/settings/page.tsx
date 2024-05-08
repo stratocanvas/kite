@@ -12,42 +12,29 @@ import {
 import { Input } from "@/components/ui/input"
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { createClient } from '@/utils/supabase/client'
-import { SubmitData } from "./submit";
 import { useForm } from "react-hook-form";
+import { getUserData, getUsedId, SubmitData } from "./fetch";
+import { useToast } from "@/components/ui/use-toast";
+import { UserStateContext } from "@/providers"
+import { useRouter } from "next/navigation";
 
-const supabase = createClient();
 
 
 const formSchema = z.object({
-    id: z.string().min(2).max(16).regex(/^[a-zA-Z0-9_]+$/),
-    nickname: z.string().min(1).max(16),
+    id: z.string().min(2).max(24).regex(/^[a-zA-Z0-9_]+$/),
+    nickname: z.string().min(1).max(24),
 })
 
 const fetchUsedId = async (input: string) => {
-    const { data, error } = await supabase
-        .from("users")
-        .select("name")
-        .eq("name", input)
-        .limit(1)
-        .maybeSingle();
-    if (!data || error) {
-        return ''; 
-    }
+    const { data, error } = await getUsedId(input)
     return { data, error };
 };
 
 const fetchUserData = async () => {
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    const { data, error: dataError } = await supabase
-        .from('users')
-        .select('name, n_name')
-        .eq('id', user.id)
-        .single();
-
-    return { data, error: dataError };
+    const { data, error } = await getUserData()
+    return { data, error };
 };
 
 const checkIdDuplication = async (input: string) => {
@@ -72,6 +59,12 @@ const prePopulated = async () => {
 
 
 export default function InitialSetup() {
+
+    const router = useRouter();
+    const { userData } = React.useContext(UserStateContext);
+
+
+    const { toast } = useToast();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         mode: 'onChange',
@@ -82,15 +75,20 @@ export default function InitialSetup() {
     });
 
     useEffect(() => {
-        const fetchData = async () => {
-            const data = await prePopulated();
-            // Use setValue to update form fields individually
-            form.setValue('id', data.name || ''); // Provide a fallback value to ensure it's always controlled
-            form.setValue('nickname', data.n_name || ''); // Provide a fallback value to ensure it's always controlled
+        if (!userData) {
+            const path = window.location.pathname + window.location.search;
+            router.push(`/auth?next=${encodeURIComponent(path)}`);
+        } else {
+            const fetchData = async () => {
+                const data = await prePopulated();
+                // Use setValue to update form fields individually
+                form.setValue('id', data.name || ''); // Provide a fallback value to ensure it's always controlled
+                form.setValue('nickname', data.n_name || ''); // Provide a fallback value to ensure it's always controlled
+            }
+            fetchData();
         };
 
-        fetchData();
-    }, [form]);
+    }, [form, userData]);
 
     const { watch, setError, clearErrors } = form;
     const idValue = watch("id"); // 'id' 필드의 현재 값을 관찰합니다.
@@ -132,12 +130,10 @@ export default function InitialSetup() {
     }
 
     return (
-        <Card className="w-full max-w-sm mx-auto">
+        <Card className="w-full max-w-sm mx-auto border-none shadow-none">
             <CardHeader>
-                <CardTitle>안녕하세요</CardTitle>
-                <CardDescription>
-                    처음 오셨군요! 시작하기 전에 프로필을 설정할게요.
-                </CardDescription>
+                <CardTitle>내 정보</CardTitle>
+
             </CardHeader>
             <CardContent>
                 <Form {...form}>
@@ -151,9 +147,6 @@ export default function InitialSetup() {
                                     <FormControl>
                                         <Input {...field} />
                                     </FormControl>
-                                    <FormDescription>
-                                        다른 사람에게 표시되는 닉네임이예요. 창의력을 발휘해보세요! ㅇㅇ같이 단순한 이름도 괜찮아요.
-                                    </FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -171,13 +164,17 @@ export default function InitialSetup() {
                                         </div>
                                     </FormControl>
                                     <FormDescription>
-                                        다른 사람에게 표시되는 고유한 아이디예요.
+                                        숫자, 영문 소문자, 대문자, _ 만 입력 가능합니다.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit">확인</Button>
+                        <Button type="submit" className="w-full md:w-auto" onClick={() => {
+                            toast({
+                                description: '변경사항 저장됨',
+                            })
+                        }}>확인</Button>
                     </form>
                 </Form>
             </CardContent>

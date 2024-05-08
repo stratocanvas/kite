@@ -2,16 +2,26 @@
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { createBrowserClient } from '@supabase/ssr'
-import { useEffect } from 'react';
+import { createClient } from '@/utils/supabase/client'
+import { useEffect, useLayoutEffect } from 'react';
+import { GetUser } from "@/app/fetch"
+import { useRouter } from "next/navigation";
 
 
-const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-)
 
 export default function LoginPage() {
+    const supabase = createClient()
+    const router = useRouter();
+    useLayoutEffect(() => {
+        const fetchUser = async () => {
+            const data = await GetUser();
+            if (data) {
+                router.back()
+            }
+        };
+
+        fetchUser();
+    }, []);
     const signIn = (provider: string, next: string) => {
         const redirectUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
         supabase.auth.signInWithOAuth({
@@ -22,8 +32,6 @@ export default function LoginPage() {
         });
     }
 
-    const signOut = () => supabase.auth.signOut();
-
     // Extract 'next' parameter from URL on client side
     let next = "/";
     useEffect(() => {
@@ -32,7 +40,7 @@ export default function LoginPage() {
     }, []);
 
     return (
-        <Card className="w-full max-w-sm mx-auto">
+        <Card className="sm:w-full lg:w-[400px] mx-auto border-none shadow-none">
             <CardHeader>
                 <CardTitle>로그인</CardTitle>
                 <CardDescription>
@@ -42,7 +50,6 @@ export default function LoginPage() {
             <CardContent className="grid gap-2">
                 <Button onClick={() => signIn('twitter', next)}>Twitter로 계속하기</Button>
                 <Button onClick={() => signIn('google', next)}>Google로 계속하기</Button>
-                <Button onClick={() => signOut()}>로그아웃</Button>
             </CardContent>
         </Card>
     );

@@ -137,31 +137,29 @@ export default function BoothDescription({ data }: { data: any }) {
                                     <div className="flex flex-row items-start justify-start space-x-4 pl-6 pr-6">
 
                                         {data?.author.map((author: any) => (
-                                            <Link href={`/author/${author.author_id}`} key={author.author_id}>
 
-                                                <div
-                                                    className="flex flex-col items-center justify-center"
-                                                >
-                                                    <Avatar className="h-28 w-28 relative rounded-full overflow-hidden">
-                                                        <AvatarImage asChild>
-                                                            <Image
-                                                                src={author.thumbnail || ""}
-                                                                alt={author?.name}
-                                                                fill
-                                                                style={{ objectFit: "cover" }}
-                                                                className="rounded-full"
-                                                            />
-                                                        </AvatarImage>
-                                                        <AvatarFallback className="text-4xl text-muted-foreground">
-                                                            {author.name[0]}
-                                                        </AvatarFallback>
-                                                    </Avatar>
-
-                                                    <Label className="mt-2 text-center w-16 break-words whitespace-normal max-h-12 overflow-y-hidden">
-                                                        {author.name}
-                                                    </Label>
-                                                </div>
-                                            </Link>
+                                            <div
+                                                className="flex flex-col items-center justify-center"
+                                            >
+                                                <Avatar className="h-28 w-28 relative rounded-full overflow-hidden">
+                                                    <AvatarImage asChild src={author?.thumbnail}>
+                                                    <Image
+                                                        src={author?.thumbnail || ''}
+                                                        alt={author?.name}
+                                                        fill
+                                                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 50vw, 33vw"
+                                                        style={{ objectFit: "cover" }}
+                                                        className="rounded-full"
+                                                    />
+                                                    </AvatarImage>
+                                                    <AvatarFallback className="text-4xl text-muted-foreground">
+                                                        {author.name[0]}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <Label className="mt-2 text-center w-16 break-words whitespace-normal max-h-12 overflow-y-hidden">
+                                                    {author.name}
+                                                </Label>
+                                            </div>
                                         ))}
                                     </div>
                                     <ScrollBar orientation="horizontal" />

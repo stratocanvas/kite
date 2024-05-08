@@ -10,6 +10,7 @@ interface FormData {
 	boothinfo: any;
 	preorder: any;
 	products: any;
+	genre: number[];
 }
 
 interface AuthorData {
@@ -17,8 +18,13 @@ interface AuthorData {
 	sns_x: string;
 }
 
+interface CategoryData {
+	name: string;
+}
+
 const supabase = createClient();
 export async function RegisterAuthor(values: AuthorData) {
+	console.log(values);
 	// sns_x 맨 앞글자가 '@'로 시작하지 않는 경우 '@' 추가
 	if (!values.sns_x.startsWith("@")) {
 		values.sns_x = `@${values.sns_x}`;
@@ -28,6 +34,20 @@ export async function RegisterAuthor(values: AuthorData) {
 		.from("author")
 		.insert({ name: values.name, sns_x: values.sns_x })
 		.select("author_id, name, sns_x")
+		.single();
+	if (error) {
+		throw error;
+	}
+	return data;
+}
+
+export async function RegisterCategory(values: CategoryData) {
+	console.log(values);
+
+	const { data, error } = await supabase
+		.from("category")
+		.insert({ name: values.name })
+		.select("category_id, name")
 		.single();
 	if (error) {
 		throw error;
@@ -64,6 +84,19 @@ export async function SubmitBooth(formData: FormData) {
 
 	if (boothAuthorError) {
 		throw boothAuthorError;
+	}
+
+	if (formData.genre) {
+		const genreData = formData.genre.map((genreId) => ({
+			booth_id: boothData.booth_id,
+			genre_id: genreId,
+		}));
+		const { error: genreError } = await supabase
+			.from("booth_genre")
+			.insert(genreData);
+		if (genreError) {
+			throw genreError;
+		}
 	}
 
 	if (formData.products) {
@@ -148,6 +181,24 @@ export async function SubmitBooth(formData: FormData) {
 			}
 		}
 	}
+	if (formData.preorder) {
+		for (const preorder of formData.preorder) {
+			const { data: preorderData, error: preorderError } = await supabase
+				.from("preorder")
+				.insert({
+					booth_id: boothData.booth_id,
+					title: preorder.title,
+					type: preorder.type,
+					date: preorder.date,
+					url: preorder.url,
+					always: false,
+				});
+
+			if (preorderError) {
+				console.log("Error occurred in preorder insert");
+				throw preorderError;
+			}
+		}
+	}
 	return boothData;
-	
 }

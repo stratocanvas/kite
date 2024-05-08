@@ -3,39 +3,49 @@
 import { useCallback, useState, useEffect, memo } from 'react';
 import { GetBookmarks, SetBookmark } from "../actions";
 import { Button } from '@/components/ui/button'
-import { Heart, HeartOff, ThumbsDown, Flag, Siren, Ellipsis, Pencil, MessageCircleWarning } from 'lucide-react'
+import { Heart, HeartOff, ThumbsDown, Flag, Siren, Ellipsis, Pencil, MessageCircleWarning, Info } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import useSWR, { useSWRConfig } from 'swr';
 import { useRouter } from 'next/navigation'
 import AuthorAuth from "../auth/author-auth"
 import Link from "next/link";
 import CheckOwner from "./owner";
+import { useToast } from "@/components/ui/use-toast"
+import { UserStateContext } from "@/providers"
+import { useContext } from "react"
 
 function useBoothMenu(boothId: string, authorData: any) {
+    const { userData } = useContext(UserStateContext);
+    const { data: wishlist, mutate } = useSWR('wishlist', GetBookmarks, { revalidateOnFocus: true, revalidateOnReconnect: true, revalidateOnMount: true });
+    const { toast } = useToast();
+    const router = useRouter();
     const [dialogOpen, setDialogOpen] = useState(false);
     const [isOwner, setIsOwner] = useState(false);
-    const router = useRouter();
-    const { data: wishlist, mutate } = useSWR('wishlist', GetBookmarks, { revalidateOnFocus: true, revalidateOnReconnect: true, revalidateOnMount: true }); const changeBookmark = useCallback(async () => {
-        const isBookmarked = wishlist?.some((item) => item.booth_id === boothId);
+
+    const changeBookmark = useCallback(async () => {
+        if (!userData) {
+            toast({
+                description: "로그인이 필요합니다.",
+            });
+            const path = window.location.pathname + window.location.search;
+            router.push(`/auth?next=${encodeURIComponent(path)}`);
+            return;
+        }
+
+        const isBookmarked = wishlist?.some((item) => item.booth_id === boothId) ?? false;
         const updatedWishlist = isBookmarked
-            ? wishlist.filter((item) => item.booth_id !== boothId)
-            : [...wishlist, { booth_id: boothId }];
+            ? (wishlist || []).filter((item) => item.booth_id !== boothId)
+            : [...(wishlist || []), { booth_id: boothId }];
 
         mutate(updatedWishlist, false); // 로컬 데이터를 업데이트
 
         try {
             const result = await SetBookmark(boothId, !isBookmarked);
             mutate(); // 서버에서 최신 데이터를 다시 가져옴
-            if (result && result.errorType === 'userError') {
-                if (typeof window !== "undefined") {
-                    const path = window.location.pathname + window.location.search;
-                    router.push(`/auth?next=${encodeURIComponent(path)}`);
-                }
-            }
         } catch (error) {
             console.error("Error setting bookmark:", error);
         }
-    }, [boothId, wishlist, mutate, router]);
+    }, [boothId, wishlist, mutate, userData]);
 
     useEffect(() => {
         if (authorData) {
@@ -102,7 +112,7 @@ export function BoothMenu({ data }: { data: any }) {
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                        {isOwner ? (
+                        {/* isOwner ? (
                             <>
                                 <Link href={`/booth/${data.booth_id}/edit`}>
                                     <DropdownMenuItem className="flex justify-between">
@@ -119,14 +129,10 @@ export function BoothMenu({ data }: { data: any }) {
                                 </DropdownMenuItem>
 
                             </>
-                        )}
+                        )*/}
                         <DropdownMenuItem className="flex justify-between">
-                            <span>오류 제보</span>
-                            <MessageCircleWarning className="ml-4 h-4 w-4" />
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="flex justify-between">
-                            <span>악용 신고</span>
-                            <Siren className="ml-4 h-4 w-4" />
+                            <span>문의</span>
+                            <Info className="ml-4 h-4 w-4" />
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
                 </DropdownMenuContent>
@@ -144,12 +150,12 @@ export const LikeButton = memo(({ booth }: { booth: any }) => {
         event.stopPropagation(); // 이벤트 버블링 막기
         event.preventDefault(); // 기본 이벤트 방지
 
-        const isBookmarked = wishlist?.some((item) => item.booth_id === booth.booth_id);
+        const isBookmarked = wishlist?.some((item) => item.booth_id === booth.booth_id) ?? false;
         const updatedWishlist = isBookmarked
-            ? wishlist.filter((item) => item.booth_id !== booth.booth_id)
-            : [...wishlist, { booth_id: booth.booth_id }];
+            ? (wishlist || []).filter((item) => item.booth_id !== booth.booth_id)
+            : [...(wishlist || []), { booth_id: booth.booth_id }];
 
-        mutate(updatedWishlist, false);
+        mutate(updatedWishlist, false); // 로컬 데이터를 업데이트
 
         try {
             const result = await SetBookmark(booth.booth_id, !isBookmarked);

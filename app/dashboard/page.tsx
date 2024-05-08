@@ -1,450 +1,452 @@
-import Link from "next/link"
+'use client'
 import {
-  Activity,
-  ArrowUpRight,
-  CircleUser,
-  CreditCard,
-  DollarSign,
-  Menu,
-  Package2,
-  Search,
-  Users,
-} from "lucide-react"
+    Card,
+    CardContent,
+    CardTitle,
+    CardDescription,
+    CardFooter,
+    CardHeader
+} from "@/components/ui/card";
+import { useMemo, useCallback, useState, useEffect, useRef, Suspense, memo, useLayoutEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+} from "@/components/ui/carousel"
+import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
+import { Minus, Plus, Trash } from "lucide-react";
+import useSWR from 'swr';
+import { GetCart, AddOrUpdateCart, DeleteCart, GetBookmarks } from './actions';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { UserStateContext } from "@/providers"
+import * as React from "react"
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react"
+import { cn } from "@/lib/utils"
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList
+} from "@/components/ui/command"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
+import { usePathname, useRouter, redirect } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import IndoorMap from "./map"
+import CountUp from 'react-countup'
+import { Toaster } from "@/components/ui/toaster"
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-
-export default function Dashboard() {
-  return (
-    <div className="flex min-h-screen w-full flex-col">
-      <header className="sticky top-0 flex h-16 items-center gap-4 border -b bg-background px-4 md:px-6">
-        <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-          <Link
-            href="#"
-            className="flex items-center gap-2 text-lg font-semibold md:text-base"
-          >
-            <Package2 className="h-6 w-6" />
-            <span className="sr-only">Acme Inc</span>
-          </Link>
-          <Link
-            href="#"
-            className="text-foreground transition-colors hover:text-foreground"
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="#"
-            className="text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Orders
-          </Link>
-          <Link
-            href="#"
-            className="text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Products
-          </Link>
-          <Link
-            href="#"
-            className="text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Customers
-          </Link>
-          <Link
-            href="#"
-            className="text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Analytics
-          </Link>
-        </nav>
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="shrink-0 md:hidden"
-            >
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle navigation menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left">
-            <nav className="grid gap-6 text-lg font-medium">
-              <Link
-                href="#"
-                className="flex items-center gap-2 text-lg font-semibold"
-              >
-                <Package2 className="h-6 w-6" />
-                <span className="sr-only">Acme Inc</span>
-              </Link>
-              <Link href="#" className="hover:text-foreground">
-                Dashboard
-              </Link>
-              <Link
-                href="#"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                Orders
-              </Link>
-              <Link
-                href="#"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                Products
-              </Link>
-              <Link
-                href="#"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                Customers
-              </Link>
-              <Link
-                href="#"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                Analytics
-              </Link>
-            </nav>
-          </SheetContent>
-        </Sheet>
-        <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
-          <form className="ml-auto flex-1 sm:flex-initial">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search products..."
-                className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
-              />
-            </div>
-          </form>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="icon" className="rounded-full">
-                <CircleUser className="h-5 w-5" />
-                <span className="sr-only">Toggle user menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </header>
-      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-          <Card x-chunk="dashboard-01-chunk-0">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Revenue
-              </CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">$45,231.89</div>
-              <p className="text-xs text-muted-foreground">
-                +20.1% from last month
-              </p>
-            </CardContent>
-          </Card>
-          <Card x-chunk="dashboard-01-chunk-1">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Subscriptions
-              </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">+2350</div>
-              <p className="text-xs text-muted-foreground">
-                +180.1% from last month
-              </p>
-            </CardContent>
-          </Card>
-          <Card x-chunk="dashboard-01-chunk-2">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Sales</CardTitle>
-              <CreditCard className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">+12,234</div>
-              <p className="text-xs text-muted-foreground">
-                +19% from last month
-              </p>
-            </CardContent>
-          </Card>
-          <Card x-chunk="dashboard-01-chunk-3">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Now</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">+573</div>
-              <p className="text-xs text-muted-foreground">
-                +201 since last hour
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-        <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
-          <Card
-            className="xl:col-span-2" x-chunk="dashboard-01-chunk-4"
-          >
-            <CardHeader className="flex flex-row items-center">
-              <div className="grid gap-2">
-                <CardTitle>Transactions</CardTitle>
-                <CardDescription>
-                  Recent transactions from your store.
-                </CardDescription>
-              </div>
-              <Button asChild size="sm" className="ml-auto gap-1">
-                <Link href="#">
-                  View All
-                  <ArrowUpRight className="h-4 w-4" />
-                </Link>
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Customer</TableHead>
-                    <TableHead className="hidden xl:table-column">
-                      Type
-                    </TableHead>
-                    <TableHead className="hidden xl:table-column">
-                      Status
-                    </TableHead>
-                    <TableHead className="hidden xl:table-column">
-                      Date
-                    </TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Liam Johnson</div>
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        liam@example.com
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      Sale
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      <Badge className="text-xs" variant="outline">
-                        Approved
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                      2023-06-23
-                    </TableCell>
-                    <TableCell className="text-right">$250.00</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Olivia Smith</div>
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        olivia@example.com
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      Refund
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      <Badge className="text-xs" variant="outline">
-                        Declined
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                      2023-06-24
-                    </TableCell>
-                    <TableCell className="text-right">$150.00</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Noah Williams</div>
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        noah@example.com
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      Subscription
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      <Badge className="text-xs" variant="outline">
-                        Approved
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                      2023-06-25
-                    </TableCell>
-                    <TableCell className="text-right">$350.00</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Emma Brown</div>
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        emma@example.com
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      Sale
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      <Badge className="text-xs" variant="outline">
-                        Approved
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                      2023-06-26
-                    </TableCell>
-                    <TableCell className="text-right">$450.00</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Liam Johnson</div>
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        liam@example.com
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      Sale
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      <Badge className="text-xs" variant="outline">
-                        Approved
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                      2023-06-27
-                    </TableCell>
-                    <TableCell className="text-right">$550.00</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-          <Card x-chunk="dashboard-01-chunk-5">
-            <CardHeader>
-              <CardTitle>Recent Sales</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-8">
-              <div className="flex items-center gap-4">
-                <Avatar className="hidden h-9 w-9 sm:flex">
-                  <AvatarImage src="/avatars/01.png" alt="Avatar" />
-                  <AvatarFallback>OM</AvatarFallback>
-                </Avatar>
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">
-                    Olivia Martin
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    olivia.martin@email.com
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">+$1,999.00</div>
-              </div>
-              <div className="flex items-center gap-4">
-                <Avatar className="hidden h-9 w-9 sm:flex">
-                  <AvatarImage src="/avatars/02.png" alt="Avatar" />
-                  <AvatarFallback>JL</AvatarFallback>
-                </Avatar>
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">
-                    Jackson Lee
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    jackson.lee@email.com
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">+$39.00</div>
-              </div>
-              <div className="flex items-center gap-4">
-                <Avatar className="hidden h-9 w-9 sm:flex">
-                  <AvatarImage src="/avatars/03.png" alt="Avatar" />
-                  <AvatarFallback>IN</AvatarFallback>
-                </Avatar>
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">
-                    Isabella Nguyen
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    isabella.nguyen@email.com
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">+$299.00</div>
-              </div>
-              <div className="flex items-center gap-4">
-                <Avatar className="hidden h-9 w-9 sm:flex">
-                  <AvatarImage src="/avatars/04.png" alt="Avatar" />
-                  <AvatarFallback>WK</AvatarFallback>
-                </Avatar>
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">
-                    William Kim
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    will@email.com
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">+$99.00</div>
-              </div>
-              <div className="flex items-center gap-4">
-                <Avatar className="hidden h-9 w-9 sm:flex">
-                  <AvatarImage src="/avatars/05.png" alt="Avatar" />
-                  <AvatarFallback>SD</AvatarFallback>
-                </Avatar>
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">
-                    Sofia Davis
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    sofia.davis@email.com
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">+$39.00</div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
-    </div>
-  )
+interface Event {
+    value: string;
+    label: string;
 }
+
+const MemoizedIndoorMap = memo(IndoorMap, (prevProps, nextProps) => {
+    return prevProps.eventId === nextProps.eventId &&
+        prevProps.boothLocations.length === nextProps.boothLocations.length &&
+        prevProps.boothLocations.every((loc, index) => loc === nextProps.boothLocations[index]);
+});
+export default function Cart() {
+    const { data: items, mutate } = useSWR('cart', GetCart, { revalidateOnMount: true, revalidateOnFocus: true, revalidateOnReconnect: true });
+    const { data: wishlist } = useSWR('wishlist', () => GetBookmarks(), { revalidateOnMount: true, revalidateOnFocus: true, revalidateOnReconnect: true });
+
+    const router = useRouter()
+    const pathname = usePathname()
+
+    const [open, setOpen] = useState(false);
+    const [value, setValue] = useState("");
+    const [events, setEvents] = useState<Event[]>([]);
+
+    const { userData } = React.useContext(UserStateContext);
+
+    useLayoutEffect(() => {
+        if (userData === null) {
+            const path = window.location.pathname + window.location.search;
+            router.push(`/auth?next=${encodeURIComponent(path)}`);
+        }
+    }, [userData, router]);
+
+    //장바구니에 포함된 상품 수량 변경
+    const handleQuantityChange = useCallback(async (productId: string, optionId: string, quantity: number, isIncrease: boolean) => {
+        const newQuantity = isIncrease ? quantity + 1 : quantity - 1;
+
+        mutate(items?.map(item => {
+            if (item.product_id === productId && item.option_id === optionId) {
+                return { ...item, quantity: newQuantity };
+            }
+            return item;
+        }), false);
+
+        try {
+            if (newQuantity > 0) {
+                await AddOrUpdateCart(productId, optionId, newQuantity);
+            } else {
+                await DeleteCart(productId, optionId);
+            }
+            mutate();
+        } catch (error) {
+            console.error('Failed to update cart:', error);
+            mutate();
+        }
+    }, [mutate, items]);
+
+    //부스 목록 그룹화
+    const booths = useMemo(() => {
+        return items?.reduce((acc: { [key: string]: any }, item: any) => {
+            if (item.eventId === value) {
+                const boothId = item.product.booth.booth_id;
+                if (!acc[boothId]) {
+                    acc[boothId] = {
+                        boothName: item.boothName,
+                        date: item.date,
+                        products: [],
+                        boothLocation: item.boothLocation[0],
+                        boothLocationAll: item.boothLocation
+                    };
+                } else {
+                    acc[boothId].boothLocationAll = [...new Set([...acc[boothId].boothLocationAll, ...item.boothLocation])];
+                }
+                const productIndex = acc[boothId].products.findIndex(product => product.productId === item.product_id);
+                if (productIndex > -1) {
+                    const optionIndex = acc[boothId].products[productIndex].options.findIndex(option => option.optionId === item.option_id);
+                    if (optionIndex > -1) {
+                        acc[boothId].products[productIndex].options[optionIndex].quantity += item.quantity;
+                    } else {
+                        acc[boothId].products[productIndex].options.push({
+                            optionId: item.option_id,
+                            optionName: item.optionName,
+                            price: item.price,
+                            quantity: item.quantity
+                        });
+                    }
+                } else {
+                    acc[boothId].products.push({
+                        productId: item.product_id,
+                        productName: item.productName,
+                        options: [{
+                            optionId: item.option_id,
+                            optionName: item.optionName,
+                            price: item.price,
+                            quantity: item.quantity
+                        }]
+                    });
+                }
+            }
+            return acc;
+        }, {}) || {};
+    }, [items, value]);
+
+    //부스 위치 전달
+    const allBoothLocations = useMemo(() => {
+        const cartBoothLocations = Object.values(booths).reduce((acc: any[], booth: any) => {
+            acc.push(...booth.boothLocationAll.map((location: string) => ({
+                id: location,
+                color: 'red',
+                type: 'cart'
+            })));
+            return acc;
+        }, []);
+
+        const wishlistBoothLocations = wishlist?.reduce((acc: any[], item: any) => {
+            if (item.booth?.event?.event_id === value) {
+                acc.push(...item.booth.locations.map((location: string) => ({
+                    id: location,
+                    color: 'blue',
+                    type: 'wishlist'
+                })));
+            }
+            return acc;
+        }, []) || [];
+
+        return [...cartBoothLocations, ...wishlistBoothLocations];
+    }, [booths, wishlist, value]);
+
+    useEffect(() => {
+        if (items && wishlist) {
+            const uniqueEvents = Array.from(new Set([
+                ...items.map(item => ({
+                    value: item.eventId,
+                    label: item.eventName
+                })),
+                ...wishlist.map(item => ({
+                    value: item.booth?.event?.event_id ?? '',
+                    label: item.booth?.event?.name ?? ''
+                }))
+            ].map(e => JSON.stringify(e)))).map(e => JSON.parse(e)).filter(e => e.value);
+            setEvents(uniqueEvents);
+            if (uniqueEvents.length > 0 && !value) {
+                setValue(uniqueEvents[0].value);
+            }
+        }
+    }, [items, wishlist, value]);
+
+    // Get a new searchParams string by merging the current
+    // searchParams with a provided key/value pair
+    useEffect(() => {
+        if (value) {
+            const params = new URLSearchParams();
+            params.set('event', value);
+            const newUrl = `${window.location.pathname}?${params.toString()}`;
+            router.replace(newUrl, undefined, { shallow: true });
+        }
+    }, [value, router]);
+
+    //카운트(전체 부스)
+    const prevTotalPrice = useRef(0);
+    const totalPrice = useMemo(() => items?.reduce((acc, item) => item.eventId === value ? acc + (item.price * item.quantity) : acc, 0) || 0, [items, value]);
+    useEffect(() => {
+        const newPrevTotal = totalPrice;
+        setTimeout(() => {
+            prevTotalPrice.current = newPrevTotal;
+        }, 100);
+    }, [totalPrice]);
+
+    const prevBoothPrices = useRef<{ [boothId: string]: number }>({});
+
+    // 개별 부스에 대한 현재 가격 계산
+    const boothPrices = useMemo(() => {
+        return Object.entries(booths).reduce((acc, [boothId, booth]) => {
+            acc[boothId] = booth.products.reduce((acc, product) =>
+                acc + product.options.reduce((acc, option) => acc + (option.price * option.quantity), 0)
+                , 0);
+            return acc;
+        }, {} as { [boothId: string]: number });
+    }, [booths]);
+
+    useEffect(() => {
+        // 개별 부스에 대한 이전 가격 상태 업데이트
+        for (const [boothId, price] of Object.entries(boothPrices)) {
+            setTimeout(() => {
+                prevBoothPrices.current[boothId] = price;
+            }, 100);
+        }
+    }, [boothPrices]);
+
+    return (
+        <>
+            <Card className="border-none shadow-none">
+                <CardHeader>
+                    <CardTitle className="font-bold">
+                        북마크
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="px-0">
+                    <div className="flex flex-col gap-2">
+                        <Popover open={open} onOpenChange={setOpen}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={open}
+                                    className="w-[calc(100%-3rem)] lg:w-[250px] justify-between mx-6"
+                                >
+                                    {value
+                                        ? events.find((event) => event.value === value)?.label
+                                        : "행사 선택..."}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                            </PopoverTrigger>
+                            <Suspense>
+                                <PopoverContent className="w-full lg:w-[250px] p-0">
+                                    <Command>
+                                        <CommandInput placeholder="행사 검색..." />
+                                        <CommandList>
+                                            <CommandEmpty>검색된 행사 없음</CommandEmpty>
+                                            <CommandGroup>
+                                                {events.map((event) => (
+                                                    <CommandItem
+                                                        key={event.value}
+                                                        value={event.value}
+                                                        onSelect={() => {
+                                                            setValue(event.value === value ? "" : event.value);
+                                                            setOpen(false);
+                                                        }}
+                                                    >
+                                                        <Check
+                                                            className={cn(
+                                                                "mr-2 h-4 w-4",
+                                                                value === event.value ? "opacity-100" : "opacity-0"
+                                                            )}
+                                                        />
+                                                        {event.label}
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Suspense>
+                        </Popover>
+                        <div className="flex flex-col lg:flex-row lg:w-full">
+                            <Card className="w-[calc(100%-3rem)] ml-6 mb-3 lg:w-1/2 h-[330px] lg:h-[700px]">
+                                <CardContent className="w-full h-full p-0 m-0">
+                                    <Suspense>
+                                        <MemoizedIndoorMap boothLocations={allBoothLocations} />
+                                    </Suspense>
+                                </CardContent>
+                            </Card>
+                            <Tabs defaultValue="wishlist" className="w-full lg:w-1/2">
+                                <TabsList className="w-[calc(100%-3rem)] mx-6">
+                                    <TabsTrigger value="wishlist">위시리스트</TabsTrigger>
+                                    <TabsTrigger value="cart">장바구니</TabsTrigger>
+                                </TabsList>
+                                <TabsContent value="wishlist">
+                                    <TabsContent value="wishlist">
+                                        {wishlist
+                                            ?.filter((item) => item.booth?.event?.event_id === value)
+                                            .map((item) => (
+                                                <div key={item.booth_id}>
+                                                    <Card className="mx-6 my-2">
+                                                        <CardHeader>
+                                                            <CardTitle className="break-words overflow-hidden text-ellipsis font-bold">
+                                                                <div className="flex gap-2 items-center">
+                                                                    {item.booth?.locations.length > 1 ? (
+                                                                        <>
+                                                                            {item.booth?.locations[0].replace(/\d+/g, '')}
+                                                                            {item.booth?.locations[0].replace(/\D+/g, '')}
+
+                                                                        </>
+                                                                    ) : (
+                                                                        item.booth?.locations[0]
+                                                                    )}
+                                                                    {item.booth?.date.some(date => [0, 6].includes(new Date(date).getDay())) && (
+                                                                        <Badge variant="secondary">
+                                                                            {item.booth?.date.length === 2 ? "양일" : new Date(item.booth?.date[0]).toLocaleDateString('ko-KR', { weekday: 'long' })}
+                                                                        </Badge>
+                                                                    )}
+                                                                </div>
+                                                            </CardTitle>
+                                                            <CardDescription className="text-md text-foreground">
+                                                                {item.booth?.name}
+                                                            </CardDescription>
+                                                        </CardHeader>
+                                                        <CardContent>
+
+                                                        </CardContent>
+                                                    </Card>
+                                                </div>
+                                            ))}
+                                    </TabsContent>
+                                </TabsContent>
+                                <TabsContent value="cart">
+                                    <Card className="w-[calc(100%-3rem)] mx-6">
+                                        <CardContent className="flex flex-col gap-2">
+                                            <Label className="mt-6 text-muted-foreground">장바구니 합계</Label>
+                                            <Label className="text-3xl font-bold mt-1">
+                                                <CountUp suffix="원" start={prevTotalPrice.current} end={totalPrice} duration={1} />
+                                            </Label>
+                                        </CardContent>
+                                    </Card>
+                                    <Suspense>
+                                        <Carousel className="w-full mt-2"
+                                            opts={{
+                                                align: 'start',
+                                                dragFree: true
+                                            }}
+                                            plugins={
+                                                []
+                                            }>
+                                            <CarouselContent className="ml-3 mr-6">
+                                                {Object.entries(booths).map(([boothId, booth]) => (
+                                                    <CarouselItem key={boothId} className="basis-auto pl-3">
+                                                        <Card className="w-[290px] h-[100%] flex flex-col">
+                                                            <CardHeader>
+                                                                <CardTitle className="break-words overflow-hidden text-ellipsis font-bold">
+                                                                    <div className="flex gap-2 items-center">
+                                                                        {booth.boothLocation}
+                                                                        {booth.date.some(date => [0, 6].includes(new Date(date).getDay())) && (
+                                                                            <Badge variant="secondary">
+                                                                                {booth.date.length === 2 ? "양일" : new Date(booth.date[0]).toLocaleDateString('ko-KR', { weekday: 'long' })}
+                                                                            </Badge>
+                                                                        )}
+                                                                    </div>
+                                                                </CardTitle>
+
+                                                                <CardDescription className="text-lg text-foreground">
+                                                                    <div>{booth.boothName}</div>
+                                                                </CardDescription>
+                                                                <div className="flex gap-1">
+                                                                    <CardDescription className="text-md text-foreground">
+                                                                        <CountUp
+                                                                            start={prevBoothPrices.current[boothId] || 0}
+                                                                            end={boothPrices[boothId]}
+                                                                            duration={1}
+                                                                            separator=","
+                                                                            suffix="원"
+                                                                        />
+
+                                                                    </CardDescription>
+                                                                    <Label className="text-muted-foreground text-md">
+                                                                        {" - "}
+                                                                        {booth.products.reduce((acc, product) =>
+                                                                            acc + product.options.reduce((acc, option) => acc + option.quantity, 0)
+                                                                            , 0)}개 항목
+                                                                    </Label>
+                                                                </div>
+                                                                <Separator />
+                                                            </CardHeader>
+                                                            <CardContent className="flex flex-col gap-4">
+                                                                {booth.products.sort((a, b) => a.productName.localeCompare(b.productName)).map(product => (
+                                                                    <div key={product.productId}>
+                                                                        <Label className="text-md text-muted-foreground">
+                                                                            {product.productName}
+                                                                        </Label>
+                                                                        {product.options.sort((a, b) => a.optionName.localeCompare(b.optionName)).map(option => (
+                                                                            <div key={option.optionId} className="flex justify-between mb-2">
+                                                                                <div className="flex flex-col">
+                                                                                    <Label className="text-lg font-bold">
+                                                                                        {option.optionName}
+                                                                                    </Label>
+                                                                                    <Label className="text-muted-foreground text-sm">
+                                                                                        {option.price.toLocaleString()}원
+                                                                                    </Label>
+                                                                                </div>
+                                                                                <div className="flex justify-end items-center">
+                                                                                    <Button variant="secondary" className="w-8 h-8 p-0" onClick={() => handleQuantityChange(product.productId, option.optionId, option.quantity, false)}>
+                                                                                        {option.quantity > 1 ? <Minus className="h-4 w-4 m-0 p-0" /> : <Trash className="h-4 w-4 m-0 p-0" />}
+                                                                                    </Button>
+                                                                                    <Label className="mx-3 text-md">
+                                                                                        {option.quantity}
+                                                                                    </Label>
+                                                                                    <Button variant="secondary" className="w-8 h-8 p-0" onClick={() => handleQuantityChange(product.productId, option.optionId, option.quantity, true)}>
+                                                                                        <Plus className="h-4 w-4 m-0 p-0" />
+                                                                                    </Button>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                ))}
+                                                            </CardContent>
+                                                            {/*
+                                                            <CardFooter className="flex items-center overflow-x-auto mt-auto">
+                                                                <Button className="w-full">수령 완료</Button>
+                                                            </CardFooter>
+                                                                        */}
+                                                        </Card>
+                                                    </CarouselItem>
+                                                ))}
+                                            </CarouselContent>
+                                            <CarouselPrevious className="ml-16 w-10 h-10" />
+                                            <CarouselNext className="mr-16 w-10 h-10" />
+
+                                        </Carousel>
+                                    </Suspense>
+                                </TabsContent>
+                            </Tabs>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card >
+        </>
+    );
+}
+

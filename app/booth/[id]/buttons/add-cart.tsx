@@ -3,13 +3,28 @@ import { Button } from "@/components/ui/button";
 import useOptionsStore from '@/store/options';
 import { mutate } from 'swr';
 import { AddOrUpdateCart } from '../actions';
-
+import { UserStateContext } from "@/providers"
+import React from "react";
+import { useToast } from "@/components/ui/use-toast"
+import { useRouter } from "next/navigation";
+import { useContext } from "react";
 export default function AddCart({ product, boothId }: { product: any, boothId: string }) {
+    const { userData } = useContext(UserStateContext);
+    const { toast } = useToast()
     const { selectedOptions } = useOptionsStore();
     const selectedOption = selectedOptions[product.product_id];
+    const router = useRouter();
 
     const handleAddToCart = async () => {
-        if (selectedOption && boothId) {
+        if (!userData) {
+            toast({
+                description: "로그인이 필요합니다.",
+            })
+            const path = window.location.pathname + window.location.search;
+            router.push(`/auth?next=${encodeURIComponent(path)}`);
+        }
+
+        if (userData && selectedOption && boothId) {
             const optimisticItem = {
                 product_id: product.product_id,
                 option_id: selectedOption.option_id,

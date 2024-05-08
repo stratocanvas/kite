@@ -35,12 +35,20 @@ export async function ConnectAuthor(search: string) {
 				if (upsertError.code === "23505") {
 					alreadyExists = true;
 				}
+			} else {
+				const { error: updateUserError } = await supabase
+					.from("users")
+					.update({ seller: true })
+					.eq("id", userData.user.id);
+				if (updateUserError) {
+					console.error("Error updating user seller status:", updateUserError);
+				}
 			}
 			return {
 				isAuthor: true,
 				name: matchedAuthor.name,
 				sns_x: matchedAuthor.sns_x,
-                thumbnail: matchedAuthor.thumbnail,
+				thumbnail: matchedAuthor.thumbnail,
 				alreadyExists: alreadyExists,
 			};
 		}

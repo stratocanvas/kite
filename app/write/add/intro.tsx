@@ -8,7 +8,6 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
 import { ChevronLeft, ChevronRight, Plus, X, Check, ChevronsUpDown, CirclePlus, Pencil, Trash, ArrowRight, ArrowDown, CircleAlert, Circle, Dot, Loader2 } from "lucide-react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -23,8 +22,6 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-import { Textarea } from "@/components/ui/textarea"
-import { Toggle } from "@/components/ui/toggle"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 import {
@@ -41,7 +38,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { fetchEvents } from "./fetch"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useLayoutEffect } from "react"
 import { createClient } from '@/utils/supabase/client'
 import * as React from "react"
 import { useMediaQuery } from "react-responsive"
@@ -52,7 +49,7 @@ import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { RegisterAuthor } from "./submit"
+import { RegisterAuthor, RegisterCategory } from "./submit"
 import { Checkbox } from "@/components/ui/checkbox"
 import FileUpload from "@/components/ui/file-upload"
 import { SubmitBooth } from "./submit"
@@ -70,9 +67,12 @@ import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { CommandSeparator } from "cmdk"
 import { DropdownMenu, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu"
-import { useRouter } from 'next/navigation';
+import { useRouter, redirect } from 'next/navigation';
 import Vibrant from "node-vibrant"
 import { v4 as uuidv4 } from "uuid";
+import { GetUser } from "@/app/fetch"
+import { toast } from "sonner"
+import { UserStateContext } from "@/providers"
 
 const supabase = createClient()
 
@@ -114,13 +114,24 @@ const formSchema = z.object({
         date: z.array(z.date()).min(1, { message: "폼 기간을 설정해 주세요" }),
         always: z.boolean().optional(),
         url: z.string().url().optional()
-    })).optional().nullable()
+    })).optional().nullable(),
+    genre: z.array(z.number()).optional().nullable()
 });
 
 export default function RequestForm() {
+
     const router = useRouter();
+    const { userData } = React.useContext(UserStateContext);
+
+    React.useEffect(() => {
+        if (!userData) {
+            const path = window.location.pathname + window.location.search;
+            router.push(`/auth?next=${encodeURIComponent(path)}`);
+        }
+    }, [userData]);
 
     const isDesktop = useMediaQuery({ minWidth: 768 })
+
     //행사 선택
     const [eventFetched, setEventFetched] = useState(false);
     const [eventOptions, setEventOptions] = useState<{ value: number, label: string, location: string, start_date: Date, end_date: Date }[]>([]);
@@ -143,6 +154,15 @@ export default function RequestForm() {
     const [character, setCharacter] = useState(false)
     const [characterDialogOpen, setCharacterDialogOpen] = useState(false);
 
+    //장르
+    const [genreFetched, setGenreFetched] = useState(false);
+    const [genreOptions, setGenreOptions] = useState<{ value: string, label: string }[]>([]);
+    const [selectedGenre, setSelectedGenre] = useState<{ value: string, label: string }>();
+    const [genreOpen, setGenreOpen] = useState(false);
+    const [genre, setGenre] = useState(false)
+    const [genreDialogOpen, setGenreDialogOpen] = useState(false);
+
+
 
     const [name, setName] = useState(false)
     const [date, setDate] = useState(false)
@@ -155,10 +175,12 @@ export default function RequestForm() {
     const [categoryOpen, setCategoryOpen] = useState<boolean[]>([]);
     const [thumbnail, setThumbnail] = useState<string | null>(null);
     const [editMode, setEditMode] = useState(false)
+    const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
 
     const [productAuthorOpen, setProductAuthorOpen] = useState<boolean[]>([]);
     const [selectedProductAuthors, setSelectedProductAuthors] = useState<{ value: string, label: string, thumbnail: string, sns_x: string }[]>([]);
     const [preorderType, setPreorderType] = useState('')
+
     //이벤트 fetch
     useEffect(() => {
         const fetchOptions = async () => {
@@ -183,7 +205,7 @@ export default function RequestForm() {
         }
     }, [eventOpen, eventFetched]);
 
-    //카테고리 fetch
+    //굿즈 카테고리 fetch
     useEffect(() => {
         const fetchOptions = async () => {
             const { data, error } = await supabase
@@ -222,10 +244,11 @@ export default function RequestForm() {
             }
         };
 
-        if (authorOpen && !authorFetched) {
+        if ((authorOpen || (productAuthorOpen.length > 0 && productAuthorOpen.some(open => open))) && !authorFetched) {
+            console.log("FETCH")
             fetchOptions();
         }
-    }, [authorOpen, authorFetched]);
+    }, [authorOpen, authorFetched, productAuthorOpen]);
 
     //캐릭터 fetch
     useEffect(() => {
@@ -251,6 +274,28 @@ export default function RequestForm() {
         }
     }, [characterOpen, characterFetched]);
 
+    //장르 fetch
+    useEffect(() => {
+        const fetchOptions = async () => {
+            const { data, error } = await supabase
+                .from("genre")
+                .select('genre_id, name');
+            if (error) console.error('Error fetching data', error);
+            else {
+                setGenreOptions(data.map(item => ({
+                    value: item.genre_id,
+                    label: item.name,
+                })));
+                setGenreFetched(true);
+            }
+        };
+
+        if ((selectedCharacters || genreOpen) && !genreFetched) {
+            fetchOptions();
+        }
+    }, [selectedCharacters, genreOpen, genreFetched]);
+
+
     const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -262,13 +307,13 @@ export default function RequestForm() {
             thumbnail: "",
             boothinfo: null,
             products: [],
-            preorder: []
+            preorder: [],
+            genre: []
         },
         mode: "all"
     });
 
     const { isSubmitting, isSubmitted, isSubmitSuccessful, isValid } = useFormState(form);
-
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
@@ -375,7 +420,7 @@ export default function RequestForm() {
                     }
                 }
             }
-
+            console.log(values)
             const result = await SubmitBooth(values);
             console.log("Booth created successfully:", result.booth_id);
             router.push(`/booth/${result.booth_id}`);
@@ -433,6 +478,21 @@ export default function RequestForm() {
             label: format(date, 'yyyy-MM-dd'),
         }))
         : [];
+
+    useEffect(() => {
+        const allCharacterGenres = form.getValues('products')?.flatMap((product) =>
+            product.options?.flatMap((option) =>
+                option.characters?.map((characterId) => {
+                    const character = characterOptions.find((c) => c.value === characterId);
+                    return character?.genre;
+                })
+            )
+        ).filter((genre): genre is string => !!genre);
+
+        const uniqueGenres = [...new Set(allCharacterGenres)];
+        const genreIds = uniqueGenres.map((genre) => genreOptions.find((g) => g.label === genre)?.value).filter((id): id is string => !!id);
+        form.setValue('genre', [...new Set([...(form.getValues('genre') || []), ...genreIds])]);
+    }, [selectedCharacters]);
 
     return (
         <Card className="sm:w-full lg:w-[600px] mx-auto border-none shadow-none">
@@ -513,6 +573,7 @@ export default function RequestForm() {
                                                                                                         const { author_id, name, sns_x } = data;
                                                                                                         setSelectedAuthors([...selectedAuthors, { value: author_id, label: name, sns_x: sns_x }]);
                                                                                                         field.onChange([...(field.value || []), author_id]);
+                                                                                                        setAuthorFetched(false);
                                                                                                         setAuthorDialogOpen(false)
                                                                                                     })
                                                                                                     .catch((error) => {
@@ -547,7 +608,7 @@ export default function RequestForm() {
                                                                                                     </div>
                                                                                                 </div>
                                                                                                 <DialogFooter>
-                                                                                                    <Button type="submit">등록</Button>
+                                                                                                    <Button type="submit" onClick={() => setAuthorFetched(false)}>등록</Button>
                                                                                                 </DialogFooter>
                                                                                             </form>
                                                                                         </DialogContent>
@@ -824,8 +885,8 @@ export default function RequestForm() {
                                                                 <CommandGroup>
                                                                     {eventOptions.map((event) => (
                                                                         <CommandItem
-                                                                            value={event.value.toString()}
                                                                             key={event.value}
+                                                                            value={event.value}
                                                                             onSelect={() => {
                                                                                 form.setValue("event", event.value);
                                                                                 form.setValue("dates", []); // 날짜 초기화
@@ -1087,11 +1148,65 @@ export default function RequestForm() {
                                                                                         <Command>
                                                                                             <CommandInput placeholder="카테고리 검색..." />
                                                                                             <CommandList>
-                                                                                                <CommandEmpty>검색된 카테고리 없음</CommandEmpty>
+                                                                                                <CommandEmpty>
+                                                                                                    <Dialog open={categoryDialogOpen} onOpenChange={() => setCategoryDialogOpen(!categoryDialogOpen)}>
+                                                                                                        <div className="flex flex-col gap-2 items-center">
+                                                                                                            검색된 카테고리 없음
+                                                                                                            <DialogTrigger asChild>
+                                                                                                                <Button variant="secondary" onClick={() => setCategoryDialogOpen(true)}>
+                                                                                                                    카테고리 등록
+                                                                                                                </Button>
+                                                                                                            </DialogTrigger>
+                                                                                                        </div>
+                                                                                                        <DialogContent className="sm:max-w-[425px]">
+                                                                                                            <DialogHeader>
+                                                                                                                <DialogTitle>카테고리 등록</DialogTitle>
+                                                                                                            </DialogHeader>
+                                                                                                            <form onSubmit={(e) => {
+                                                                                                                e.preventDefault();
+                                                                                                                e.stopPropagation();
+                                                                                                                const form = e.target as HTMLFormElement;
+                                                                                                                const formData = new FormData(form);
+                                                                                                                const name = formData.get('name') as string;
+                                                                                                                RegisterCategory({ name })
+                                                                                                                    .then((data) => {
+                                                                                                                        const { category_id } = data;
+                                                                                                                        const newProducts = [...field.value];
+                                                                                                                        newProducts[index].category = category_id;
+                                                                                                                        field.onChange(newProducts);
+                                                                                                                        setCategoryFetched(false);
+                                                                                                                        setCategoryDialogOpen(false);
+                                                                                                                    })
+                                                                                                                    .catch((error) => {
+                                                                                                                        console.error('Failed to register author:', error);
+                                                                                                                    });
+                                                                                                            }}>
+                                                                                                                <div className="flex flex-col gap-6 py-4 justify-start">
+                                                                                                                    <div className="flex flex-col gap-2">
+                                                                                                                        <Label htmlFor="name">
+                                                                                                                            이름
+                                                                                                                        </Label>
+                                                                                                                        <Input
+                                                                                                                            id="name"
+                                                                                                                            name="name"
+                                                                                                                            placeholder="굿즈 종류 입력"
+                                                                                                                            autoComplete="off"
+                                                                                                                            required
+                                                                                                                        />
+                                                                                                                    </div>
+
+                                                                                                                </div>
+                                                                                                                <DialogFooter>
+                                                                                                                    <Button type="submit">등록</Button>
+                                                                                                                </DialogFooter>
+                                                                                                            </form>
+                                                                                                        </DialogContent>
+                                                                                                    </Dialog>
+                                                                                                </CommandEmpty>
                                                                                                 <CommandGroup>
                                                                                                     {categoryOptions.map((category) => (
                                                                                                         <CommandItem
-                                                                                                            value={category.value.toString()}
+                                                                                                            value={category.value}
                                                                                                             key={category.value}
                                                                                                             onSelect={() => {
                                                                                                                 const newProducts = [...field.value];
@@ -1124,7 +1239,6 @@ export default function RequestForm() {
                                                                                 </Popover>
                                                                             </div>
                                                                             <div>
-
                                                                                 <Label htmlFor={`prodAuthor-${index}`}>작가</Label>
                                                                                 <Popover open={productAuthorOpen[index] || false} onOpenChange={() => {
                                                                                     const newStates = [...productAuthorOpen];
@@ -1168,7 +1282,7 @@ export default function RequestForm() {
                                                                                                         </div>
                                                                                                         <DialogContent className="sm:max-w-[425px]">
                                                                                                             <DialogHeader>
-                                                                                                                <DialogTitle>캐릭터 등록</DialogTitle>
+                                                                                                                <DialogTitle>작가 등록</DialogTitle>
                                                                                                             </DialogHeader>
                                                                                                             <form onSubmit={(e) => {
                                                                                                                 e.preventDefault();
@@ -1176,13 +1290,21 @@ export default function RequestForm() {
                                                                                                                 const form = e.target as HTMLFormElement;
                                                                                                                 const formData = new FormData(form);
                                                                                                                 const name = formData.get('name') as string;
-                                                                                                                const genre = formData.get('genre') as string;
-                                                                                                                RegisterAuthor({ name, genre })
+                                                                                                                const sns_x = formData.get('sns_x') as string;
+                                                                                                                const isBoothAuthor = formData.get('isBoothAuthor') as boolean;
+                                                                                                                console.log(isBoothAuthor)
+                                                                                                                RegisterAuthor({ name, sns_x })
                                                                                                                     .then((data) => {
-                                                                                                                        const { character_id, name, genre } = data;
-                                                                                                                        setSelectedCharacters([...selectedCharacters, { value: character_id, label: name, genre: genre }]);
-                                                                                                                        field.onChange([...(field.value || []), character_id]);
-                                                                                                                        setCharacterDialogOpen(false)
+                                                                                                                        const { author_id } = data;
+                                                                                                                        const newProducts = [...field.value];
+                                                                                                                        newProducts[index].authors.push(author_id);
+                                                                                                                        field.onChange(newProducts);
+                                                                                                                        if (isBoothAuthor) {
+                                                                                                                            setSelectedAuthors([...selectedAuthors, { value: author_id, label: name, sns_x: sns_x }]);
+                                                                                                                        }
+                                                                                                                        setAuthorFetched(false);
+                                                                                                                        setAuthorDialogOpen(false);
+
                                                                                                                     })
                                                                                                                     .catch((error) => {
                                                                                                                         console.error('Failed to register author:', error);
@@ -1196,22 +1318,32 @@ export default function RequestForm() {
                                                                                                                         <Input
                                                                                                                             id="name"
                                                                                                                             name="name"
-                                                                                                                            required
+                                                                                                                            placeholder="작가 활동명 입력"
                                                                                                                             autoComplete="off"
-
+                                                                                                                            required
                                                                                                                         />
                                                                                                                     </div>
                                                                                                                     <div className="flex flex-col gap-2">
                                                                                                                         <Label htmlFor="sns_x">
-                                                                                                                            장르
+                                                                                                                            SNS 아이디
                                                                                                                         </Label>
                                                                                                                         <Input
                                                                                                                             id="sns_x"
                                                                                                                             name="sns_x"
                                                                                                                             autoComplete="off"
 
+                                                                                                                            placeholder="X(Twitter) 아이디 입력"
                                                                                                                             required
                                                                                                                         />
+                                                                                                                    </div>
+                                                                                                                    <div className="flex gap-2">
+                                                                                                                        <Checkbox id="isBoothAuthor" name="isBoothAuthor" />
+                                                                                                                        <Label
+                                                                                                                            htmlFor="isBoothAuthor"
+                                                                                                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                                                                                                        >
+                                                                                                                            부스 참여 작가에도 추가
+                                                                                                                        </Label>
                                                                                                                     </div>
                                                                                                                 </div>
                                                                                                                 <DialogFooter>
@@ -1441,12 +1573,13 @@ export default function RequestForm() {
                                                                                                                                 <Dialog open={characterDialogOpen} onOpenChange={() => setCharacterDialogOpen(!characterDialogOpen)}>
                                                                                                                                     <div className="flex flex-col gap-2 items-center">
                                                                                                                                         검색된 캐릭터 없음
-                                                                                                                                        <DialogTrigger asChild>
+                                                                                                                                        {/*<DialogTrigger asChild>
                                                                                                                                             <Button variant="secondary" >
                                                                                                                                                 캐릭터 등록
                                                                                                                                             </Button>
-                                                                                                                                        </DialogTrigger>
+                                                                                                                            </DialogTrigger>*/}
                                                                                                                                     </div>
+                                                                                                                                    {/*
                                                                                                                                     <DialogContent className="sm:max-w-[425px]">
                                                                                                                                         <DialogHeader>
                                                                                                                                             <DialogTitle>캐릭터 등록</DialogTitle>
@@ -1499,8 +1632,9 @@ export default function RequestForm() {
                                                                                                                                                 <Button type="submit">등록</Button>
                                                                                                                                             </DialogFooter>
                                                                                                                                         </form>
-                                                                                                                                    </DialogContent>
+                                                                                                                                    </DialogContent>*/}
                                                                                                                                 </Dialog>
+
                                                                                                                             </CommandEmpty>
                                                                                                                             <CommandGroup>
                                                                                                                                 {characterOptions.map((character) => (
@@ -1737,7 +1871,23 @@ export default function RequestForm() {
                                                                 <CarouselItem key={index} className="basis-auto pl-4 h-full">
                                                                     <Card>
                                                                         <CardContent className="flex flex-col gap-4 mt-4">
+                                                                            {editMode &&
+                                                                                <Button
+                                                                                    type="button"
+                                                                                    variant="destructive"
+                                                                                    onClick={() => {
+                                                                                        const newPreorders = field.value.filter((_, i) => i !== index);
+                                                                                        field.onChange(newPreorders);
+                                                                                    }}
+                                                                                >
+                                                                                    <div className="flex items-center gap-2">
+                                                                                        <Trash className="w-4 h-4" />
+                                                                                        삭제
+                                                                                    </div>
+                                                                                </Button>
+                                                                            }
                                                                             <div>
+
                                                                                 <Label htmlFor={`preorders.${index}.title`}>
                                                                                     제목
                                                                                 </Label>
@@ -1828,58 +1978,131 @@ export default function RequestForm() {
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="event"
+                                        name="genre"
                                         render={({ field }) => (
                                             <FormItem className="flex flex-col">
                                                 <FormLabel className="text-lg">장르</FormLabel>
-                                                <Popover open={eventOpen} onOpenChange={() => setEventOpen(!eventOpen)}>
+                                                <Popover open={genreOpen} onOpenChange={() => {
+                                                    setGenreOpen(!genreOpen)
+                                                }}>
                                                     <PopoverTrigger asChild>
                                                         <FormControl>
                                                             <Button
                                                                 variant="outline"
                                                                 role="combobox"
                                                                 className={cn(
-                                                                    "w-full md:w-[400px] justify-between",
+                                                                    "w-full md:w-[250px] justify-between",
                                                                     !field.value && "text-muted-foreground"
                                                                 )}
-                                                                onClick={() => setEventOpen(true)}
+                                                                onClick={() => {
+                                                                    setGenreOpen(!genreOpen)
+                                                                }}
                                                             >
-                                                                {field.value
-                                                                    ? eventOptions.find(
-                                                                        (event) => event.value === field.value
-                                                                    )?.label
-                                                                    : "장르 선택"}
+                                                                장르 추가
 
                                                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                             </Button>
                                                         </FormControl>
                                                     </PopoverTrigger>
-                                                    <PopoverContent className="w-full md:w-[400px] p-0">
+                                                    <PopoverContent className="w-full p-0">
                                                         <Command>
                                                             <CommandInput placeholder="장르 검색..." />
                                                             <CommandList>
-                                                                <CommandEmpty>검색된 장르 없음</CommandEmpty>
+                                                                <CommandEmpty>
+                                                                    <Dialog open={genreDialogOpen} onOpenChange={() => setGenreDialogOpen(!genreDialogOpen)}>
+                                                                        <div className="flex flex-col gap-2 items-center">
+                                                                            검색된 장르 없음
+                                                                            {/*
+                                                                            <DialogTrigger asChild>
+                                                                                <Button variant="secondary" onClick={() => setGenreDialogOpen(true)}>
+                                                                                    장르 등록
+                                                                                </Button>
+                                                            </DialogTrigger>*/}
+                                                                        </div>
+                                                                        {/*
+                                                                        <DialogContent className="sm:max-w-[425px]">
+                                                                            <DialogHeader>
+                                                                                <DialogTitle>장르 등록</DialogTitle>
+                                                                            </DialogHeader>
+                                                                            <form onSubmit={(e) => {
+                                                                                e.preventDefault();
+                                                                                e.stopPropagation();
+                                                                                const form = e.target as HTMLFormElement;
+                                                                                const formData = new FormData(form);
+                                                                                const name = formData.get('name') as string;
+                                                                                const genre = formData.get('genre') as string;
+                                                                                RegisterAuthor({ name, genre })
+                                                                                    .then((data) => {
+                                                                                        const { character_id, name, genre } = data;
+                                                                                        setSelectedCharacters([...selectedCharacters, { value: character_id, label: name, genre: genre }]);
+                                                                                        field.onChange([...(field.value || []), character_id]);
+                                                                                        setCharacterDialogOpen(false)
+                                                                                    })
+                                                                                    .catch((error) => {
+                                                                                        console.error('Failed to register author:', error);
+                                                                                    });
+                                                                            }}>
+                                                                                <div className="flex flex-col gap-6 py-4 justify-start">
+                                                                                    <div className="flex flex-col gap-2">
+                                                                                        <Label htmlFor="name">
+                                                                                            이름
+                                                                                        </Label>
+                                                                                        <Input
+                                                                                            id="name"
+                                                                                            name="name"
+                                                                                            required
+                                                                                            autoComplete="off"
+
+                                                                                        />
+                                                                                    </div>
+                                                                                    <div className="flex flex-col gap-2">
+                                                                                        <Label htmlFor="sns_x">
+                                                                                            장르
+                                                                                        </Label>
+                                                                                        <Input
+                                                                                            id="sns_x"
+                                                                                            name="sns_x"
+                                                                                            autoComplete="off"
+
+                                                                                            required
+                                                                                        />
+                                                                                    </div>
+                                                                                </div>
+                                                                                <DialogFooter>
+                                                                                    <Button type="submit">등록</Button>
+                                                                                </DialogFooter>
+                                                                            </form>
+                                                                        </DialogContent>
+                                                                        */}
+                                                                    </Dialog>
+                                                                </CommandEmpty>
+                                                                <CommandSeparator />
                                                                 <CommandGroup>
-                                                                    {eventOptions.map((event) => (
+                                                                    {genreOptions.map((genre) => (
                                                                         <CommandItem
-                                                                            value={event.value.toString()}
-                                                                            key={event.value}
+                                                                            value={genre.value}
+                                                                            key={genre.value}
                                                                             onSelect={() => {
-                                                                                form.setValue("event", event.value);
-                                                                                form.setValue("dates", []); // 날짜 초기화
-                                                                                setEventOpen(false);
-                                                                                setEvent(true);
+                                                                                const newGenres = [...(field.value || [])];
+                                                                                const isSelected = newGenres.includes(genre.value);
+                                                                                if (isSelected) {
+                                                                                    field.onChange(newGenres.filter((id) => id !== genre.value));
+                                                                                } else {
+                                                                                    field.onChange([...newGenres, genre.value]);
+                                                                                }
                                                                             }}
                                                                         >
                                                                             <Check
                                                                                 className={cn(
                                                                                     "mr-2 h-4 w-4",
-                                                                                    event.value === field.value
+                                                                                    field.value.includes(genre.value)
                                                                                         ? "opacity-100"
                                                                                         : "opacity-0"
                                                                                 )}
                                                                             />
-                                                                            {event.label}
+
+                                                                            {genre.label}
+
                                                                         </CommandItem>
                                                                     ))}
                                                                 </CommandGroup>
@@ -1887,22 +2110,36 @@ export default function RequestForm() {
                                                         </Command>
                                                     </PopoverContent>
                                                 </Popover>
+                                                {field.value.length > 0 &&
+                                                    <div className="flex flex-wrap gap-2 mt-2">
+                                                        {field.value.map((genreId) => {
+                                                            const genre = genreOptions.find((a) => a.value === genreId);
+                                                            return (
+                                                                <Badge key={genreId} variant="secondary" className="flex items-center gap-1 px-2 py-1 rounded-md">
+                                                                    <Button
+                                                                        className="w-4 h-4 text-muted-foreground"
+                                                                        size="icon"
+                                                                        asChild
+                                                                        variant="ghost"
+                                                                        onClick={() => {
+                                                                            const newGenres = field.value.filter((id) => id !== genreId);
+                                                                            field.onChange(newGenres);
+                                                                        }}
+                                                                    >
+                                                                        <X className="h-4 w-4 mr-1" />
+                                                                    </Button>
+                                                                    <p className="text-sm">{genre?.label}</p>
+                                                                </Badge>
+                                                            );
+                                                        })}
+
+                                                    </div>
+                                                }
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
-                                    <div className="text-red-500">
-                                        {form.watch('products')?.flatMap((product) =>
-                                            product.options?.flatMap((option) =>
-                                                option.characters?.map((characterId) => {
-                                                    const character = characterOptions.find((c) => c.value === characterId);
-                                                    return character ? character.genre : null;
-                                                })
-                                            )
-                                        )
-                                            .filter((genre, index, self) => genre && self.indexOf(genre) === index)
-                                            .join(', ')}
-                                    </div>
+
                                     <div className="sticky bottom-0 bg-gradient-to-t from-background via-background/70 to-transparent pb-6 pt-6">
                                         {isValid ? (
                                             isSubmitting ? (
@@ -1916,6 +2153,7 @@ export default function RequestForm() {
                                                     variant="default"
                                                     className="w-full lg:w-auto"
                                                     size="lg"
+                                                    onClick={() => toast.success("부스 등록 완료", { description: "부스 페이지로 이동합니다." })}
                                                 >
                                                     제출
                                                 </Button>
@@ -1969,8 +2207,11 @@ export function DatePickerWithRange({
     }, [value])
 
     const formatDate = (date: Date | undefined) => {
-        return date ? format(date, "M월 d일") : ''
-    }
+        if (date && !isNaN(date.getTime())) {
+            return format(date, "M월 d일");
+        }
+        return '';
+    };
 
     const formatDateRange = () => {
         if (!dateRange || !dateRange.from || !dateRange.to) return '날짜 선택...'
@@ -1982,30 +2223,47 @@ export function DatePickerWithRange({
     }
 
     const handleStartTimeChange = (value: string) => {
-        setStartTime(value)
+        setStartTime(value);
         if (dateRange?.from && dateRange?.to && dateRange.from.getTime() === dateRange.to.getTime()) {
             if (value > endTime) {
-                setEndTime(value)
+                setEndTime(value);
             }
         }
-    }
+        if (onChange && dateRange) {
+            const fromDateTime = new Date(dateRange.from);
+            fromDateTime.setHours(parseInt(value.split(":")[0]), parseInt(value.split(":")[1]));
+            onChange([fromDateTime, dateRange.to]);
+        }
+    };
 
     const handleEndTimeChange = (value: string) => {
-        setEndTime(value)
+        setEndTime(value);
         if (dateRange?.from && dateRange?.to && dateRange.from.getTime() === dateRange.to.getTime()) {
             if (value < startTime) {
-                setStartTime(value)
+                setStartTime(value);
             }
         }
-    }
+        if (onChange && dateRange) {
+            const toDateTime = new Date(dateRange.to);
+            toDateTime.setHours(parseInt(value.split(":")[0]), parseInt(value.split(":")[1]));
+            onChange([dateRange.from, toDateTime]);
+        }
+    };
 
     const handleDateRangeChange = (value: DateRange | undefined) => {
-        setDateRange(value)
-        if (onChange) {
-            onChange(value ? [value.from, value.to] : [])
-        }
-    }
+        setDateRange(value);
+        if (onChange && value) {
+            const fromDateTime = new Date(value.from);
+            fromDateTime.setHours(parseInt(startTime.split(":")[0]), parseInt(startTime.split(":")[1]));
 
+            const toDateTime = new Date(value.to);
+            toDateTime.setHours(parseInt(endTime.split(":")[0]), parseInt(endTime.split(":")[1]));
+
+            onChange([fromDateTime, toDateTime]);
+        } else if (onChange) {
+            onChange([]);
+        }
+    };
     return (
         <div className={cn("grid gap-2", className)}>
             <Popover>
