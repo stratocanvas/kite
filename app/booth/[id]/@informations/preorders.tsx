@@ -61,10 +61,7 @@ export default async function BoothPreorders({ params }: { params: { id: string 
                                             className="w-[290px] h-[100%] flex flex-col"
                                         >
                                             <CardHeader>
-                                                <div className="flex gap-2 items-center">
-                                                    <CardTitle>
-                                                        {preorder.title}
-                                                    </CardTitle>
+                                                <div className="flex flex-col gap-2 items-start">
                                                     {(() => {
                                                         const { type, isEnding } = getPreorderStatus(preorder);
                                                         return (
@@ -74,6 +71,10 @@ export default async function BoothPreorders({ params }: { params: { id: string 
                                                             </Badge>
                                                         );
                                                     })()}
+                                                    <CardTitle>
+                                                        {preorder.title}
+                                                    </CardTitle>
+
                                                 </div>
                                                 <CardDescription className="text-md text-foreground">
                                                     {getPreorderStatus(preorder).status}
@@ -120,7 +121,7 @@ const getPreorderStatus = (preorder: any) => {
     return {
         type: preorder.type === 'ship' ? '통판' : preorder.type === 'preorder' ? '선입금' : '수요조사',
         status: startDate > now ? `${formatDistanceToNow(startDate, { addSuffix: true, locale: ko })} 시작` :
-                endDate > now ? `${formatDistanceToNow(endDate, { addSuffix: true, locale: ko })} 종료` : '종료',
+            endDate > now ? `${formatDistanceToNow(endDate, { addSuffix: true, locale: ko })} 종료` : '종료',
         isEnding
     };
 };

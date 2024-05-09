@@ -13,7 +13,7 @@ import { useRef } from "react";
 import imageCompression from 'browser-image-compression';
 
 
-const compressImage = async (file: File): Promise<string> => {
+/*const compressImage = async (file: File): Promise<string> => {
   const options = {
     maxSizeMB: 1,
     useWebWorker: true,
@@ -36,6 +36,7 @@ const compressImage = async (file: File): Promise<string> => {
     return '';
   }
 };
+*/
 
 interface TiptapProps {
   onChange?: (jsonData: any) => void;
@@ -93,15 +94,15 @@ const Tiptap = ({ onChange, initValue }: TiptapProps) => {
         allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
         onDrop: async (currentEditor, files, pos) => {
           for (const file of files) {
-            const compressedImageUrl = await compressImage(file);
-            if (compressedImageUrl) {
-              currentEditor.chain().insertContentAt(pos, {
-                type: 'image',
-                attrs: {
-                  src: compressedImageUrl,
-                },
-              }).focus().run();
-            }
+            // const compressedImageUrl = await compressImage(file);
+            // if (compressedImageUrl) {
+            currentEditor.chain().insertContentAt(pos, {
+              type: 'image',
+              attrs: {
+                src: URL.createObjectURL(file),
+              },
+            }).focus().run();
+            // }
           }
         },
 
@@ -111,15 +112,15 @@ const Tiptap = ({ onChange, initValue }: TiptapProps) => {
             if (htmlContent) {
               return false;
             }
-            const compressedImageUrl = await compressImage(file);
-            if (compressedImageUrl) {
-              currentEditor.chain().insertContentAt(currentEditor.state.selection.anchor, {
-                type: 'image',
-                attrs: {
-                  src: compressedImageUrl,
-                },
-              }).focus().run();
-            }
+            // const compressedImageUrl = await compressImage(file);
+            // if (compressedImageUrl) {
+            currentEditor.chain().insertContentAt(currentEditor.state.selection.anchor, {
+              type: 'image',
+              attrs: {
+                src: URL.createObjectURL(file),
+              },
+            }).focus().run();
+            // }
           }
         },
       }),
@@ -147,22 +148,21 @@ const addImage = async (editor: Editor, event: React.ChangeEvent<HTMLInputElemen
   if (files) {
     const pos = editor.state.selection.anchor;
     for (const file of files) {
-      const compressedImageUrl = await compressImage(file);
-      if (compressedImageUrl) {
-        editor.chain().insertContentAt(pos, {
-          type: 'image',
-          attrs: {
-            src: compressedImageUrl,
-          },
-        }).focus().run();
-      }
+      // const compressedImageUrl = await compressImage(file);
+      // if (compressedImageUrl) {
+      editor.chain().insertContentAt(pos, {
+        type: 'image',
+        attrs: {
+          src: URL.createObjectURL(file),
+        },
+      }).focus().run();
+      // }
     }
   }
 
   // 이미지 선택 후 input 요소의 값을 초기화
   event.target.value = '';
 };
-
 
 
 const RichTextEditorToolbar = ({ editor }: { editor: Editor }) => {
