@@ -3,8 +3,8 @@ import { createClient } from "@/utils/supabase/server";
 
 export default async function SearchResult({
 	searchParams,
-    page = 1,
-    limit = 5,
+	page = 1,
+	limit = 5,
 }: {
 	searchParams?: {
 		character?: string;
@@ -12,7 +12,7 @@ export default async function SearchResult({
 		genre?: string;
 		author?: string;
 		page?: number;
-		event?:number;
+		event?: number;
 	};
 }) {
 	const supabase = createClient();
@@ -41,12 +41,10 @@ export default async function SearchResult({
 	}
 
 	const { data: queryResult, error: queryError } = await query;
-
 	if (queryError || !queryResult) {
 		// Handle the error or return an appropriate response
 		return { booth: [] };
 	}
-
 	const {
 		data: booth,
 		error: boothError,
@@ -67,13 +65,9 @@ export default async function SearchResult({
     `,
 			{ count: "exact" },
 		)
-		.in(
-			"booth_id",
-			queryResult.map((result) => result.booth_id),
-		)
+		.in("booth_id", [...new Set(queryResult.map((result) => result.booth_id))])
 		.order("created_at", { ascending: false })
 		.range((page - 1) * limit, page * limit - 1);
-
 	if (boothError || !booth) {
 		// Handle the error or return an appropriate response
 		return { booth: [] };
