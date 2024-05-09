@@ -104,12 +104,12 @@ export function BoothMenu({ data }: { data: any }) {
                     <DropdownMenuGroup>
                         {wishlist?.some((item) => item.booth_id === data.booth_id) ? (
                             <DropdownMenuItem onClick={changeBookmark} className="flex justify-between">
-                                <span>찜 목록에서 제거</span>
+                                <span>위시리스트에서 제거</span>
                                 <HeartOff className="ml-4 h-4 w-4" />
                             </DropdownMenuItem>
                         ) : (
                             <DropdownMenuItem onClick={changeBookmark} className="flex justify-between">
-                                <span>찜 목록에 추가</span>
+                                <span>위시리스트에 추가</span>
                                 <Heart className="ml-4 h-4 w-4" />
                             </DropdownMenuItem>
                         )}
@@ -217,12 +217,12 @@ export function BoothMenu2({ data }: { data: any }) {
                     <DropdownMenuGroup>
                         {wishlist?.some((item) => item.booth_id === data.booth_id) ? (
                             <DropdownMenuItem onClick={changeBookmark} className="flex justify-between">
-                                <span>찜 목록에서 제거</span>
+                                <span>위시리스트에서 제거</span>
                                 <HeartOff className="ml-4 h-4 w-4" />
                             </DropdownMenuItem>
                         ) : (
                             <DropdownMenuItem onClick={changeBookmark} className="flex justify-between">
-                                <span>찜 목록에 추가</span>
+                                <span>위시리스트에 추가</span>
                                 <Heart className="ml-4 h-4 w-4" />
                             </DropdownMenuItem>
                         )}
