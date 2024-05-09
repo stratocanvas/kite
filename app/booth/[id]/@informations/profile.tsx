@@ -151,6 +151,7 @@ export default function BoothProfile({ data, color }: { data: any, color: string
                                 ? '양일'
                                 : new Date(data?.date).toLocaleDateString('ko-KR', {
                                     weekday: 'long',
+                                    timeZone: 'Asia/Seoul'
                                 })}
                         </div>
                     </div>

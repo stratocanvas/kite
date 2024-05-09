@@ -125,17 +125,17 @@ export async function GetBookmarks() {
 	const supabase = createClient();
 	const user = await GetUser();
 	const { data: wishlist, error: wishlistError } = await supabase
-	  .from("b_wishlists")
-	  .select("booth_id, booth(name, locations, event(event_id, name), date)")
-	  .eq("users_id", user);
+		.from("b_wishlists")
+		.select("booth_id, booth(name, locations, event(event_id, name), date)")
+		.eq("users_id", user);
 	if (wishlistError) {
 		return [];
 	}
 	if (!wishlist) {
-	  return [];
+		return [];
 	}
 	return wishlist;
-  }
+}
 
 export async function SetBookmark(boothId: string, action: boolean) {
 	try {
@@ -144,7 +144,6 @@ export async function SetBookmark(boothId: string, action: boolean) {
 			error: userError,
 		} = await supabase.auth.getUser();
 		if (userError) {
-
 		}
 
 		// The rest of your SetBookmark logic...
@@ -164,7 +163,5 @@ export async function SetBookmark(boothId: string, action: boolean) {
 				.eq("users_id", user?.id)
 				.eq("booth_id", boothId);
 		}
-	} catch (error) {
-
-	}
+	} catch (error) {}
 }

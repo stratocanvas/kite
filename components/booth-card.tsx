@@ -62,9 +62,10 @@ export default function BoothCard({ booth, displayEvent }: { booth: any, display
                                         `${booth.locations[0]}-${booth.locations[booth.locations.length - 1].match(/\d+$/)[0]}`
                                         : booth.locations?.length === 1 ? booth.locations[0] : "위치 미정"} ·{" "}
                                     {Array.isArray(booth?.date) && booth?.date.length === 2
-                                        ? "양일"
-                                        : new Date(booth?.date).toLocaleDateString("ko-KR", {
-                                            weekday: "long",
+                                        ? '양일'
+                                        : new Date(booth?.date).toLocaleDateString('ko-KR', {
+                                            weekday: 'long',
+                                            timeZone: 'Asia/Seoul'
                                         })}
                                 </CardDescription>
                                 <CardDescription className="text-white text-opacity-70">

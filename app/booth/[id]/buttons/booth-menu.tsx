@@ -13,14 +13,16 @@ import CheckOwner from "./owner";
 import { useToast } from "@/components/ui/use-toast"
 import { UserStateContext } from "@/providers"
 import { useContext } from "react"
+import Contact from '../contact/contact';
 
 function useBoothMenu(boothId: string, authorData: any) {
     const { userData } = useContext(UserStateContext);
     const { data: wishlist, mutate } = useSWR('wishlist', GetBookmarks, { revalidateOnFocus: true, revalidateOnReconnect: true, revalidateOnMount: true });
     const { toast } = useToast();
     const router = useRouter();
-    const [dialogOpen, setDialogOpen] = useState(false);
+    const [authDialogOpen, setAuthDialogOpen] = useState(false);
     const [isOwner, setIsOwner] = useState(false);
+    const [contactDialogOpen, setContactDialogOpen] = useState(false);
 
     const changeBookmark = useCallback(async () => {
         if (!userData) {
@@ -59,18 +61,20 @@ function useBoothMenu(boothId: string, authorData: any) {
     }, [authorData]);
 
     return {
-        dialogOpen,
-        setDialogOpen,
+        authDialogOpen,
+        setAuthDialogOpen,
         isOwner,
         wishlist,
         changeBookmark,
+        contactDialogOpen,
+        setContactDialogOpen
     };
 }
 
 
 
 export function BoothMenu({ data }: { data: any }) {
-    const { dialogOpen, setDialogOpen, isOwner, wishlist, changeBookmark } = useBoothMenu(
+    const { authDialogOpen, setAuthDialogOpen, isOwner, wishlist, changeBookmark, contactDialogOpen, setContactDialogOpen } = useBoothMenu(
         data.booth_id,
         data.author
     );
@@ -123,21 +127,22 @@ export function BoothMenu({ data }: { data: any }) {
                             </>
                         ) : (
                             <>
-                                <DropdownMenuItem className="flex justify-between" onSelect={() => setDialogOpen(true)}>
+                                <DropdownMenuItem className="flex justify-between" onSelect={() => setAuthDialogOpen(true)}>
                                     <span>편집 권한 얻기</span>
                                     <Flag className="ml-4 h-4 w-4" />
                                 </DropdownMenuItem>
 
                             </>
                         )*/}
-                        <DropdownMenuItem className="flex justify-between">
+                        <DropdownMenuItem className="flex justify-between" onSelect={() => setContactDialogOpen(true)}>
                             <span>문의</span>
                             <Info className="ml-4 h-4 w-4" />
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
                 </DropdownMenuContent>
             </DropdownMenu>
-            <AuthorAuth dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} />
+            {/*<AuthorAuth authDialogOpen={authDialogOpen} setAuthDialogOpen={setAuthDialogOpen} />*/}
+            <Contact contactDialogOpen={contactDialogOpen} setContactDialogOpen={setContactDialogOpen} boothId={data.booth_id} />
         </div>
     )
 }
@@ -185,7 +190,7 @@ export const LikeButton = memo(({ booth }: { booth: any }) => {
 });
 
 export function BoothMenu2({ data }: { data: any }) {
-    const { dialogOpen, setDialogOpen, isOwner, wishlist, changeBookmark } = useBoothMenu(
+    const { authDialogOpen, setAuthDialogOpen, isOwner, wishlist, changeBookmark, contactDialogOpen, setContactDialogOpen } = useBoothMenu(
         data.booth_id,
         data.author
     );
@@ -224,7 +229,7 @@ export function BoothMenu2({ data }: { data: any }) {
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                        {isOwner ? (
+                        {/* isOwner ? (
                             <>
                                 <Link href={`/booth/${data.booth_id}/edit`}>
                                     <DropdownMenuItem className="flex justify-between">
@@ -235,26 +240,22 @@ export function BoothMenu2({ data }: { data: any }) {
                             </>
                         ) : (
                             <>
-                                <DropdownMenuItem className="flex justify-between" onSelect={() => setDialogOpen(true)}>
+                                <DropdownMenuItem className="flex justify-between" onSelect={() => setAuthDialogOpen(true)}>
                                     <span>편집 권한 얻기</span>
                                     <Flag className="ml-4 h-4 w-4" />
                                 </DropdownMenuItem>
 
                             </>
-                        )}
-                        <DropdownMenuItem className="flex justify-between">
-                            <span>오류 제보</span>
-                            <MessageCircleWarning className="ml-4 h-4 w-4" />
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="flex justify-between">
-                            <span>악용 신고</span>
-                            <Siren className="ml-4 h-4 w-4" />
+                        ) */}
+                        <DropdownMenuItem className="flex justify-between" onSelect={() => setContactDialogOpen(true)}>
+                            <span>문의</span>
+                            <Info className="ml-4 h-4 w-4" />
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
                 </DropdownMenuContent>
             </DropdownMenu>
-            <AuthorAuth dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} />
-
+            {/*<AuthorAuth authDialogOpen={authDialogOpen} setAuthDialogOpen={setAuthDialogOpen} />*/}
+            <Contact contactDialogOpen={contactDialogOpen} setContactDialogOpen={setContactDialogOpen} boothId={data.booth_id} />
         </div>
     )
 }
