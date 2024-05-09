@@ -1,12 +1,13 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { createClient } from '@/utils/supabase/client'
 import { useEffect, useLayoutEffect } from 'react';
 import { GetUser } from "@/app/fetch"
 import { useRouter } from "next/navigation";
-
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Info } from 'lucide-react';
 
 
 export default function LoginPage() {
@@ -40,7 +41,7 @@ export default function LoginPage() {
     }, []);
 
     return (
-        <Card className="sm:w-full lg:w-[400px] mx-auto border-none shadow-none">
+        <Card className="sm:w-full lg:w-[500px] mx-auto border-none shadow-none">
             <CardHeader>
                 <CardTitle>로그인</CardTitle>
                 <CardDescription>
@@ -49,8 +50,18 @@ export default function LoginPage() {
             </CardHeader>
             <CardContent className="grid gap-2">
                 <Button onClick={() => signIn('twitter', next)}>Twitter로 계속하기</Button>
-                {/*<Button onClick={() => signIn('google', next)}>Google로 계속하기</Button>*/}
             </CardContent>
+            <CardFooter>
+                <Alert>
+                    <Info className='w-4 h-4'/>
+                    <AlertTitle>
+                        Twitter 로그인 시 오류가 발생하나요?
+                    </AlertTitle>
+                    <AlertDescription>
+                        Twitter 계정에 이메일이 등록되어 있는지 확인해 주세요.
+                    </AlertDescription>
+                </Alert>
+            </CardFooter>
         </Card>
     );
 }
