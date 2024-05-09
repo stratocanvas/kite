@@ -12,11 +12,12 @@ import { GetUser } from "@/app/fetch"
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast"
 import { UserStateContext } from "@/providers"
-import { useContext, useEffect, useLayoutEffect } from "react";
+import { useContext, useEffect, useLayoutEffect, useState } from "react";
 import { deleteUser } from "@/app/deleteuser";
 import { Dialog, DialogTrigger, DialogContent, DialogClose, DialogFooter, DialogDescription, DialogTitle, DialogHeader } from "@/components/ui/dialog"
 const supabase = createClient()
 export function TopMenuDesktop() {
+  const [open, setOpen] = useState(false)
   const pathname = usePathname();
   const isSticky = pathname === '/';
   const { theme, setTheme } = useTheme()
@@ -74,6 +75,8 @@ export function TopMenuDesktop() {
     toast({
       description: "회원 탈퇴 되었습니다.",
     })
+    router.push("/")
+    setOpen(false)
   };
 
 
@@ -109,7 +112,7 @@ export function TopMenuDesktop() {
               <PencilLine />
             </Button>
           </Link>
-          <Dialog>
+          <Dialog open={open} onOpenChange={setOpen}>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost"><User /></Button>
