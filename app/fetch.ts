@@ -27,7 +27,7 @@ export async function GetUser() {
 	}
 	const { data } = await supabase
 		.from("users")
-		.select("name, n_name")
+		.select("id, name, n_name")
 		.eq("id", user?.id)
 		.limit(1)
 		.single();
