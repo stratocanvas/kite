@@ -49,7 +49,7 @@ export default function LoginPage() {
             </CardHeader>
             <CardContent className="grid gap-2">
                 <Button onClick={() => signIn('twitter', next)}>Twitter로 계속하기</Button>
-                <Button onClick={() => signIn('google', next)}>Google로 계속하기</Button>
+                {/*<Button onClick={() => signIn('google', next)}>Google로 계속하기</Button>*/}
             </CardContent>
         </Card>
     );
