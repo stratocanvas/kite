@@ -37,7 +37,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             disableTransitionOnChange
           >
             <UserStateProvider>
-            <h1 className="w-full h-auto p-2 text-center font-bold bg-blue-500 text-white">잠시 후 03:15부터 서버 점검이 진행됩니다. 점검 중 일부 기능이 불안정할 수 있습니다. 예상 소요시간: 약 2시간</h1>
               <TopMenuDesktop />
               <main className="flex flex-col min-h-screen">
                 {children}

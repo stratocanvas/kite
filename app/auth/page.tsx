@@ -50,10 +50,12 @@ export default function LoginPage() {
             </CardHeader>
             <CardContent className="grid gap-2">
                 <Button onClick={() => signIn('twitter', next)}>Twitter로 계속하기</Button>
+                <Button onClick={() => signIn('google', next)}>Google로 계속하기</Button>
+
             </CardContent>
             <CardFooter>
                 <Alert>
-                    <Info className='w-4 h-4'/>
+                    <Info className='w-4 h-4' />
                     <AlertTitle>
                         Twitter 로그인 시 오류가 발생하나요?
                     </AlertTitle>
