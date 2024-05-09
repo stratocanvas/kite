@@ -610,7 +610,7 @@ export default function RequestForm() {
                 description: "등록된 부스 페이지로 이동합니다.",
             })
             console.log(result.booth_id)
-            router.push(`/booth/${result.booth_id}`);
+            router.replace(`/booth/${result.booth_id}`);
         } catch (error) {
             toast({
                 variant: "destructive",
