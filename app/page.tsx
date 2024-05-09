@@ -25,7 +25,7 @@ export default async function Home() {
   preorder(type,date),
   genre(name),
   thumbnail`)
-  .limit(20)
+  .limit(10)
   .order("created_at", { ascending: false })
 
   const groupedBooths = booth?.reduce((acc, cur) => {
