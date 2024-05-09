@@ -4,7 +4,7 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useTheme } from "next-themes"
-import { Bookmark, PencilLine, User, LogOut, LogIn, Settings } from "lucide-react"
+import { Bookmark, PencilLine, User, LogOut, LogIn, Settings, UserRoundX } from "lucide-react"
 import { usePathname } from 'next/navigation';
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/utils/supabase/client"
@@ -13,7 +13,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast"
 import { UserStateContext } from "@/providers"
 import { useContext, useEffect, useLayoutEffect } from "react";
-
+import { deleteUser } from "@/app/deleteuser";
+import { Dialog, DialogTrigger, DialogContent, DialogClose, DialogFooter, DialogDescription, DialogTitle, DialogHeader } from "@/components/ui/dialog"
 const supabase = createClient()
 export function TopMenuDesktop() {
   const pathname = usePathname();
@@ -62,7 +63,19 @@ export function TopMenuDesktop() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setUserData(null);
+    toast({
+      description: "로그아웃 되었습니다.",
+    })
   };
+
+  const handleDeleteUser = async () => {
+    await deleteUser(userData?.id);
+    setUserData(null);
+    toast({
+      description: "회원 탈퇴 되었습니다.",
+    })
+  };
+
 
   return (
     <div className={cn("bg-background/80 backdrop-blur-md py-1 border-none relative top-0 z-40", {
@@ -96,26 +109,27 @@ export function TopMenuDesktop() {
               <PencilLine />
             </Button>
           </Link>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost"><User /></Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-auto">
-              {userData ? (
-                <>
-                  <DropdownMenuLabel>{userData?.n_name}</DropdownMenuLabel>
-                  <DropdownMenuLabel className="text-muted-foreground text-sm -mt-2">@{userData?.name}</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                      <Link href="/dashboard" className="w-full">
-                        <div className="flex justify-between items-center">
-                          <span>북마크</span>
-                          <Bookmark className="h-4 w-4" />
-                        </div>
-                      </Link>
-                    </DropdownMenuItem>
-                    {/*
+          <Dialog>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost"><User /></Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-auto">
+                {userData ? (
+                  <>
+                    <DropdownMenuLabel>{userData?.n_name}</DropdownMenuLabel>
+                    <DropdownMenuLabel className="text-muted-foreground text-sm -mt-2">@{userData?.name}</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem>
+                        <Link href="/dashboard" className="w-full">
+                          <div className="flex justify-between items-center">
+                            <span>북마크</span>
+                            <Bookmark className="h-4 w-4" />
+                          </div>
+                        </Link>
+                      </DropdownMenuItem>
+                      {/*
                     <DropdownMenuItem className="flex justify-between">
                       <Link href="/settings" className="w-full">
                         <div className="flex justify-between items-center">
@@ -125,31 +139,58 @@ export function TopMenuDesktop() {
                       </Link>
                     </DropdownMenuItem>
                      */ }
+                      <DropdownMenuSeparator />
+                    </DropdownMenuGroup>
+                    <DropdownMenuItem onClick={() => {
+                      handleSignOut()
+
+                    }} className="flex justify-between items-center">
+                      <span>로그아웃</span>
+                      <LogOut className="h-4 w-4" />
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                  </DropdownMenuGroup>
-                  <DropdownMenuItem onClick={() => {
-                    handleSignOut()
-                    toast({
-                      description: "로그아웃 되었습니다.",
-                    })
-                  }} className="flex justify-between items-center">
-                    <span>로그아웃</span>
-                    <LogOut className="h-4 w-4" />
-                  </DropdownMenuItem>
-                </>
-              ) : (
-                <>
-                  <DropdownMenuItem className="flex justify-between items-center" onClick={() => {
-                    const path = window.location.pathname + window.location.search;
-                    router.push(`/auth?next=${encodeURIComponent(path)}`);
-                  }}>
-                    <span>로그인</span>
-                    <LogIn className="h-4 w-4" />
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                    <DropdownMenuItem >
+                      <DialogTrigger className="w-full">
+                        <div className="flex justify-between items-center">
+                          <span className="text-red-500 hover:text-red-500">회원 탈퇴</span>
+                          <UserRoundX className="text-red-500 hover:text-red-500 w-4 h-4" />
+                        </div>
+                      </DialogTrigger>
+
+                    </DropdownMenuItem>
+
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem className="flex justify-between items-center" onClick={() => {
+                      const path = window.location.pathname + window.location.search;
+                      router.push(`/auth?next=${encodeURIComponent(path)}`);
+                    }}>
+                      <span>로그인</span>
+                      <LogIn className="h-4 w-4" />
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  회원 탈퇴
+                </DialogTitle>
+                <DialogDescription>
+                  이 작업은 취소할 수 없습니다.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button variant="destructive" onClick={() => {
+                  handleDeleteUser()
+                }}>
+                  회원 탈퇴
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </div>
