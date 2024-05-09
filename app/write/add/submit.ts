@@ -197,16 +197,18 @@ export async function SubmitBooth(formData: FormData) {
 						throw optionError;
 					}
 
-					if (option.character) {
-						const { error: optionCharacterError } = await supabase
-							.from("option_character")
-							.insert({
-								option_id: optionData.option_id,
-								character_id: option.character,
-							});
+					if (option.characters) {
+						for (const characterId of option.characters) {
+							const { error: optionCharacterError } = await supabase
+								.from("option_character")
+								.insert({
+									option_id: optionData.option_id,
+									character_id: characterId,
+								});
 
-						if (optionCharacterError) {
-							throw optionCharacterError;
+							if (optionCharacterError) {
+								throw optionCharacterError;
+							}
 						}
 					}
 				}

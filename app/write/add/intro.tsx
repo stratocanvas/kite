@@ -107,7 +107,7 @@ const formSchema = z.object({
         options: z.array(z.object({
             name: z.string().min(1, { message: "옵션 이름을 입력해 주세요" }),
             price: z.number().min(0, { message: "가격을 입력해 주세요" }),
-            character: z.number().optional().nullable(),
+            characters: z.array(z.number()).optional().nullable(),
             thumbnail: z.string().optional().nullable(),
         })).optional().nullable()
     })).optional().nullable(),
@@ -476,13 +476,26 @@ export default function RequestForm() {
                 const thumbnailDimensions = await getImageDimensions(values.thumbnail);
                 // 파일명 변경 
                 const thumbnailUuid = uuidv4();
-                const thumbnailFileName = `${thumbnailUuid}-c(${darkMutedHex})-w(${thumbnailDimensions.width})-h(${thumbnailDimensions.height}).webp`;
                 // 이미지 파일 가져오기
                 const thumbnailFile = await fetch(values.thumbnail).then(r => r.blob());
+
+                // 파일 확장자 추출
+                const fileExtension = thumbnailFile.type.split('/')[1];
+
+                // 허용된 확장자 목록
+                const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+
+                // 파일 확장자 검사
+                if (!allowedExtensions.includes(fileExtension)) {
+                    throw new Error('지원되지 않는 이미지 형식입니다.');
+                }
+
+                const thumbnailFileName = `${thumbnailUuid}-c(${darkMutedHex})-w(${thumbnailDimensions.width})-h(${thumbnailDimensions.height}).${fileExtension}`;
+
                 const { data, error } = await supabase.storage
                     .from("booth")
                     .upload(`thumbnails/${thumbnailFileName}`, thumbnailFile, {
-                        contentType: "image/webp",
+                        contentType: `image/${fileExtension}`,
                     });
 
                 if (error) {
@@ -506,16 +519,26 @@ export default function RequestForm() {
 
                         // 파일명 변경
                         const imageUuid = uuidv4();
-                        const imageFileName = `${imageUuid}-c(${mutedHex})-w(${imageDimensions.width})-h(${imageDimensions.height}).webp`;
-
                         // 이미지 파일 가져오기
                         const imageFile = await fetch(item.attrs?.src).then(r => r.blob());
 
-                        // Supabase에 업로드  
+                        // 파일 확장자 추출
+                        const fileExtension = imageFile.type.split('/')[1];
+
+                        // 허용된 확장자 목록
+                        const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+
+                        // 파일 확장자 검사
+                        if (!allowedExtensions.includes(fileExtension)) {
+                            throw new Error('지원되지 않는 이미지 형식입니다.');
+                        }
+
+                        const imageFileName = `${imageUuid}-c(${mutedHex})-w(${imageDimensions.width})-h(${imageDimensions.height}).${fileExtension}`;
+
                         const { data, error } = await supabase.storage
                             .from("booth")
                             .upload(`article/${imageFileName}`, imageFile, {
-                                contentType: "image/webp",
+                                contentType: `image/${fileExtension}`,
                             });
 
                         if (error) {
@@ -544,16 +567,27 @@ export default function RequestForm() {
 
                                 // 파일명 변경
                                 const optionUuid = uuidv4();
-                                const optionFileName = `${optionUuid}-c(${mutedHex})-w(${optionDimensions.width})-h(${optionDimensions.height}).webp`;
-
                                 // 이미지 파일 가져오기
                                 const optionFile = await fetch(option.thumbnail).then(r => r.blob());
+
+                                // 파일 확장자 추출
+                                const fileExtension = optionFile.type.split('/')[1];
+
+                                // 허용된 확장자 목록
+                                const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+
+                                // 파일 확장자 검사
+                                if (!allowedExtensions.includes(fileExtension)) {
+                                    throw new Error('지원되지 않는 이미지 형식입니다.');
+                                }
+
+                                const optionFileName = `${optionUuid}-c(${mutedHex})-w(${optionDimensions.width})-h(${optionDimensions.height}).${fileExtension}`;
 
                                 // Supabase에 업로드
                                 const { data, error } = await supabase.storage
                                     .from("product")
                                     .upload(`option/${optionFileName}`, optionFile, {
-                                        contentType: "image/webp",
+                                        contentType: `image/${fileExtension}`,
                                     });
 
                                 if (error) {
@@ -570,6 +604,7 @@ export default function RequestForm() {
                     }
                 }
             }
+            console.log(values)
             const result = await SubmitBooth(values);
             toast({
                 title: "부스 등록 성공!",
@@ -1003,7 +1038,7 @@ export default function RequestForm() {
                                                     </div>
                                                     {(field.value || []).length === 0 && (
                                                         <div className="flex items-center space-x-2">
-                                                            <Checkbox id="terms2" />
+                                                            <Checkbox id="terms2" onClick={() => { setLocation(true); field.onChange([]); setLocationUnknown((prev) => !prev) }}/>
                                                             <Label
                                                                 htmlFor="terms2"
                                                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -1868,6 +1903,8 @@ export default function RequestForm() {
                                                                                                                                                 setCharacter(true);
                                                                                                                                                 setSelectedCharacters([...selectedCharacters, character]);
                                                                                                                                             }
+                                                                                                                                            console.log(selectedCharacters);
+                                                                                                                                            console.log(option.characters);
                                                                                                                                         }}
                                                                                                                                     >
                                                                                                                                         <Check

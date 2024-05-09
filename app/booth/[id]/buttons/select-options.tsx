@@ -21,11 +21,15 @@ export default function SelectOptionsButton({ product, options }: { product: any
 
     return (
         <>
-            <div className="flex w-full gap-2">
-                <ToggleGroup variant="outline" type="single">
+            <div className="flex flex-wrap gap-2 justify-start">
+                <ToggleGroup variant="outline" type="single" className="flex flex-wrap gap-2 justify-start">
                     {options.map((option: any) => (
                         <div key={option.option_id}>
-                            <ToggleGroupItem value={option.option_id} onClick={() => selectOption(product, option)}>
+                            <ToggleGroupItem
+                                value={option.option_id}
+                                onClick={() => selectOption(product, option)}
+                                className="text-left truncate"
+                            >
                                 {option.name}
                             </ToggleGroupItem>
                         </div>

@@ -43,25 +43,25 @@ function FileUpload({ name, maxSize, maxFiles, ratio, onChange, value }: FileUpl
     const onDrop = useCallback(async (uploadedFiles: File[]) => {
         const file = uploadedFiles[0];
         if (file) {
-            setIsCompressing(true);
-            const options = {
-                maxSizeMB: 1,
-                useWebWorker: true,
-                fileType: 'image/webp',
-            }
+            // setIsCompressing(true);
+            // const options = {
+            //     maxSizeMB: 1,
+            //     useWebWorker: true,
+            //     fileType: 'image/webp',
+            // }
             try {
-                const compressedFile = await imageCompression(file, options);
+                // const compressedFile = await imageCompression(file, options);
                 const reader = new FileReader();
                 reader.onloadend = () => {
                     const base64String = reader.result as string;
                     onChange(base64String);
                     setPreviewUrl(base64String);
-                    setIsCompressing(false);
+                    // setIsCompressing(false);
                 };
-                reader.readAsDataURL(compressedFile);
+                reader.readAsDataURL(file);
             } catch (error) {
                 console.log(error);
-                setIsCompressing(false);
+                // setIsCompressing(false);
             }
         }
     }, [onChange]);
