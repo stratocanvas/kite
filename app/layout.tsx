@@ -7,6 +7,7 @@ import { Analytics } from "@vercel/analytics/react"
 import localFont from "next/font/local";
 import { Toaster } from "@/components/ui/toaster"
 import UserStateProvider from "@/providers";
+import Footer from "@/app/footer";
 
 const Pretendard = localFont({
   src: "./fonts/PretendardVariable.woff2",
@@ -37,8 +38,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           >
             <UserStateProvider>
               <TopMenuDesktop />
-              {children}
+              <main className="flex-grow min-h-screen">
+                {children}
+              </main>
               <Toaster />
+              <Footer />
             </UserStateProvider>
           </ThemeProvider>
           <Analytics />

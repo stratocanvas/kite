@@ -44,6 +44,8 @@ import { Badge } from "@/components/ui/badge";
 import IndoorMap from "./map"
 import CountUp from 'react-countup'
 import { Toaster } from "@/components/ui/toaster"
+import { SquareArrowOutUpRight } from "lucide-react"
+import Link from "next/link"
 
 interface Event {
     value: string;
@@ -307,24 +309,31 @@ export default function Cart() {
                                                 <div key={item.booth_id}>
                                                     <Card className="mx-6 my-2">
                                                         <CardHeader>
-                                                            <CardTitle className="break-words overflow-hidden text-ellipsis font-bold">
-                                                                <div className="flex gap-2 items-center">
-                                                                    {item.booth?.locations.length > 1 ? (
-                                                                        <>
-                                                                            {item.booth?.locations[0].replace(/\d+/g, '')}
-                                                                            {item.booth?.locations[0].replace(/\D+/g, '')}
+                                                            <div className="flex justify-between items-center">
+                                                                <CardTitle className="break-words overflow-hidden text-ellipsis font-bold">
+                                                                    <div className="flex gap-2 items-center">
+                                                                        {item.booth?.locations.length > 1 ? (
+                                                                            <>
+                                                                                {item.booth?.locations[0].replace(/\d+/g, '')}
+                                                                                {item.booth?.locations[0].replace(/\D+/g, '')}
 
-                                                                        </>
-                                                                    ) : (
-                                                                        item.booth?.locations[0]
-                                                                    )}
-                                                                    {item.booth?.date.some(date => [0, 6].includes(new Date(date).getDay())) && (
-                                                                        <Badge variant="secondary">
-                                                                            {item.booth?.date.length === 2 ? "양일" : new Date(item.booth?.date[0]).toLocaleDateString('ko-KR', { weekday: 'long' })}
-                                                                        </Badge>
-                                                                    )}
-                                                                </div>
-                                                            </CardTitle>
+                                                                            </>
+                                                                        ) : (
+                                                                            item.booth?.locations[0]
+                                                                        )}
+                                                                        {item.booth?.date.some(date => [0, 6].includes(new Date(date).getDay())) && (
+                                                                            <Badge variant="secondary">
+                                                                                {item.booth?.date.length === 2 ? "양일" : new Date(item.booth?.date[0]).toLocaleDateString('ko-KR', { weekday: 'long' })}
+                                                                            </Badge>
+                                                                        )}
+                                                                    </div>
+                                                                </CardTitle>
+                                                                <Button variant="secondary" size="icon" className="ml-2">
+                                                                    <Link href={`/booth/${item.booth_id}`}>
+                                                                        <SquareArrowOutUpRight />
+                                                                    </Link>
+                                                                </Button>
+                                                            </div>
                                                             <CardDescription className="text-md text-foreground">
                                                                 {item.booth?.name}
                                                             </CardDescription>
@@ -361,13 +370,20 @@ export default function Cart() {
                                                         <Card className="w-[290px] h-[100%] flex flex-col">
                                                             <CardHeader>
                                                                 <CardTitle className="break-words overflow-hidden text-ellipsis font-bold">
-                                                                    <div className="flex gap-2 items-center">
-                                                                        {booth.boothLocation}
-                                                                        {booth.date.some(date => [0, 6].includes(new Date(date).getDay())) && (
-                                                                            <Badge variant="secondary">
-                                                                                {booth.date.length === 2 ? "양일" : new Date(booth.date[0]).toLocaleDateString('ko-KR', { weekday: 'long' })}
-                                                                            </Badge>
-                                                                        )}
+                                                                    <div className="flex justify-between items-center">
+                                                                        <div className="flex gap-2 items-center">
+                                                                            {booth.boothLocation}
+                                                                            {booth.date.some(date => [0, 6].includes(new Date(date).getDay())) && (
+                                                                                <Badge variant="secondary">
+                                                                                    {booth.date.length === 2 ? "양일" : new Date(booth.date[0]).toLocaleDateString('ko-KR', { weekday: 'long' })}
+                                                                                </Badge>
+                                                                            )}
+                                                                        </div>
+                                                                        <Button variant="secondary" size="icon" className="ml-2">
+                                                                            <Link href={`/booth/${boothId}`}>
+                                                                                <SquareArrowOutUpRight />
+                                                                            </Link>
+                                                                        </Button>
                                                                     </div>
                                                                 </CardTitle>
 

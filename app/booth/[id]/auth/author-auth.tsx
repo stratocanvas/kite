@@ -16,7 +16,7 @@ import { useRouter } from 'next/navigation';
 import { fetchUser } from "./fetch";
 
 
-export default function AuthorAuth({ dialogOpen, setDialogOpen }: { dialogOpen: any, setDialogOpen: any }) {
+export default function AuthorAuth({ authDialogOpen, setAuthDialogOpen }: { authDialogOpen: any, setAuthDialogOpen: any }) {
     const supabase = createClient();
     const [twitter, setTwitter] = useState(false);
     const [user, setUser] = useState(false);
@@ -55,7 +55,7 @@ export default function AuthorAuth({ dialogOpen, setDialogOpen }: { dialogOpen: 
     }, []);
     return (
         <>
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <Dialog open={authDialogOpen} onOpenChange={setAuthDialogOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>이 부스의 작가님이 맞는지 확인할게요</DialogTitle>

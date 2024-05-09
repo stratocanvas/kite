@@ -604,12 +604,12 @@ export default function RequestForm() {
                     }
                 }
             }
-            console.log(values)
             const result = await SubmitBooth(values);
             toast({
                 title: "부스 등록 성공!",
                 description: "등록된 부스 페이지로 이동합니다.",
             })
+            console.log(result.booth_id)
             router.push(`/booth/${result.booth_id}`);
         } catch (error) {
             toast({
@@ -839,7 +839,7 @@ export default function RequestForm() {
                                                                                                                         required
                                                                                                                         autoComplete="off"
                                                                                                                         placeholder="작가 활동명 입력"
-                                                                                                                        className="w-full"
+                                                                                                                        className="w-full text-[16px]"
                                                                                                                         onChange={(e) => { field.onChange(e.target.value) }}
                                                                                                                     />
                                                                                                                 </FormControl>
@@ -858,7 +858,7 @@ export default function RequestForm() {
                                                                                                                         required
                                                                                                                         autoComplete="off"
                                                                                                                         placeholder="X(Twitter) 아이디 입력"
-                                                                                                                        className="w-full"
+                                                                                                                        className="w-full text-[16px]"
                                                                                                                         onChange={(e) => { field.onChange(e.target.value) }}
                                                                                                                     />
                                                                                                                 </FormControl>
@@ -985,17 +985,16 @@ export default function RequestForm() {
                                                         <FormControl>
                                                             {!locationUnknown ? (
                                                                 <Input
-                                                                    className="border-none m-0 h-8"
+                                                                    className="border-none m-0 h-8 text-[16px]"
                                                                     placeholder="A00..."
                                                                     value={inputValue}
                                                                     autoComplete="off"
-
                                                                     onChange={(e) => setInputValue(e.target.value)}
 
                                                                 />
                                                             ) : (
                                                                 <Input
-                                                                    className="border-none m-0 h-8"
+                                                                    className="border-none m-0 h-8 text-[16px]"
                                                                     placeholder="A00..."
                                                                     value={inputValue}
                                                                     autoComplete="off"
@@ -1101,7 +1100,7 @@ export default function RequestForm() {
                                                             required
                                                             autoComplete="off"
 
-                                                            className="w-full md:w-[400px]"
+                                                            className="w-full md:w-[400px] text-[16px]"
                                                             onChange={(e) => { setName(true); field.onChange(e.target.value) }}
                                                         />
                                                     </FormControl>
@@ -1343,7 +1342,7 @@ export default function RequestForm() {
                                                                                     id={`prodName-${index}`}
                                                                                     value={product.name}
                                                                                     autoComplete="off"
-
+                                                                                    className="text-[16px]"
                                                                                     onChange={(e) => {
                                                                                         const newProducts = [...field.value];
                                                                                         newProducts[index] = {
@@ -1435,6 +1434,7 @@ export default function RequestForm() {
                                                                                                                             placeholder="굿즈 종류 입력"
                                                                                                                             autoComplete="off"
                                                                                                                             required
+                                                                                                                            className="text-[16px]"
                                                                                                                         />
                                                                                                                     </div>
 
@@ -1754,6 +1754,7 @@ export default function RequestForm() {
                                                                                                                     newProducts[index].options[optionIndex].name = e.target.value;
                                                                                                                     field.onChange(newProducts);
                                                                                                                 }}
+                                                                                                                className="text-[16px]"
                                                                                                                 autoComplete="off"
 
                                                                                                             />
@@ -1774,6 +1775,7 @@ export default function RequestForm() {
                                                                                                                     newProducts[index].options[optionIndex].price = price;
                                                                                                                     field.onChange(newProducts);
                                                                                                                 }}
+                                                                                                                className="text-[16px]"
                                                                                                                 onKeyDown={(e) => {
                                                                                                                     if (e.key === 'Backspace') {
                                                                                                                         const newProducts = [...field.value];
@@ -2141,6 +2143,7 @@ export default function RequestForm() {
                                                                                         field.onChange(newPreorders);
                                                                                     }}
                                                                                     autoComplete="off"
+                                                                                    className="text-[16px]"
 
                                                                                 />
                                                                             </div>
@@ -2204,6 +2207,7 @@ export default function RequestForm() {
                                                                                         field.onChange(newPreorders);
                                                                                     }}
                                                                                     autoComplete="off"
+                                                                                    className="text-[16px]"
 
                                                                                 />
                                                                             </div>
@@ -2542,10 +2546,11 @@ export function DatePickerWithRange({
                                 <Input
                                     id="start-time"
                                     type="time"
-                                    className="w-full"
+                                    className="w-full text-[16px]"
                                     value={startTime}
                                     onChange={(e) => handleStartTimeChange(e.target.value)}
                                     autoComplete="off"
+                                    
 
                                 />
                             </div>
@@ -2556,7 +2561,7 @@ export function DatePickerWithRange({
                                 <Input
                                     id="end-time"
                                     type="time"
-                                    className="w-full"
+                                    className="w-full text-[16px]"
                                     value={endTime}
                                     onChange={(e) => handleEndTimeChange(e.target.value)}
                                     autoComplete="off"

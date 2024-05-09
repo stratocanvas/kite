@@ -22,9 +22,10 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-  } from "@/components/ui/form"
+} from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea"
 import { SubmitRequest } from "./submit"
+import { useToast } from "@/components/ui/use-toast"
 
 const formSchema = z.object({
     infoUrl: z.string().url({
@@ -34,6 +35,7 @@ const formSchema = z.object({
 })
 
 export default function RequestForm() {
+    const { toast } = useToast()
     const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -41,8 +43,20 @@ export default function RequestForm() {
             comment: ""
         }
     })
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        SubmitRequest(values)
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        try {
+            await SubmitRequest(values)
+            toast({
+                title: '부스 추가 요청 완료!',
+            })
+            form.reset()
+        } catch (error) {
+            toast({
+                variant: 'destructive',
+                title: '부스 추가 요청에 실패했어요.',
+                description: '잠시 후 다시 시도해 주세요.',
+            })
+        }
     }
     return (
         <Card className="sm:w-full lg:w-[600px] mx-auto border-none shadow-none">
@@ -69,7 +83,7 @@ export default function RequestForm() {
                                         <Input placeholder="https://example.com" {...field} />
                                     </FormControl>
                                     <FormDescription>
-                                        부스 인포 게시글 또는 작가님의 SNS 계정 링크를 입력해 주세요. 
+                                        부스 인포 게시글 또는 작가님의 SNS 계정 링크를 입력해 주세요.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
