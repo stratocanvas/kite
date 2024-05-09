@@ -38,11 +38,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           >
             <UserStateProvider>
               <TopMenuDesktop />
-              <main className="flex-grow min-h-screen">
+              <main className="flex flex-col min-h-screen">
                 {children}
               </main>
+
               <Toaster />
-              <Footer />
+              <footer className="footer">
+                <Footer />
+              </footer>
             </UserStateProvider>
           </ThemeProvider>
           <Analytics />

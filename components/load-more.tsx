@@ -6,12 +6,14 @@ import { Loader2 } from 'lucide-react';
 import BoothCard from '@/components/booth-card';
 import { useEffect, useMemo } from 'react';
 import { useInView } from 'react-intersection-observer';
+import { Skeleton } from './ui/skeleton';
+import { AspectRatio } from './ui/aspect-ratio';
 
 
 export default function MoreBooth({ initialBoothIds, searchParams }: { initialBoothIds: string[], searchParams: any }) {
     const getKey = (pageIndex: number, previousPageData: { booth: any[] } | null) => {
         if (previousPageData && !previousPageData.booth.length) return null;
-        return { searchParams, page: pageIndex + 1, limit: 5 };
+        return { searchParams, page: pageIndex + 1, limit: 9 };
     };
 
     const fetcher = (params) => SearchResult(params);
@@ -30,16 +32,18 @@ export default function MoreBooth({ initialBoothIds, searchParams }: { initialBo
 
     const { ref: buttonRef, inView: buttonInView } = useInView({
         threshold: 0,
+        rootMargin: "800px",
     });
+    const isLoading = data && typeof data[size - 1] === "undefined";
+    const isReachingEnd = data && data[data.length - 1]?.booth?.length === 0;
 
     useEffect(() => {
         if (buttonInView) {
             setSize((prev) => prev + 1);
         }
-    }, [buttonInView, setSize]);
+    }, [buttonInView, setSize, isReachingEnd, data]);
 
-    const isLoading = data && typeof data[size - 1] === "undefined";
-    const isReachingEnd = data && data[data.length - 1]?.booth?.length === 0;
+
 
     return data ? (
         <>
@@ -51,15 +55,17 @@ export default function MoreBooth({ initialBoothIds, searchParams }: { initialBo
             {!isReachingEnd && (
                 <div ref={buttonRef}>
                     {isLoading ? (
-                        <div className='flex justify-center items-center h-full'>
-                            <Loader2 className="w-6 h-6 animate-spin" />
-                        </div>
+                        <Skeleton className='w-full h-full mx-auto'>
+                            <AspectRatio ratio={21 / 27} className="relative rounded-md">
+
+                            </AspectRatio>
+                        </Skeleton>
                     ) : (
                         <></>
                     )}
                 </div>
             )}
-            {isReachingEnd && <div className='text-center lg:hidden'>마지막 항목입니다</div>}
+            {isReachingEnd && <div className='text-center lg:h-full lg:w-full'>마지막 항목입니다</div>}
         </>
     ) : null;
 }
