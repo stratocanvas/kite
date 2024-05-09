@@ -18,7 +18,7 @@ export default async function BoothList({ searchParams }: { searchParams: { [key
       <div className="w-full flex justify-center items-center mx-auto px-8 sticky top-0 z-10 bg-background/80 py-2 backdrop-blur-md">
         <SearchBarSmall params={searchParams} />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-5 gap-6 p-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-5 gap-6 p-8 mt-4">
         {booth?.map((booth) => (
           <div key={booth.booth_id}>
             <BoothCard booth={booth} displayEvent />
