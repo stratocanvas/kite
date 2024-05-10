@@ -9,12 +9,12 @@ import { usePathname } from 'next/navigation';
 import { Button } from "@/components/ui/button"
 
 import { createClient } from "@/utils/supabase/client"
-import { GetUser, SignOut } from "@/app/fetch"
+import { GetUser, SignOut } from "@/app/api/auth/fetch"
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast"
 import { UserStateContext } from "@/providers"
 import { useContext, useEffect, useCallback, useState } from "react";
-import { deleteUser } from "@/app/deleteuser";
+import { deleteUser } from "@/app/api/auth/deleteuser";
 import { Dialog, DialogTrigger, DialogContent, DialogClose, DialogFooter, DialogDescription, DialogTitle, DialogHeader } from "@/components/ui/dialog"
 export function TopMenuDesktop() {
   const [open, setOpen] = useState(false)
