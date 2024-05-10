@@ -1,8 +1,8 @@
 "use server";
 import { createClient } from "@/utils/supabase/server";
-const supabase = createClient();
 
 export async function GetUser() {
+	const supabase = createClient();
 	const {
 		data: { user },
 		error,
@@ -15,6 +15,8 @@ export async function AddCart(
 	optionId: string,
 	quantity: number,
 ) {
+	const supabase = createClient();
+
 	const user = await GetUser();
 	const { data: cart, error: cartError } = await supabase.from("cart").insert([
 		{
@@ -27,6 +29,8 @@ export async function AddCart(
 }
 
 export async function GetCart() {
+	const supabase = createClient();
+
 	const user = await GetUser();
 	const { data: cart, error: cartError } = await supabase
 		.from("cart")
@@ -73,6 +77,8 @@ export async function AddOrUpdateCart(
 	optionId: string,
 	quantity: number,
 ) {
+	const supabase = createClient();
+
 	const user = await GetUser();
 	// Check if the cart item already exists
 	const { data: existingCartItem, error: existingCartItemError } =
@@ -112,6 +118,8 @@ export async function AddOrUpdateCart(
 }
 
 export async function DeleteCart(productId: string, optionId: string) {
+	const supabase = createClient();
+
 	const user = await GetUser();
 	const { data: cart, error: cartError } = await supabase
 		.from("cart")
@@ -138,6 +146,8 @@ export async function GetBookmarks() {
 }
 
 export async function SetBookmark(boothId: string, action: boolean) {
+	const supabase = createClient();
+
 	try {
 		const {
 			data: { user },

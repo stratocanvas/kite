@@ -58,7 +58,7 @@ const MemoizedIndoorMap = memo(IndoorMap, (prevProps, nextProps) => {
         prevProps.boothLocations.every((loc, index) => loc === nextProps.boothLocations[index]);
 });
 export default function Cart() {
-    const { data: items, mutate } = useSWR('cart', GetCart, { revalidateOnMount: true, revalidateOnFocus: true, revalidateOnReconnect: true });
+    const { data: items, mutate } = useSWR('cart', () => GetCart(), { revalidateOnMount: true, revalidateOnFocus: true, revalidateOnReconnect: true });
     const { data: wishlist } = useSWR('wishlist', () => GetBookmarks(), { revalidateOnMount: true, revalidateOnFocus: true, revalidateOnReconnect: true });
 
     const router = useRouter()
