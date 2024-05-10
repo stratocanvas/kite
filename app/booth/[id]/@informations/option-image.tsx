@@ -10,7 +10,7 @@ export default function OptionImage({ productId, options }: { productId: string,
     const selectedOption = selectedOptions[productId];
 
     return (
-        <Watermark text={'Sample'} lineHeight="3rem" opacity={0.4} textSize={24}>
+        <Watermark text={'Sample'} lineHeight="3rem" opacity={0.2} textSize={24}>
             <AspectRatio ratio={1 / 1}
                 style={{ backgroundColor: selectedOption?.thumbnail ? `#${selectedOption.thumbnail.split('-c(')[1].split(')')[0]}` : 'transparent' }}
                 onContextMenu={(e: MouseEvent<HTMLImageElement>) => {
@@ -32,7 +32,7 @@ export default function OptionImage({ productId, options }: { productId: string,
                                 src={selectedOption.thumbnail}
                                 alt="Image"
                                 fill
-                                className="rounded-t-md object-cover"
+                                className="rounded-t-md object-cover no-right-click"
                                 loading="lazy"
                             />
 
@@ -57,7 +57,7 @@ export default function OptionImage({ productId, options }: { productId: string,
                                     OUserSelect: 'none',
                                     userDrag: 'none'
                                 }}
-                                className="rounded-t-md object-cover"
+                                className="rounded-t-md object-cover no-right-click"
                                 loading="lazy"
                             />
                     </>

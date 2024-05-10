@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
+import './protect.css';
 const contentSchema: z.ZodType<any> = z.lazy(() =>
     z.object({
         type: z.string(),
@@ -40,7 +40,7 @@ export function Block({ type, attrs, content, marks }: { type: string; attrs?: a
                     return <Separator className="my-2" />;
                 case 'image':
                     return (
-                        <div className="relative rounded-md flex gap-2 w-full h-auto my-2 lg:my-4 overflow-hidden" style={{ backgroundColor: `#${attrs?.src.split('-c(')[1].split(')')[0]}` }}>
+                        <div className="no-right-click relative rounded-md flex gap-2 w-full h-auto my-2 lg:my-4 overflow-hidden" style={{ backgroundColor: `#${attrs?.src.split('-c(')[1].split(')')[0]}` }}>
                             <Image
                                 className="rounded-md"
                                 loading="lazy"
@@ -49,6 +49,16 @@ export function Block({ type, attrs, content, marks }: { type: string; attrs?: a
                                 width={1200}
                                 height={1200}
                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                style={{
+                                    userSelect: 'none',
+                                    WebkitUserSelect: 'none',
+                                    WebkitTouchCallout: 'none',
+                                    WebkitUserDrag: 'none',
+                                    KhtmlUserSelect: 'none',
+                                    MozUserSelect: 'none',
+                                    OUserSelect: 'none',
+                                    userDrag: 'none'
+                                }}
                             />
                         </div>
 
