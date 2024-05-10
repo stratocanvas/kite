@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import useOptionsStore from '@/store/options';
 import { mutate } from 'swr';
-import { AddOrUpdateCart } from '../../../api/buttons/actions';
+import { AddOrUpdateCart } from './actions';
 import { UserStateContext } from "@/providers"
 import React from "react";
 import { useToast } from "@/components/ui/use-toast"
