@@ -7,12 +7,14 @@ import { Search } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useEffect, useState } from "react";
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
+import { FilterLight } from "./filterlight";
 
 export function SearchBar() {
     const [selectedCharacters, setSelectedCharacters] = useState<string[]>([]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
     const [selectedAuthors, setSelectedAuthors] = useState<string[]>([]);
+    const [selectedDOW, setSelectedDOW] = useState<number[]>([]);
 
     const searchParams = useSearchParams();
     const { replace } = useRouter();
@@ -30,6 +32,9 @@ export function SearchBar() {
         }
         if (selectedAuthors.length > 0) {
             params.set('author', selectedAuthors.join(','));
+        }
+        if (selectedDOW.length > 0) {
+            params.set('dow', selectedDOW.join(','));
         }
         replace(`/booth?${params.toString()}`);
     }
@@ -70,6 +75,11 @@ export function SearchBar() {
                         subFromNested={false}
                         onSelectedOptionsChange={setSelectedAuthors}
                     />
+                    <FilterLight
+                        title="요일"
+                        table="dow"
+                        onSelectedOptionsChange={setSelectedDOW}
+                    />
                 </div>
                 <ScrollBar orientation="horizontal" />
             </ScrollArea>
@@ -85,6 +95,7 @@ export function SearchBarSmall(params: typeof searchParams) {
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
     const [selectedAuthors, setSelectedAuthors] = useState<string[]>([]);
+    const [selectedDOW, setSelectedDOW] = useState<number[]>([]);
 
     const parameters = params
     const searchParams = useSearchParams();
@@ -113,6 +124,9 @@ export function SearchBarSmall(params: typeof searchParams) {
         } else {
             params.delete('author');
         }
+        if (selectedDOW.length > 0) {
+            params.set('dow', selectedDOW.join(','));
+        }
         push(`${pathname}?${params.toString()}`);
     }
 
@@ -122,16 +136,18 @@ export function SearchBarSmall(params: typeof searchParams) {
         const categoryParams = params.get('category')?.split(',') || [];
         const genreParams = params.get('genre')?.split(',') || [];
         const authorParams = params.get('author')?.split(',') || [];
+        const dowParams = params.get('dow')?.split(',') || [];
 
         setSelectedCharacters(characterParams);
         setSelectedCategories(categoryParams);
         setSelectedGenres(genreParams);
         setSelectedAuthors(authorParams);
+        setSelectedDOW(dowParams.map(Number));
     }, [searchParams]);
 
     useEffect(() => {
         handleSearch();
-    }, [selectedCharacters, selectedCategories, selectedGenres, selectedAuthors]);
+    }, [selectedCharacters, selectedCategories, selectedGenres, selectedAuthors, selectedDOW]);
 
     return (
         <div className="flex flex-col lg:flex-row gap-2 w-full justify-center">
@@ -172,6 +188,11 @@ export function SearchBarSmall(params: typeof searchParams) {
                         count="booth"
                         subFromNested={false}
                         onSelectedOptionsChange={setSelectedAuthors}
+                    />
+                    <FilterLight
+                        title="요일"
+                        table="dow"
+                        onSelectedOptionsChange={setSelectedDOW}
                     />
                 </div>
                 <ScrollBar orientation="horizontal" />
