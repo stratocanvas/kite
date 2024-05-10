@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation';
-import { fetchUser } from "./fetch";
+import { fetchUser } from "../../../api/auth/booth/auth/fetch";
 
 
 export default function AuthorAuth({ authDialogOpen, setAuthDialogOpen }: { authDialogOpen: any, setAuthDialogOpen: any }) {

@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button'
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { ConnectAuthor } from './connect';
+import { ConnectAuthor } from '../../../../api/auth/booth/auth/result/connect';
 import { Suspense } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dot, Loader2 } from 'lucide-react';
