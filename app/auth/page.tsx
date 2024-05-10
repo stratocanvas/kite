@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { createClient } from '@/utils/supabase/client'
 import { useEffect, useLayoutEffect } from 'react';
-import { GetUser } from "@/app/fetch"
+import { GetUser } from "@/app/api/auth/fetch"
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Info } from 'lucide-react';

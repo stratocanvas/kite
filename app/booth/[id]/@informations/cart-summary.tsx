@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Plus, Minus, X, Trash } from "lucide-react";
 import useSWR, { mutate } from 'swr';
-import { AddCart, DeleteCart, GetCart, AddOrUpdateCart } from '../buttons/actions';
+import { AddCart, DeleteCart, GetCart, AddOrUpdateCart } from '../../../api/auth/booth/buttons/actions';
 import CountUp from 'react-countup'
 
 // Props 타입 정의

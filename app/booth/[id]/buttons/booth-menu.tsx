@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useState, useEffect, memo } from 'react';
-import { GetBookmarks, SetBookmark } from "./actions";
+import { GetBookmarks, SetBookmark } from "../../../api/auth/booth/buttons/actions";
 import { Button } from '@/components/ui/button'
 import { Heart, HeartOff, ThumbsDown, Flag, Siren, Ellipsis, Pencil, MessageCircleWarning, Info } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -9,7 +9,7 @@ import useSWR, { useSWRConfig } from 'swr';
 import { useRouter } from 'next/navigation'
 import AuthorAuth from "../auth/author-auth"
 import Link from "next/link";
-import CheckOwner from "./owner";
+import CheckOwner from "../../../api/auth/booth/buttons/owner";
 import { useToast } from "@/components/ui/use-toast"
 import { UserStateContext } from "@/providers"
 import { useContext } from "react"

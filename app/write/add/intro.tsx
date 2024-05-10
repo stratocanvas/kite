@@ -39,7 +39,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { fetchEvents } from "./fetch"
+import { fetchEvents } from "../../api/auth/write/fetch"
 import { useEffect, useState, useLayoutEffect } from "react"
 import { createClient } from '@/utils/supabase/client'
 import * as React from "react"
@@ -51,10 +51,10 @@ import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { RegisterAuthor, RegisterCategory } from "./submit"
+import { RegisterAuthor, RegisterCategory } from "../../api/auth/write/submit"
 import { Checkbox } from "@/components/ui/checkbox"
 import FileUpload from "@/components/ui/file-upload"
-import { SubmitBooth } from "./submit"
+import { SubmitBooth } from "../../api/auth/write/submit"
 import Tiptap from "@/components/tiptap-editor"
 import { Calendar as CalendarIcon } from "lucide-react"
 import { DateRange } from "react-day-picker"
@@ -72,12 +72,12 @@ import { DropdownMenu, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuConten
 import { useRouter, redirect } from 'next/navigation';
 import Vibrant from "node-vibrant"
 import { v4 as uuidv4 } from "uuid";
-import { GetUser } from "@/app/fetch"
+import { GetUser } from "@/app/api/auth/fetch"
 import { useToast } from "@/components/ui/use-toast"
 import { UserStateContext } from "@/providers"
-import { fetchTwitterUser } from "./fetch"
+import { fetchTwitterUser } from "../../api/auth/write/fetch"
 import imageCompression from 'browser-image-compression';
-import { RegisterTwitterAuthor } from "./submit";
+import { RegisterTwitterAuthor } from "../../api/auth/write/submit";
 
 const supabase = createClient()
 
