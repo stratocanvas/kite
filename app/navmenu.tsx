@@ -8,14 +8,13 @@ import { Bookmark, PencilLine, User, LogOut, LogIn, Settings, UserRoundX } from 
 import { usePathname } from 'next/navigation';
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/utils/supabase/client"
-import { GetUser } from "@/app/fetch"
+import { GetUser, SignOut } from "@/app/fetch"
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast"
 import { UserStateContext } from "@/providers"
-import { useContext, useEffect, useLayoutEffect, useState } from "react";
+import { useContext, useEffect, useCallback, useState } from "react";
 import { deleteUser } from "@/app/deleteuser";
 import { Dialog, DialogTrigger, DialogContent, DialogClose, DialogFooter, DialogDescription, DialogTitle, DialogHeader } from "@/components/ui/dialog"
-const supabase = createClient()
 export function TopMenuDesktop() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname();
@@ -46,38 +45,34 @@ export function TopMenuDesktop() {
     }, [])
   */
 
-  useEffect(() => {
-    if (theme !== 'system') {
-      setTheme('system')
-    }
-  }, [theme])
-
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     const data = await GetUser();
     setUserData(data);
-  };
+  }, [setUserData]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     fetchUser();
-  }, [userData])
+  }, [fetchUser])
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
+  const handleSignOut = useCallback(async () => {
+    await SignOut();
     setUserData(null);
     toast({
       description: "로그아웃 되었습니다.",
     })
-  };
+  }, [setUserData]);
 
-  const handleDeleteUser = async () => {
-    await deleteUser(userData?.id);
-    setUserData(null);
-    toast({
-      description: "회원 탈퇴 되었습니다.",
-    })
-    router.push("/")
-    setOpen(false)
-  };
+  const handleDeleteUser = useCallback(async () => {
+    if (userData) {
+      await deleteUser(userData.id);
+      setUserData(null);
+      toast({
+        description: "회원 탈퇴 되었습니다.",
+      })
+      router.push("/")
+      setOpen(false)
+    }
+  }, [userData, router, setOpen, setUserData]);
 
 
   return (
