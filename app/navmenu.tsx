@@ -7,15 +7,13 @@ import { useTheme } from "next-themes"
 import { Bookmark, PencilLine, User, LogOut, LogIn, Settings, UserRoundX } from "lucide-react"
 import { usePathname } from 'next/navigation';
 import { Button } from "@/components/ui/button"
-import { createClient } from "@/utils/supabase/client"
-import { GetUser } from "@/app/fetch"
+import { GetUser, SignOut } from "@/app/api/session/actions"
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast"
 import { UserStateContext } from "@/providers"
 import { useContext, useEffect, useLayoutEffect, useState } from "react";
-import { deleteUser } from "@/app/deleteuser";
+import { deleteUser } from "@/app/api/session/deleteuser";
 import { Dialog, DialogTrigger, DialogContent, DialogClose, DialogFooter, DialogDescription, DialogTitle, DialogHeader } from "@/components/ui/dialog"
-const supabase = createClient()
 export function TopMenuDesktop() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname();
@@ -59,10 +57,10 @@ export function TopMenuDesktop() {
 
   useLayoutEffect(() => {
     fetchUser();
-  }, [userData])
+  }, [])
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await SignOut();
     setUserData(null);
     toast({
       description: "로그아웃 되었습니다.",
@@ -104,14 +102,14 @@ export function TopMenuDesktop() {
         <Button className="hidden" onClick={() => setTheme('system')} />
         <div className="flex gap-2">
           <Link href="/write">
-            <Button variant="ghost">
+            <Button size="icon" variant="ghost">
               <PencilLine />
             </Button>
           </Link>
           <Dialog open={open} onOpenChange={setOpen}>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost"><User /></Button>
+                <Button size="icon" variant="ghost"><User /></Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-auto">
                 {userData ? (

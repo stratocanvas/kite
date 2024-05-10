@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { AddCart, UpdateCart, DeleteCart, GetCart } from '../app/booth/[id]/actions'; // actions.ts에서 함수들을 import
+import { AddCart, UpdateCart, DeleteCart, GetCart } from '../app/api/buttons/actions'; // actions.ts에서 함수들을 import
 
 interface CartItem {
     product: any; // 상품 객체
