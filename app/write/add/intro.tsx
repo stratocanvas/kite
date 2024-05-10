@@ -7,6 +7,8 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
+import { TriangleAlert } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Plus, X, Check, ChevronsUpDown, CirclePlus, Pencil, Trash, ArrowRight, ArrowDown, CircleAlert, Circle, Dot, Loader2 } from "lucide-react"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -97,16 +99,21 @@ const formSchema = z.object({
     authors: z.array(z.number()).optional(),
     thumbnail: z.string().optional(),
     boothinfo: z.object({
-        type: z.string().optional().nullable(),
-        content: z.array(contentSchema).optional().nullable(),
-    }).optional().nullable(),
+        type: z.string(),
+        content: z.array(contentSchema).refine(
+            (content) => content.some((item) => item?.type === "image"),
+            {
+                message: "인포 이미지를 올려주세요",
+            }
+        ),
+    }),
     products: z.array(z.object({
         category: z.number().optional(),
         name: z.string().min(1, { message: "굿즈 이름을 입력해 주세요" }),
         authors: z.array(z.number()).optional().nullable(),
         options: z.array(z.object({
             name: z.string().min(1, { message: "옵션 이름을 입력해 주세요" }),
-            price: z.number().min(0, { message: "가격을 입력해 주세요" }),
+            price: z.number().min(0, { invalid: "가격을 입력해 주세요" }),
             characters: z.array(z.number()).optional().nullable(),
             thumbnail: z.string().optional().nullable(),
         })).optional().nullable()
@@ -366,7 +373,7 @@ export default function RequestForm() {
 
 
 
-    const { isSubmitting, isSubmitted, isSubmitSuccessful, isValid } = useFormState(form);
+    const { isSubmitting, isSubmitted, isSubmitSuccessful, isValid, errors } = useFormState(form);
 
     async function onSubmitAuthor(authorFormValues: z.infer<typeof authorFormSchema>) {
         const { authorname, authorsns_x, authorprofile } = authorFormValues;
@@ -1037,7 +1044,7 @@ export default function RequestForm() {
                                                     </div>
                                                     {(field.value || []).length === 0 && (
                                                         <div className="flex items-center space-x-2">
-                                                            <Checkbox id="terms2" onClick={() => { setLocation(true); field.onChange([]); setLocationUnknown((prev) => !prev) }}/>
+                                                            <Checkbox id="terms2" onClick={() => { setLocation(true); field.onChange([]); setLocationUnknown((prev) => !prev) }} />
                                                             <Label
                                                                 htmlFor="terms2"
                                                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -1058,7 +1065,10 @@ export default function RequestForm() {
                                             name="dates"
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col">
-                                                    <FormLabel className="text-lg">참여 날짜</FormLabel>
+                                                    <div className="flex justify-between items-center">
+                                                        <FormLabel className="text-lg">참가 날짜</FormLabel>
+                                                        <Badge>필수</Badge>
+                                                    </div>
                                                     <FormControl>
                                                         <ToggleGroup
                                                             className="justify-start"
@@ -1094,7 +1104,10 @@ export default function RequestForm() {
                                             name="name"
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col">
-                                                    <FormLabel className="text-lg">부스 이름</FormLabel>
+                                                    <div className="flex justify-between items-center">
+                                                        <FormLabel className="text-lg">부스 이름</FormLabel>
+                                                        <Badge>필수</Badge>
+                                                    </div>
                                                     <FormControl>
                                                         <Input {...field}
                                                             required
@@ -1114,7 +1127,10 @@ export default function RequestForm() {
                                         name="event"
                                         render={({ field }) => (
                                             <FormItem className="flex flex-col">
-                                                <FormLabel className="text-lg">행사</FormLabel>
+                                                <div className="flex justify-between items-center">
+                                                    <FormLabel className="text-lg">행사</FormLabel>
+                                                    <Badge>필수</Badge>
+                                                </div>
                                                 <Popover open={eventOpen} onOpenChange={() => setEventOpen(!eventOpen)}>
                                                     <PopoverTrigger asChild>
                                                         <FormControl>
@@ -1208,7 +1224,10 @@ export default function RequestForm() {
                                         name="boothinfo"
                                         render={({ field }) => (
                                             <FormItem className="flex flex-col">
-                                                <FormLabel className="text-lg">인포</FormLabel>
+                                                <div className="flex justify-between items-center">
+                                                    <FormLabel className={cn("text-lg", errors?.boothinfo && "text-destructive")}>인포</FormLabel>
+                                                    <Badge>필수</Badge>
+                                                </div>
                                                 <FormControl>
                                                     <Tiptap
                                                         initValue={field.value || null} // 추가
@@ -1217,7 +1236,11 @@ export default function RequestForm() {
                                                         }}
                                                     />
                                                 </FormControl>
-                                                <FormMessage />
+                                                {errors?.boothinfo && (
+                                                    <p className="text-sm text-destructive">
+                                                        {errors?.boothinfo?.content?.message}
+                                                    </p>
+                                                )}
                                             </FormItem>
                                         )}
                                     />
@@ -1337,7 +1360,10 @@ export default function RequestForm() {
                                                                             }
                                                                             <div>
 
-                                                                                <Label htmlFor={`prodName-${index}`}>굿즈 이름</Label>
+                                                                                <div className="flex justify-between items-center mb-1">
+                                                                                    <Label htmlFor={`prodName-${index}`}>굿즈 이름</Label>
+                                                                                    <Badge>필수</Badge>
+                                                                                </div>
                                                                                 <Input
                                                                                     id={`prodName-${index}`}
                                                                                     value={product.name}
@@ -1745,7 +1771,13 @@ export default function RequestForm() {
                                                                                                     </div>
                                                                                                     <div className="w-3/5 flex flex-col gap-2">
                                                                                                         <div className="w-auto h-auto flex flex-col gap-1">
-                                                                                                            <Label htmlFor={`products.${index}.options.${optionIndex}.name`}>이름</Label>
+                                                                                                            <div className="flex justify-between items-center mb-1">
+
+                                                                                                                <Label htmlFor={`products.${index}.options.${optionIndex}.name`}>이름</Label>
+                                                                                                                <Badge>
+                                                                                                                    필수
+                                                                                                                </Badge>
+                                                                                                            </div>
                                                                                                             <Input
                                                                                                                 id={`products.${index}.options.${optionIndex}.name`}
                                                                                                                 value={option.name}
@@ -1760,7 +1792,12 @@ export default function RequestForm() {
                                                                                                             />
                                                                                                         </div>
                                                                                                         <div className="w-auto h-auto flex flex-col gap-1">
-                                                                                                            <Label htmlFor={`products.${index}.options.${optionIndex}.price`}>가격</Label>
+                                                                                                            <div className="flex justify-between items-center mb-1">
+                                                                                                                <Label htmlFor={`products.${index}.options.${optionIndex}.price`}>가격</Label>
+                                                                                                                <Badge>
+                                                                                                                    필수
+                                                                                                                </Badge>
+                                                                                                            </div>
                                                                                                             <Input
                                                                                                                 id={`products.${index}.options.${optionIndex}.price`}
                                                                                                                 type="text"
@@ -2130,10 +2167,15 @@ export default function RequestForm() {
                                                                                 </Button>
                                                                             }
                                                                             <div>
+                                                                                <div className="flex justify-between items-center mb-1">
 
-                                                                                <Label htmlFor={`preorders.${index}.title`}>
-                                                                                    제목
-                                                                                </Label>
+                                                                                    <Label htmlFor={`preorders.${index}.title`}>
+                                                                                        제목
+                                                                                    </Label>
+                                                                                    <Badge>
+                                                                                        필수
+                                                                                    </Badge>
+                                                                                </div>
                                                                                 <Input
                                                                                     id={`preorders.${index}.title`}
                                                                                     value={preorder.title}
@@ -2148,9 +2190,15 @@ export default function RequestForm() {
                                                                                 />
                                                                             </div>
                                                                             <div className="flex flex-col gap-1">
-                                                                                <Label htmlFor={`preorders.${index}.type`}>
-                                                                                    분류
-                                                                                </Label>
+                                                                                <div className="flex justify-between items-center mb-1">
+
+                                                                                    <Label htmlFor={`preorders.${index}.type`}>
+                                                                                        분류
+                                                                                    </Label>
+                                                                                    <Badge>
+                                                                                        필수
+                                                                                    </Badge>
+                                                                                </div>
                                                                                 <DropdownMenu>
                                                                                     <DropdownMenuTrigger asChild>
                                                                                         <Button variant="outline" className="w-full justify-between">
@@ -2181,9 +2229,15 @@ export default function RequestForm() {
                                                                                 </DropdownMenu>
                                                                             </div>
                                                                             <div>
-                                                                                <Label htmlFor={`preorders.${index}.date`}>
-                                                                                    기간
-                                                                                </Label>
+                                                                                <div className="flex justify-between items-center mb-1">
+
+                                                                                    <Label htmlFor={`preorders.${index}.date`}>
+                                                                                        기간
+                                                                                    </Label>
+                                                                                    <Badge>
+                                                                                        필수
+                                                                                    </Badge>
+                                                                                </div>
                                                                                 <DatePickerWithRange
                                                                                     value={preorder.date}
                                                                                     onChange={(value) => {
@@ -2194,9 +2248,14 @@ export default function RequestForm() {
                                                                                 />
                                                                             </div>
                                                                             <div>
-                                                                                <Label htmlFor={`preorders.${index}.url`}>
-                                                                                    링크
-                                                                                </Label>
+                                                                                <div className="flex justify-between items-center mb-1">
+                                                                                    <Label htmlFor={`preorders.${index}.url`}>
+                                                                                        링크
+                                                                                    </Label>
+                                                                                    <Badge>
+                                                                                        필수
+                                                                                    </Badge>
+                                                                                </div>
                                                                                 <Input
                                                                                     id={`preorders.${index}.url`}
                                                                                     type="url"
@@ -2405,10 +2464,23 @@ export default function RequestForm() {
                                                 </Button>
                                             )
                                         ) : (
-                                            <Button type="button" variant="destructive" className="w-full lg:w-auto" size="lg" disabled>
-                                                입력한 내용을 확인해 주세요
-                                            </Button>
+                                            <>
+                                                <Button type="button" className="w-full lg:w-auto" size="lg" disabled>
+                                                    입력한 내용을 확인해 주세요
+                                                </Button>
+
+                                            </>
                                         )}
+                                    </div>
+                                    <div className="grid gap-1 lg:grid-cols-3">
+                                        {getErrorMessages(errors).map((message, index) => (
+                                            <Alert className="mt-2 w-auto lg:w-[220px]" key={index}>
+                                                <TriangleAlert className="h-4 w-4 mr-2" />
+                                                <AlertDescription>
+                                                    {message}
+                                                </AlertDescription>
+                                            </Alert>
+                                        ))}
                                     </div>
 
                                 </>
@@ -2423,6 +2495,22 @@ export default function RequestForm() {
             </div>
         </Card >
     )
+}
+
+function getErrorMessages(obj: any): string[] {
+    const messages: string[] = [];
+
+    for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            if (key === "message" && typeof obj[key] === "string") {
+                messages.push(obj[key]);
+            } else if (typeof obj[key] === "object") {
+                messages.push(...getErrorMessages(obj[key]));
+            }
+        }
+    }
+
+    return messages;
 }
 
 interface DatePickerWithRangeProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -2550,7 +2638,7 @@ export function DatePickerWithRange({
                                     value={startTime}
                                     onChange={(e) => handleStartTimeChange(e.target.value)}
                                     autoComplete="off"
-                                    
+
 
                                 />
                             </div>
