@@ -36,3 +36,8 @@ export async function GetUser() {
 		providers: user?.app_metadata?.providers || [],
 	};
 }
+
+export async function SignOut() {
+	const supabase = createClient();
+	await supabase.auth.signOut();
+}
