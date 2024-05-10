@@ -2,7 +2,7 @@
 import { useEditor, EditorContent, type Editor, BubbleMenu, FloatingMenu } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from '@tiptap/extension-image'
-
+import Placeholder from '@tiptap/extension-placeholder'
 import { Bold, List, ListOrdered, Heading as HeadingIcon, Quote as QuoteIcon, Minus, Image as ImageIcon } from "lucide-react";
 import { Toggle } from "@/components/ui/toggle";
 import { ToggleGroup } from "@/components/ui/toggle-group"
@@ -11,7 +11,7 @@ import FileHandler from '@tiptap-pro/extension-file-handler'
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
 import imageCompression from 'browser-image-compression';
-
+import './tiptap.css'
 
 /*const compressImage = async (file: File): Promise<string> => {
   const options = {
@@ -47,10 +47,15 @@ const Tiptap = ({ onChange, initValue }: TiptapProps) => {
     editorProps: {
       attributes: {
         class:
-          "text-muted-foreground min-h-[80px] max-h-[500px] w-full rounded-md border bg-transparent px-3 py-2 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none overflow-auto",
+          "text-muted-foreground min-h-[200px] max-h-[500px] w-full rounded-md border bg-transparent px-3 py-2 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none overflow-auto",
       },
     },
     extensions: [
+      Placeholder.configure({
+        // Use a placeholder:
+        placeholder: '인포 이미지를 꼭 올려주세요!',
+        emptyEditorClass: 'is-editor-empty',
+      }),
       StarterKit.configure({
         horizontalRule: {
           HTMLAttributes: {

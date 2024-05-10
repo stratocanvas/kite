@@ -27,7 +27,9 @@ export default async function SearchResult({
 		day_of_week_array
     `);
 	if (searchParams?.character) {
-		query = query.overlaps("character_ids", [searchParams.character.split(",")]);
+		query = query.overlaps("character_ids", [
+			searchParams.character.split(","),
+		]);
 	}
 	if (searchParams?.category) {
 		query = query.overlaps("category_ids", searchParams.category.split(","));
@@ -70,7 +72,10 @@ export default async function SearchResult({
     `,
 			{ count: "exact" },
 		)
-		.in("booth_id", queryResult.map((result) => result.booth_id))
+		.in(
+			"booth_id",
+			queryResult.map((result) => result.booth_id),
+		)
 		.order("created_at", { ascending: false })
 		.range((page - 1) * limit, page * limit - 1);
 	if (boothError) {
