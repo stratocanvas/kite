@@ -70,7 +70,7 @@ export function Filter({
             const { data, error } = await supabase
                 .from(table)
                 .select(`${id}, name, ${count}(count)`, { count: "estimated" });
-            if (error) console.error(`Error fetching data from ${table}`, error);
+            if (error) console.error('Error fetching data');
             else {
                 setOptions(data.map(item => ({
                     id: item[id],

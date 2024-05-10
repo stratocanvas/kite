@@ -7,6 +7,7 @@ import { useTheme } from "next-themes"
 import { Bookmark, PencilLine, User, LogOut, LogIn, Settings, UserRoundX } from "lucide-react"
 import { usePathname } from 'next/navigation';
 import { Button } from "@/components/ui/button"
+
 import { createClient } from "@/utils/supabase/client"
 import { GetUser, SignOut } from "@/app/fetch"
 import { useRouter } from "next/navigation";
@@ -15,7 +16,6 @@ import { UserStateContext } from "@/providers"
 import { useContext, useEffect, useLayoutEffect, useState, useCallback } from "react";
 import { deleteUser } from "@/app/deleteuser";
 import { Dialog, DialogTrigger, DialogContent, DialogClose, DialogFooter, DialogDescription, DialogTitle, DialogHeader } from "@/components/ui/dialog"
-const supabase = createClient()
 export function TopMenuDesktop() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname();
@@ -106,14 +106,14 @@ export function TopMenuDesktop() {
         <Button className="hidden" onClick={() => setTheme('system')} />
         <div className="flex gap-2">
           <Link href="/write">
-            <Button variant="ghost">
+            <Button size="icon" variant="ghost">
               <PencilLine />
             </Button>
           </Link>
           <Dialog open={open} onOpenChange={setOpen}>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost"><User /></Button>
+                <Button size="icon" variant="ghost"><User /></Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-auto">
                 {userData ? (

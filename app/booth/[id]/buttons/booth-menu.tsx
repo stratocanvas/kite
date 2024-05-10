@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useState, useEffect, memo } from 'react';
-import { GetBookmarks, SetBookmark } from "../actions";
+import { GetBookmarks, SetBookmark } from "../../../api/buttons/actions";
 import { Button } from '@/components/ui/button'
 import { Heart, HeartOff, ThumbsDown, Flag, Siren, Ellipsis, Pencil, MessageCircleWarning, Info } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
