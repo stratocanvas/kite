@@ -97,15 +97,11 @@ export function TopMenuDesktop() {
             </Button>
           </Link>
         </div>
-        <Button className="hidden" onClick={() => setTheme('light')}>
-          라이트
-        </Button>
-        <Button className="hidden" onClick={() => setTheme('dark')}>
-          다크
-        </Button>
-        <Button className="hidden" onClick={() => setTheme('system')}>
-          시스템
-        </Button>
+        <Button className="hidden" onClick={() => setTheme('light')} />
+
+        <Button className="hidden" onClick={() => setTheme('dark')} />
+
+        <Button className="hidden" onClick={() => setTheme('system')} />
         <div className="flex gap-2">
           <Link href="/write">
             <Button variant="ghost">
