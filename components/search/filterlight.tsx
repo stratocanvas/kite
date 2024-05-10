@@ -58,21 +58,20 @@ export function FilterLight({
     onSelectedOptionsChange,
 
 }: CategoryFilterProps) {
-    const searchParams = useSearchParams();
-    const [selectedValues, setSelectedValues] = useState(new Set<string>());
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
     const options = [
         {
             id: "6",
             name: "토요일",
         },
         {
-            id: "0",
+            id: "7",
             name: "일요일",
         },
     ];
 
+    const searchParams = useSearchParams();
+    const [selectedValues, setSelectedValues] = useState(new Set<string>());
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     useEffect(() => {
         const selectedOptionsFromParams = new Set(searchParams.get(table)?.split(","));
@@ -82,6 +81,7 @@ export function FilterLight({
     useEffect(() => {
         onSelectedOptionsChange(Array.from(selectedValues));
     }, [selectedValues, onSelectedOptionsChange]);
+
 
     return (
         <Popover>
@@ -145,6 +145,7 @@ export function FilterLight({
                                                     newSelectedValues.add(option.id);
                                                 }
                                                 setSelectedValues(newSelectedValues);
+                                                onSelectedOptionsChange(Array.from(newSelectedValues)); // 변경된 부분
                                             }}
                                         >
                                             <div className="flex w-full items-center gap-2 justify-between">

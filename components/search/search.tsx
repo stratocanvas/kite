@@ -14,7 +14,7 @@ export function SearchBar() {
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
     const [selectedAuthors, setSelectedAuthors] = useState<string[]>([]);
-    const [selectedDOW, setSelectedDOW] = useState<number[]>([]);
+    const [selectedDOW, setSelectedDOW] = useState<string[]>([]);
 
     const searchParams = useSearchParams();
     const { replace } = useRouter();
@@ -95,7 +95,7 @@ export function SearchBarSmall(params: typeof searchParams) {
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
     const [selectedAuthors, setSelectedAuthors] = useState<string[]>([]);
-    const [selectedDOW, setSelectedDOW] = useState<number[]>([]);
+    const [selectedDOW, setSelectedDOW] = useState<string[]>([]);
 
     const parameters = params
     const searchParams = useSearchParams();
@@ -126,6 +126,8 @@ export function SearchBarSmall(params: typeof searchParams) {
         }
         if (selectedDOW.length > 0) {
             params.set('dow', selectedDOW.join(','));
+        } else {
+            params.delete('dow'); // 변경된 부분
         }
         push(`${pathname}?${params.toString()}`);
     }
