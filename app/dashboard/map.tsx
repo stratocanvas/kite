@@ -11,7 +11,6 @@ import Link from "next/link";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { LikeButton } from '../booth/[id]/buttons/booth-menu';
 import { X } from 'lucide-react';
-import { ShoppingCart, Heart } from 'lucide-static';
 
 const preventMapReset = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -47,7 +46,6 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
     const search = searchParams.get('event');
 
     useEffect(() => {
-        console.log(search)
         const fetchMapData = async () => {
             const { data: eventMap, error: eventError } = await supabase
                 .from("event")
