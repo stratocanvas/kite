@@ -7,13 +7,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
 	matcher: [
-		"/auth/:path*",
-		"/write/add",
-		"/dashboard/:path*",
-		"/dashboard",
-		"/dashboard/",
-		"/api/:path*",
-    "/booth/:path*",
+
 		/*
 		 * Match all request paths except for the ones starting with:
 		 * - _next/static (static files)
