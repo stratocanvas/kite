@@ -10,6 +10,7 @@ export const config = {
     '/auth/:path*',
     '/write/add',
     '/dashboard/:path*',
+    '/dashboard',
     '/api/:path*',
     /*
      * Match all request paths except for the ones starting with:
