@@ -7,12 +7,14 @@ import { useTheme } from "next-themes"
 import { Bookmark, PencilLine, User, LogOut, LogIn, Settings, UserRoundX } from "lucide-react"
 import { usePathname } from 'next/navigation';
 import { Button } from "@/components/ui/button"
-import { GetUser, SignOut } from "@/app/api/session/actions"
+
+import { createClient } from "@/utils/supabase/client"
+import { GetUser, SignOut } from "@/app/fetch"
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast"
 import { UserStateContext } from "@/providers"
-import { useContext, useEffect, useLayoutEffect, useState, useCallback} from "react";
-import { deleteUser } from "@/app/api/session/deleteuser";
+import { useContext, useEffect, useCallback, useState } from "react";
+import { deleteUser } from "@/app/deleteuser";
 import { Dialog, DialogTrigger, DialogContent, DialogClose, DialogFooter, DialogDescription, DialogTitle, DialogHeader } from "@/components/ui/dialog"
 export function TopMenuDesktop() {
   const [open, setOpen] = useState(false)
