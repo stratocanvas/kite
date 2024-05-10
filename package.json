@@ -11,6 +11,7 @@
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.569.0",
     "@aws-sdk/client-s3": "^3.569.0",
+    "@hirohe/react-watermark": "^0.5.0",
     "@hookform/resolvers": "^3.3.4",
     "@radix-ui/react-aspect-ratio": "^1.0.3",
     "@radix-ui/react-avatar": "^1.0.4",

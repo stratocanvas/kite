@@ -73,7 +73,7 @@ export function FilterWithThumb({
       const { data, error } = await supabase
         .from(table)
         .select(`${id}, name, ${subFromNested ? `${sub}(name)` : sub}, thumbnail, ${count}(count)`, { count: "estimated" });
-        if (error) console.error('Error fetching data');
+      if (error) console.error('Error fetching data');
       else {
         setOptions(data.map(item => ({
           id: item[id],
@@ -86,10 +86,10 @@ export function FilterWithThumb({
       }
     };
 
-    if (!isDataFetched && (isPopoverOpen)) {
+    if (!isDataFetched && (isPopoverOpen || params)) {
       fetchOptions();
-  }
-  }, [isPopoverOpen, isDataFetched, table, id, sub, count, subFromNested]);
+    }
+  }, [isPopoverOpen, isDataFetched, table, id, sub, count, subFromNested, params]);
 
   useEffect(() => {
     const selectedOptionsFromParams = new Set(searchParams.get(table)?.split(",").map(Number));

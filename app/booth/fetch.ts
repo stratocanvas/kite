@@ -13,32 +13,36 @@ export default async function SearchResult({
 		author?: string;
 		page?: number;
 		event?: number;
-		dow?: number;
+		dow?: string;
 	};
 }) {
 	const supabase = createClient();
-	let query = supabase.from("booth_search").select(`
+	let query = supabase.from("booth_search_2").select(`
         booth_id,
-        character_id,
-        category_id,
-        genre_id,
-        author_id,
-		event_id
+        character_ids,
+        category_ids,
+        genre_ids,
+        author_ids,
+		event_ids,
+		day_of_week_array
     `);
 	if (searchParams?.character) {
-		query = query.in("character_id", searchParams.character.split(","));
+		query = query.overlaps("character_ids", [searchParams.character.split(",")]);
 	}
 	if (searchParams?.category) {
-		query = query.in("category_id", searchParams.category.split(","));
+		query = query.overlaps("category_ids", searchParams.category.split(","));
 	}
 	if (searchParams?.genre) {
-		query = query.in("genre_id", searchParams.genre.split(","));
+		query = query.overlaps("genre_ids", searchParams.genre.split(","));
 	}
 	if (searchParams?.author) {
-		query = query.in("author_id", searchParams.author.split(","));
+		query = query.overlaps("author_ids", searchParams.author.split(","));
 	}
 	if (searchParams?.event) {
-		query = query.eq("event_id", searchParams.event);
+		query = query.overlaps("event_ids", [searchParams.event]);
+	}
+	if (searchParams?.dow) {
+		query = query.contains("day_of_week_array", searchParams.dow.split(","));
 	}
 
 	const { data: queryResult, error: queryError } = await query;
@@ -66,28 +70,14 @@ export default async function SearchResult({
     `,
 			{ count: "exact" },
 		)
-		.in("booth_id", [...new Set(queryResult.map((result) => result.booth_id))])
+		.in("booth_id", queryResult.map((result) => result.booth_id))
 		.order("created_at", { ascending: false })
 		.range((page - 1) * limit, page * limit - 1);
-
 	if (boothError) {
 		// Handle the error or return an appropriate response
 		return { booth: [] };
 	}
-	if (searchParams?.dow) {
-		const dows = searchParams.dow.split(",");
-		if (dows.length === 1) {
-			booth = booth.filter((item) => {
-				const date = new Date(item.date);
-				return dows.includes(date.getDay().toString());
-			});
-		} else if (dows.length > 1) {
-			booth = booth.filter((item) => {
-				const date = new Date(item.date);
-				return dows.every((dow) => dow === date.getDay().toString());
-			});
-		}
-	}
+
 	return {
 		booth: booth || [],
 		count: count || 0,
