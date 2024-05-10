@@ -8,7 +8,7 @@ import { Bookmark, PencilLine, User, LogOut, LogIn, Settings, UserRoundX } from 
 import { usePathname } from 'next/navigation';
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/utils/supabase/client"
-import { GetUser } from "@/app/fetch"
+import { GetUser, SignOut } from "@/app/fetch"
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast"
 import { UserStateContext } from "@/providers"
