@@ -47,7 +47,7 @@ export function Block({ type, attrs, content, marks }: { type: string; attrs?: a
                                 src={attrs?.src}
                                 alt=""
                                 width={1200}
-                                height={1200}
+                                height={attrs?.src.split('-h(')[1].split(')')[0] || 1200}
                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                 style={{
                                     userSelect: 'none',
