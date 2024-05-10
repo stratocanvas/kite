@@ -73,7 +73,8 @@ export function FilterWithThumb({
       const { data, error } = await supabase
         .from(table)
         .select(`${id}, name, ${subFromNested ? `${sub}(name)` : sub}, thumbnail, ${count}(count)`, { count: "estimated" });
-      if (error) console.error(`Error fetching data from ${table}`, error);
+      console.log(data);
+        if (error) console.error(`Error fetching data from ${table}`, error);
       else {
         setOptions(data.map(item => ({
           id: item[id],
