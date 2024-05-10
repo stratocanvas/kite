@@ -8,7 +8,10 @@ import { GetUser } from "@/app/fetch"
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Info } from 'lucide-react';
-
+import Image from 'next/image';
+import google from './google.png';
+import twitterwhite from './twitterwhite.png';
+import twitterblack from './twitterblack.png';
 
 export default function LoginPage() {
     const supabase = createClient()
@@ -49,18 +52,29 @@ export default function LoginPage() {
                 </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-2">
-                <Button onClick={() => signIn('twitter', next)}>Twitter로 계속하기</Button>
-                <Button onClick={() => signIn('google', next)}>Google로 계속하기</Button>
+                <Button size='lg' className='flex justify-between bg-[#4285f4] hover:bg-[#4285f4]/90' onClick={() => signIn('google', next)}>
+                    <Image className='-ml-6 w-8 h-8' src={google} alt="Google" width={32} height={32} />
+                    <p className='text-md text-white'>Google 계정으로 로그인</p>
+                    <div className='w-1 h-8' />
+                </Button>
+                <Button className='flex justify-between' size='lg' onClick={() => signIn('twitter', next)}>
+                    <div className='relative -ml-5 w-6 h-6'>
+                        <Image className='block dark:hidden' src={twitterwhite} alt="Twitter" width={24} height={24} />
+                        <Image className='hidden dark:block absolute top-0 left-0' src={twitterblack} alt="Twitter" width={24} height={24} />
+                    </div>
+                    <p className='text-md'>X 계정으로 로그인</p>
+                    <div className='w-0 h-8' />
+                </Button>
 
             </CardContent>
             <CardFooter>
                 <Alert>
                     <Info className='w-4 h-4' />
                     <AlertTitle>
-                        Twitter 로그인 시 오류가 발생하나요?
+                        X 로그인 시 오류가 발생하나요?
                     </AlertTitle>
                     <AlertDescription>
-                        Twitter 계정에 이메일이 등록되어 있는지 확인해 주세요.
+                        X 계정에 이메일이 등록되어 있는지 확인해 주세요.
                     </AlertDescription>
                 </Alert>
             </CardFooter>

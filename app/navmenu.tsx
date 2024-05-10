@@ -7,6 +7,7 @@ import { useTheme } from "next-themes"
 import { Bookmark, PencilLine, User, LogOut, LogIn, Settings, UserRoundX } from "lucide-react"
 import { usePathname } from 'next/navigation';
 import { Button } from "@/components/ui/button"
+
 import { createClient } from "@/utils/supabase/client"
 import { GetUser, SignOut } from "@/app/fetch"
 import { useRouter } from "next/navigation";
@@ -44,6 +45,12 @@ export function TopMenuDesktop() {
       fetchOptions();
     }, [])
   */
+
+  useEffect(() => {
+    if (theme !== 'system') {
+      setTheme('system')
+    }
+  }, [theme])
 
   const fetchUser = useCallback(async () => {
     const data = await GetUser();
@@ -92,25 +99,21 @@ export function TopMenuDesktop() {
             </Button>
           </Link>
         </div>
-        <Button className="hidden" onClick={() => setTheme('light')}>
-          라이트
-        </Button>
-        <Button className="hidden" onClick={() => setTheme('dark')}>
-          다크
-        </Button>
-        <Button className="hidden" onClick={() => setTheme('system')}>
-          시스템
-        </Button>
+        <Button className="hidden" onClick={() => setTheme('light')} />
+
+        <Button className="hidden" onClick={() => setTheme('dark')} />
+
+        <Button className="hidden" onClick={() => setTheme('system')} />
         <div className="flex gap-2">
           <Link href="/write">
-            <Button variant="ghost">
+            <Button size="icon" variant="ghost">
               <PencilLine />
             </Button>
           </Link>
           <Dialog open={open} onOpenChange={setOpen}>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost"><User /></Button>
+                <Button size="icon" variant="ghost"><User /></Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-auto">
                 {userData ? (

@@ -20,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Minus, Plus, Trash } from "lucide-react";
 import useSWR from 'swr';
-import { GetCart, AddOrUpdateCart, DeleteCart, GetBookmarks } from './actions';
+import { GetCart, AddOrUpdateCart, DeleteCart, GetBookmarks } from '../api/dashboard/actions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { UserStateContext } from "@/providers"
 import * as React from "react"
