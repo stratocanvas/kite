@@ -11,7 +11,7 @@ import { GetUser, SignOut } from "@/app/api/session/actions"
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast"
 import { UserStateContext } from "@/providers"
-import { useContext, useEffect, useLayoutEffect, useState } from "react";
+import { useContext, useEffect, useLayoutEffect, useState, useCallback} from "react";
 import { deleteUser } from "@/app/api/session/deleteuser";
 import { Dialog, DialogTrigger, DialogContent, DialogClose, DialogFooter, DialogDescription, DialogTitle, DialogHeader } from "@/components/ui/dialog"
 export function TopMenuDesktop() {
@@ -50,32 +50,34 @@ export function TopMenuDesktop() {
     }
   }, [theme])
 
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     const data = await GetUser();
     setUserData(data);
-  };
+  }, [setUserData]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     fetchUser();
-  }, [])
+  }, [fetchUser])
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     await SignOut();
     setUserData(null);
     toast({
       description: "로그아웃 되었습니다.",
     })
-  };
+  }, [setUserData]);
 
-  const handleDeleteUser = async () => {
-    await deleteUser(userData?.id);
-    setUserData(null);
-    toast({
-      description: "회원 탈퇴 되었습니다.",
-    })
-    router.push("/")
-    setOpen(false)
-  };
+  const handleDeleteUser = useCallback(async () => {
+    if (userData) {
+      await deleteUser(userData.id);
+      setUserData(null);
+      toast({
+        description: "회원 탈퇴 되었습니다.",
+      })
+      router.push("/")
+      setOpen(false)
+    }
+  }, [userData, router, setOpen, setUserData]);
 
 
   return (
