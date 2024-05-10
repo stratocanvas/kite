@@ -12,7 +12,6 @@ export const config = {
 		"/dashboard/:path*",
 		"/dashboard",
 		"/dashboard/",
-		"/dashboard?:path*",
 		"/api/:path*",
     "/booth/:path*",
 		/*
