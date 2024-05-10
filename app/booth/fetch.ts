@@ -13,6 +13,7 @@ export default async function SearchResult({
 		author?: string;
 		page?: number;
 		event?: number;
+		dow?: number;
 	};
 }) {
 	const supabase = createClient();
@@ -45,7 +46,7 @@ export default async function SearchResult({
 		// Handle the error or return an appropriate response
 		return { booth: [] };
 	}
-	const {
+	let {
 		data: booth,
 		error: boothError,
 		count,
@@ -68,11 +69,27 @@ export default async function SearchResult({
 		.in("booth_id", [...new Set(queryResult.map((result) => result.booth_id))])
 		.order("created_at", { ascending: false })
 		.range((page - 1) * limit, page * limit - 1);
-	if (boothError || !booth) {
+
+	if (boothError) {
 		// Handle the error or return an appropriate response
 		return { booth: [] };
 	}
+	if (searchParams?.dow) {
+		const dows = searchParams.dow.split(",");
+		if (dows.length === 1) {
+			booth = booth.filter((item) => {
+				const date = new Date(item.date);
+				return dows.includes(date.getDay().toString());
+			});
+		} else if (dows.length > 1) {
+			booth = booth.filter((item) => {
+				const date = new Date(item.date);
+				return dows.every((dow) => dow === date.getDay().toString());
+			});
+		}
+	}
 	return {
-		booth: booth,
+		booth: booth || [],
+		count: count || 0,
 	};
 }
