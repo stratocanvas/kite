@@ -82,7 +82,12 @@ export default function AddCart({ product, boothId }: { product: any, boothId: s
     return (
         <>
             {selectedOption ? (
-                <Button type="button" className="w-full font-bold" onClick={handleAddToCart}>
+                <Button
+                    type="button"
+                    className="w-full font-bold text-white"
+                    style={{ backgroundColor: selectedOption?.thumbnail ? `#${selectedOption.thumbnail.split('-c(')[1].split(')')[0]}` : '#797979' }}
+                    onClick={handleAddToCart}
+                >
                     장바구니에 담기
                 </Button>
             ) : (

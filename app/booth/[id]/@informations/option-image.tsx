@@ -11,7 +11,7 @@ export default function OptionImage({ productId, options }: { productId: string,
 
     return (
         <Watermark text={'Sample'} lineHeight="3rem" opacity={0.2} textSize={24}>
-            <AspectRatio ratio={1 / 1}
+            <AspectRatio className="rounded-t-md" ratio={1 / 1}
                 style={{ backgroundColor: selectedOption?.thumbnail ? `#${selectedOption.thumbnail.split('-c(')[1].split(')')[0]}` : 'transparent' }}
                 onContextMenu={(e: MouseEvent<HTMLImageElement>) => {
                     e.preventDefault();
