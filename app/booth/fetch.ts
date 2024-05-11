@@ -14,10 +14,11 @@ export default async function SearchResult({
 		page?: number;
 		event?: number;
 		dow?: string;
+		name?: string;
 	};
 }) {
 	const supabase = createClient();
-	let query = supabase.from("booth_search_2").select(`
+	let query = supabase.from("booth_search_3").select(`
         booth_id,
         character_ids,
         category_ids,
@@ -45,6 +46,18 @@ export default async function SearchResult({
 	}
 	if (searchParams?.dow) {
 		query = query.contains("day_of_week_array", searchParams.dow.split(","));
+	}
+	if (searchParams?.name) {
+		const { data: rpcResult, error: rpcError } = await supabase.rpc(
+			"search_booth_by_name",
+			{ prefix: searchParams?.name?.replace(" ", "+") || "" },
+		);
+		if (!rpcError && rpcResult) {
+			query = query.in(
+				"booth_id",
+				rpcResult.map((result: any) => result.booth_id),
+			);
+		}
 	}
 
 	const { data: queryResult, error: queryError } = await query;
