@@ -100,8 +100,7 @@ export function SearchBarSmall(params: typeof searchParams) {
     const parameters = params
     const searchParams = useSearchParams();
     const pathname = usePathname();
-    const { push } = useRouter();
-
+    const router = useRouter();
     function handleSearch() {
         const params = new URLSearchParams(searchParams);
         if (selectedCharacters.length > 0) {
@@ -129,7 +128,7 @@ export function SearchBarSmall(params: typeof searchParams) {
         } else {
             params.delete('dow'); // 변경된 부분
         }
-        push(`${pathname}?${params.toString()}`);
+        router.push(`${pathname}?${params.toString()}`, { scroll: false });
     }
 
     useEffect(() => {
