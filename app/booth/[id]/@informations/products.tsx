@@ -43,6 +43,7 @@ export default async function BoothProducts({ params }: { params: { id: string }
     return (
         <>
             {product && product.length > 0 && (
+                <>
                 <Card key={product?.product_id} className="h-[100%] flex flex-col border-none shadow-none" id="goods">
                     <CardContent className="flex-grow mt-6 flex items-center overflow-x-auto">
                         <Label className="text-xl font-bold">굿즈</Label>
@@ -97,6 +98,7 @@ export default async function BoothProducts({ params }: { params: { id: string }
                         </Carousel>
                     </CardContent>
                 </Card >
+                </>
             )}
         </>
     );
