@@ -1804,7 +1804,7 @@ export default function RequestForm() {
                                                                                                                 autoComplete="off"
                                                                                                                 inputMode="numeric"
                                                                                                                 pattern="[0-9]*"
-                                                                                                                value={option.price ? new Intl.NumberFormat('ko-KR').format(option.price) + '원' : ''}
+                                                                                                                value={option.price !== null && option.price !== undefined ? new Intl.NumberFormat('ko-KR').format(option.price) + '원' : ''}
                                                                                                                 onChange={(e) => {
                                                                                                                     const newProducts = [...field.value];
                                                                                                                     const inputValue = e.target.value.replace(/[^0-9]/g, '');
@@ -1817,7 +1817,7 @@ export default function RequestForm() {
                                                                                                                     if (e.key === 'Backspace') {
                                                                                                                         const newProducts = [...field.value];
                                                                                                                         const currentValue = newProducts[index].options[optionIndex].price;
-                                                                                                                        if (currentValue !== null) {
+                                                                                                                        if (currentValue !== null && currentValue !== undefined) {
                                                                                                                             const stringValue = currentValue.toString();
                                                                                                                             const newValue = stringValue.slice(0, -1);
                                                                                                                             const price = newValue === '' ? null : parseInt(newValue, 10);
