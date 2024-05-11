@@ -103,9 +103,9 @@ export function FilterWithThumb({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="lg" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+        <Button variant="secondary" size="sm" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
           <ChevronDown className="mr-2 h-4 w-4" />
-          <div className="font-bold text-lg">
+          <div className="font-bold">
             {title}
           </div>
           {selectedValues.size > 0 && (

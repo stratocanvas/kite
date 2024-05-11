@@ -5,9 +5,11 @@ import { Filter } from "./filter";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { FilterLight } from "./filterlight";
+import { Input } from "@/components/ui/input";
+import { debounce } from "lodash";
 
 export function SearchBar() {
     const [selectedCharacters, setSelectedCharacters] = useState<string[]>([]);
@@ -15,7 +17,7 @@ export function SearchBar() {
     const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
     const [selectedAuthors, setSelectedAuthors] = useState<string[]>([]);
     const [selectedDOW, setSelectedDOW] = useState<string[]>([]);
-
+    const [boothName, setBoothName] = useState<string>("");
     const searchParams = useSearchParams();
     const { replace } = useRouter();
 
@@ -36,13 +38,22 @@ export function SearchBar() {
         if (selectedDOW.length > 0) {
             params.set('dow', selectedDOW.join(','));
         }
+        if (boothName.length > 0) {
+            params.set('name', boothName);
+        }
         replace(`/booth?${params.toString()}`);
     }
 
     return (
-        <div className="flex flex-col lg:flex-row gap-2 w-full mx-8 justify-center">
+        <div className="flex flex-col gap-2 w-full lg:w-auto max-w-full mx-8 justify-center">
+            <div className="flex flex-row gap-2">
+                <Input placeholder="부스 이름 검색" className="text-[16px]" id="name" onChange={(e) => setBoothName(e.target.value)} />
+                <Button type="submit" size="default" className="w-auto" onClick={handleSearch}>
+                    <Search />
+                </Button>
+            </div>
             <ScrollArea className="whitespace-nowrap rounded-md">
-                <div className="flex flex-col lg:flex-row gap-2">
+                <div className="flex flex-row gap-2">
                     <FilterWithThumb
                         title="캐릭터"
                         table="character"
@@ -83,9 +94,6 @@ export function SearchBar() {
                 </div>
                 <ScrollBar orientation="horizontal" />
             </ScrollArea>
-            <Button size="lg" className="w-auto" onClick={handleSearch}>
-                <Search />
-            </Button>
         </div>
     )
 }
@@ -96,6 +104,9 @@ export function SearchBarSmall(params: typeof searchParams) {
     const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
     const [selectedAuthors, setSelectedAuthors] = useState<string[]>([]);
     const [selectedDOW, setSelectedDOW] = useState<string[]>([]);
+    const [boothName, setBoothName] = useState<string>("");
+    const [searchMode, setSearchMode] = useState(false);
+    const [searchInput, setSearchInput] = useState("");
 
     const parameters = params
     const searchParams = useSearchParams();
@@ -128,6 +139,11 @@ export function SearchBarSmall(params: typeof searchParams) {
         } else {
             params.delete('dow'); // 변경된 부분
         }
+        if (boothName) {
+            params.set('name', boothName);
+        } else {
+            params.delete('name');
+        }
         router.push(`${pathname}?${params.toString()}`, { scroll: false });
     }
 
@@ -138,20 +154,57 @@ export function SearchBarSmall(params: typeof searchParams) {
         const genreParams = params.get('genre')?.split(',') || [];
         const authorParams = params.get('author')?.split(',') || [];
         const dowParams = params.get('dow')?.split(',') || [];
-
+        const nameParams = params.get('name') || "";
+        console.log(nameParams);
         setSelectedCharacters(characterParams);
         setSelectedCategories(categoryParams);
         setSelectedGenres(genreParams);
         setSelectedAuthors(authorParams);
         setSelectedDOW(dowParams.map(Number));
-    }, [searchParams]);
+        setBoothName(nameParams);
+        setSearchInput(nameParams);
+    }, []);
+
+    function setQuery(name: string) {
+        setBoothName(name);
+    }
+
+    const delayedSearch = useCallback(
+        debounce((q) => setQuery(q), 500),
+        []
+    )
+
+    const handleChange = (e) => {
+        delayedSearch(e.target.value);
+    }
 
     useEffect(() => {
         handleSearch();
-    }, [selectedCharacters, selectedCategories, selectedGenres, selectedAuthors, selectedDOW]);
+    }, [selectedCharacters, selectedCategories, selectedGenres, selectedAuthors, selectedDOW, boothName]);
 
     return (
-        <div className="flex flex-col lg:flex-row gap-2 w-full justify-center">
+        <div className="flex gap-2 w-full justify-center w-full lg:w-auto mx-8">
+            <Button className={`lg:hidden ${searchMode && "rounded-r-none"}`} type="submit" variant="secondary" size="sm" onClick={() => setSearchMode(!searchMode)}>
+                <Search className="w-4 h-4" />
+            </Button>
+            {searchMode &&
+                <Input
+                    placeholder="부스 이름 검색"
+                    className="text-[16px] h-full md:hidden -ml-3 rounded-l-none h-9 bg-muted"
+                    id="name"
+                    value={searchInput}
+                    autoFocus={true}
+                    onChange={(e) => { handleChange(e); setSearchInput(e.target.value) }} />
+            }
+            <div className="hidden sm:flex gap-2 items-center bg-muted pl-3 rounded-md">
+                <Search className="h-4 w-4" />
+                <Input
+                    placeholder="부스 이름 검색"
+                    className="text-[16px] h-9 bg-muted"
+                    id="name"
+                    value={searchInput}
+                    onChange={(e) => { handleChange(e); setSearchInput(e.target.value) }} />
+            </div>
             <ScrollArea className="whitespace-nowrap rounded-md">
                 <div className="flex gap-2">
                     <FilterWithThumb
