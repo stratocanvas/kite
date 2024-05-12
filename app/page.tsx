@@ -27,8 +27,7 @@ export default async function Home() {
   thumbnail`)
   .limit(10)
   .order("created_at", { ascending: false })
-
-  const groupedBooths = booth?.reduce((acc, cur) => {
+    const groupedBooths = booth?.reduce((acc, cur) => {
     const eventName = cur.event?.name;
     if (eventName) {
       if (!acc[eventName]) {
