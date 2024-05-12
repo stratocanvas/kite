@@ -30,13 +30,6 @@ export async function GET(request: Request, { params }: { params: { id: string }
             return sortedLocations[0];
         })();
 
-        const BoldFont = await fetch(
-            new URL('https://api.kitebooth.com/storage/v1/object/public/assets/pretendardblack.woff', import.meta.url),
-        ).then((res) => res.arrayBuffer());
-        const RegularFont = await fetch(
-            new URL('https://api.kitebooth.com/storage/v1/object/public/assets/pretendardregular.woff', import.meta.url),
-        ).then((res) => res.arrayBuffer());
-
         return new ImageResponse(
             (
                 <div
@@ -71,20 +64,6 @@ export async function GET(request: Request, { params }: { params: { id: string }
             {
                 width: 1200,
                 height: 630,
-                fonts: [
-                    {
-                        name: 'PretendardBold',
-                        data: BoldFont,
-                        style: 'normal',
-                        weight: 700
-                    },
-                    {
-                        name: 'PretendardRegular',
-                        data: RegularFont,
-                        style: 'normal',
-                        weight: 400
-                    },
-                ],
 
             },
         );
