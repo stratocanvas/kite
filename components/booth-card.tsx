@@ -21,7 +21,7 @@ export default function BoothCard({ booth, displayEvent }: { booth: any, display
                         </div>
                     )}
                     <div className='absolute left-4 top-4 flex gap-2'>
-                        {booth.preorder?.map((preorder, index) => {
+                        {booth.preorder?.map((preorder: { date: string[], type: string }, index: number) => {
                             const now = new Date();
                             const endDate = new Date(preorder.date[preorder.date.length - 1]);
                             const isEnding = (endDate.getTime() - now.getTime()) / (1000 * 60 * 60) <= 24;
@@ -74,8 +74,8 @@ export default function BoothCard({ booth, displayEvent }: { booth: any, display
                             </CardHeader>
                             <CardContent className="-mt-2 flex items-center justify-between h-16">
                                 <div className="flex overflow-x-auto">
-                                    {booth.author.map((author, index) => (
-                                        <div className={`relative z-${booth.author.length - index} ${index !== booth.author.length - 1 ? '-mr-3' : ''}`} key={author.name}>
+                                    {booth.author.map((author: { author_id: string, name: string, thumbnail: string }, index: number) => (
+                                        <div className={`relative z-${booth.author.length - index} ${index !== booth.author.length - 1 ? '-mr-3' : ''}`} key={author.author_id}>
                                             <Avatar className="border-2" style={{ borderColor: booth.thumbnail ? `#${booth.thumbnail.split('-c(')[1].split(')')[0]}` : '#797979' }}>
                                                 <AvatarImage asChild src={author?.thumbnail}>
                                                     <Image
