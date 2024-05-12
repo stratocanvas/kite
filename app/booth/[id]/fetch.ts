@@ -26,3 +26,18 @@ export async function GetProductData(boothId: string) {
 		.eq("booth_id", boothId);
 	return product;
 }
+
+
+export async function GetOgData(boothId: string) {
+    const supabase = createClient();
+    const { data: booth } = await supabase
+        .from("booth")
+        .select(`booth_id, name, locations, thumbnail, date,
+                 author(name, sns_x),
+                 event(name), preorder(type, date), genre(name)`)
+        .eq("booth_id", boothId)
+        .limit(1)
+        .single();
+    return booth;
+}
+
