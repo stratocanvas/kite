@@ -4,9 +4,8 @@ import { ImageResponse } from 'next/og';
 import { GetOgData } from "../../../booth/[id]/fetch";
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
-    const url = new URL(request.url);
-    const path = url.pathname;
-    const id = path.split('/').pop();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
     try {
         const booth = await GetOgData(id)
         const title = booth?.name
