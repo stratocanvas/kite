@@ -82,7 +82,7 @@ export default async function EventPage({ searchParams }: { searchParams: { [key
             <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-5 gap-6 p-8">
                 {booth?.map((booth) => (
                     <div key={booth.booth_id}>
-                        <BoothCard booth={booth} displayEvent />
+                        <BoothCard booth={booth} displayEvent={false} />
                     </div>
                 ))}
                 <MoreBooth initialBoothIds={initialBoothIds} searchParams={searchParams} />

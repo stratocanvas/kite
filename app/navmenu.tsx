@@ -7,8 +7,6 @@ import { useTheme } from "next-themes"
 import { Bookmark, PencilLine, User, LogOut, LogIn, Settings, UserRoundX } from "lucide-react"
 import { usePathname } from 'next/navigation';
 import { Button } from "@/components/ui/button"
-
-import { createClient } from "@/utils/supabase/client"
 import { GetUser, SignOut } from "@/app/api/auth/fetch"
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast"

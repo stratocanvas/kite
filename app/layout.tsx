@@ -17,8 +17,8 @@ const Pretendard = localFont({
 })
 
 export const metadata: Metadata = {
-  title: "Kite",
-  description: "부스 인포 모음",
+  title: "Kite - 부스 인포 모음",
+  description: "동인 행사 부스 인포 모음",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
