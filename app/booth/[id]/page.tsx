@@ -34,8 +34,8 @@ type Props = {
       openGraph: {
         title: `${booth?.name}`,
         description: `${booth?.event.name} 부스 인포`,
-        images: [`https://www.kitebooth.com/api/og/booth/${id}`],
-        url: `https://www.kitebooth.com/booth?id=${id}`,
+        images: [`https://www.kitebooth.com/api/og/booth?id=${id}`],
+        url: `https://www.kitebooth.com/booth/${id}`,
       },
     }
   }
