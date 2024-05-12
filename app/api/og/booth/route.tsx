@@ -16,7 +16,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
             ? "양일"
             : new Date(booth?.date).toLocaleDateString("ko-KR", {
                 weekday: "long",
-            })
+                timeZone: "Asia/Seoul"
+            });
 
         const sortedLocations = booth?.locations?.sort((a: string, b: string) => a.localeCompare(b)) || [];
         const locationDisplay = (() => {
