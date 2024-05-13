@@ -21,6 +21,18 @@ export const metadata: Metadata = {
   description: "동인 행사 부스 정보들을 한 곳에. 캐릭터로 부스를 찾고, 마음에 드는 부스를 북마크에 추가해 보세요.",
   icons: [
     {
+      rel: 'favicon',
+      type: 'image/x-icon',
+      url: '/kitelogo.ico',
+      media: '(prefers-color-scheme: light)',
+    },
+    {
+      rel: 'favicon',
+      type: 'image/x-icon',
+      url: '/kitelogo-dark.ico',
+      media: '(prefers-color-scheme: dark)',
+    },
+    {
       rel: 'icon',
       type: 'image/png',
       url: '/kitelogo.png',
