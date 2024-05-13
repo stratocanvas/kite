@@ -2,12 +2,28 @@ import { ImageResponse } from 'next/og';
 // App router includes @vercel/og.
 // No need to install it.
 import { GetOgData } from "../../../booth/[id]/fetch";
+export const runtime = "edge"
+
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
+
+    const [pretendardRegular, pretendardBold] =
+        await Promise.all([
+            fetch(new URL('../../../../assets/pretendardregular.woff', import.meta.url)).then((res) =>
+                res.arrayBuffer()
+            ),
+            fetch(new URL('../../../../assets/pretendardblack.woff', import.meta.url)).then((res) =>
+                res.arrayBuffer()
+            ),
+        ]);
+
+
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     try {
         const booth = await GetOgData(id)
+        const thumbnailId = booth?.thumbnail?.split('/').pop();
         const title = booth?.name
         const event = booth?.event.name
         const genre = booth?.genre.map((genre) => genre.name).join(' ')
@@ -41,10 +57,13 @@ export async function GET(request: Request, { params }: { params: { id: string }
                         alignItems: 'center',
                         justifyContent: 'center',
                         backgroundColor: bgcolor,
+                        position: 'relative',
                     }}
                 >
-                    <div tw="flex px-12">
-                        <div tw="flex flex-col w-full py-12 px-12 items-left justify-start p-8">
+                    <img src={`https://api.kitebooth.com/storage/v1/render/image/public/booth/thumbnails/${thumbnailId}?width=1200&height=630&quality=75`} alt="thumbnail" width={1200} height={630} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: `linear-gradient(to top, ${bgcolor}ff 15%, ${bgcolor}dd 45%, ${bgcolor}99 100%)` }} />
+                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div tw="flex flex-col w-full items-start justify-center text-left pl-20">
                             <p tw="flex flex-col text-4xl tracking-tight -mb-1 text-white/70 text-left">
                                 {event}
                             </p>
@@ -64,6 +83,22 @@ export async function GET(request: Request, { params }: { params: { id: string }
             {
                 width: 1200,
                 height: 630,
+
+                fonts: [
+                    {
+                        name: 'Pretendard',
+                        data: pretendardRegular,
+                        style: 'normal',
+                        weight: 400,
+                    },
+                    {
+                        name: 'Pretendard',
+                        data: pretendardBold,
+                        style: 'normal',
+                        weight: 700,
+                    },
+                ],
+
 
             },
         );
