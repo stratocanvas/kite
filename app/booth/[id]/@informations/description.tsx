@@ -154,6 +154,7 @@ export default function BoothDescription({ data }: { data: any }) {
                                                 <Link href={`https://x.com/${author?.sns_x}`}>
 
                                                     <Avatar className="h-28 w-28 relative rounded-full overflow-hidden">
+                                                        {author?.thumbnail && (
                                                         <Image
                                                             src={author?.thumbnail || ''}
                                                             alt=''
@@ -161,7 +162,7 @@ export default function BoothDescription({ data }: { data: any }) {
                                                             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 50vw, 33vw"
                                                             style={{ objectFit: "cover" }}
                                                             className="rounded-full"
-                                                        />
+                                                        />)}
                                                         <AvatarFallback className="text-4xl text-muted-foreground">
                                                             {author.name[0]}
                                                         </AvatarFallback>
