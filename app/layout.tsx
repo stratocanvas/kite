@@ -22,35 +22,35 @@ export const metadata: Metadata = {
   icons: [
     {
       rel: 'favicon',
-      url: '/kitelogo.ico',
+      url: '/favicon.ico',
     },
     {
       rel: 'favicon',
-      url: '/kitelogo.ico',
+      url: '/favicon.ico',
       media: '(prefers-color-scheme: light)',
     },
     {
       rel: 'favicon',
-      url: '/kitelogo-dark.ico',
+      url: '/favicon-dark.ico',
       media: '(prefers-color-scheme: dark)',
     },
     {
       rel: 'icon',
-      url: '/kitelogo.png',
+      url: '/favicon.png',
       media: '(prefers-color-scheme: light)',
     },
     {
       rel: 'icon',
-      url: '/kitelogo-dark.png',
+      url: '/favicon-dark.png',
       media: '(prefers-color-scheme: dark)',
     },
     {
       rel: 'apple-touch-icon',
-      url: '/kitelogo-touch.png',
+      url: '/apple-touch-icon.png',
     },
     {
       rel: 'apple-icon',
-      url: '/kitelogo-apple.png',
+      url: '/apple-icon.png',
     },
   ],
 };
