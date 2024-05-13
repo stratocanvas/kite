@@ -77,16 +77,14 @@ export default function BoothCard({ booth, displayEvent }: { booth: any, display
                                     {booth.author.map((author: { author_id: string, name: string, thumbnail: string }, index: number) => (
                                         <div className={`relative z-${booth.author.length - index} ${index !== booth.author.length - 1 ? '-mr-3' : ''}`} key={author.author_id}>
                                             <Avatar className="border-2" style={{ borderColor: booth.thumbnail ? `#${booth.thumbnail.split('-c(')[1].split(')')[0]}` : '#797979' }}>
-                                                <AvatarImage asChild src={author?.thumbnail}>
                                                     <Image
                                                         src={author?.thumbnail || ''}
-                                                        alt={author?.name}
+                                                        alt=''
                                                         fill
                                                         sizes="(max-width: 768px) 33vw, (max-width: 1200px) 33vw, 33vw"
                                                         style={{ objectFit: "cover" }}
                                                         className="rounded-full"
                                                     />
-                                                </AvatarImage>
                                                 <AvatarFallback>{author.name[0]}</AvatarFallback>
                                             </Avatar>
                                         </div>
