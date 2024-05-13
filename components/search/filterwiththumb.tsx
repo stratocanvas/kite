@@ -181,6 +181,7 @@ export function FilterWithThumb({
                         </div>
 
                         <Avatar>
+                          {option.thumbnail && (
                           <Image
                             src={option?.thumbnail || ''}
                             alt=''
@@ -188,8 +189,8 @@ export function FilterWithThumb({
                             sizes="(max-width: 768px) 12vw, (max-width: 1200px) 9vw, 9vw"
                             style={{ objectFit: "cover" }}
                             className="rounded-full"
-                          />                          
-                          <AvatarFallback>{option.name[0]}</AvatarFallback>
+                          />)}                    
+                          <AvatarFallback className="w-full h-full">{option.name[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex justify-between items-center w-full">
                           <div className="flex flex-col">
