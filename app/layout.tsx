@@ -19,40 +19,6 @@ const Pretendard = localFont({
 export const metadata: Metadata = {
   title: "Kite - 부스 인포 모음",
   description: "동인 행사 부스 정보들을 한 곳에. 캐릭터로 부스를 찾고, 마음에 드는 부스를 북마크에 추가해 보세요.",
-  icons: [
-    {
-      rel: 'favicon',
-      url: '/favicon.ico',
-    },
-    {
-      rel: 'favicon',
-      url: '/favicon.ico',
-      media: '(prefers-color-scheme: light)',
-    },
-    {
-      rel: 'favicon',
-      url: '/favicon-dark.ico',
-      media: '(prefers-color-scheme: dark)',
-    },
-    {
-      rel: 'icon',
-      url: '/favicon.png',
-      media: '(prefers-color-scheme: light)',
-    },
-    {
-      rel: 'icon',
-      url: '/favicon-dark.png',
-      media: '(prefers-color-scheme: dark)',
-    },
-    {
-      rel: 'apple-touch-icon',
-      url: '/apple-touch-icon.png',
-    },
-    {
-      rel: 'apple-icon',
-      url: '/apple-icon.png',
-    },
-  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

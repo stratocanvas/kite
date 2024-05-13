@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { notFound } from "next/navigation";
 import { GetBoothData } from "./fetch";
 import type { Metadata, ResolvingMetadata } from "next"
+import Image from "next/image";
 
 //export const revalidate = 0
 type Props = {
@@ -66,6 +67,7 @@ export default async function Home({ params }: { params: { id: string } }) {
 
     return (
         <>
+        <Image src={`https://www.kitebooth.com/api/og/booth?id=${booth.booth_id}`} alt={booth.name} width={1200} height={630} className="hidden object-cover"/>
             <div className="container m-0 p-0 pb-[160px] mx-auto">
                 <div className="flex flex-col gap-4 justify-center relative xl:mx-24">
                     <div className="p-0 m-0 w-full mx-auto relative">
