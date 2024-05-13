@@ -616,7 +616,7 @@ export default function RequestForm() {
                 }
             }
             console.log(values)
-            //const result = await SubmitBooth(values);
+            const result = await SubmitBooth(values);
             toast({
                 title: "부스 등록 성공!",
                 description: "등록된 부스 페이지로 이동합니다.",
