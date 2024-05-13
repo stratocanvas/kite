@@ -15,33 +15,47 @@ import type { Metadata, ResolvingMetadata } from "next"
 type Props = {
     params: { id: string }
     searchParams: { [key: string]: string | string[] | undefined }
-  }
+}
 
-  export async function generateMetadata(
+export async function generateMetadata(
     { params, searchParams }: Props,
     parent: ResolvingMetadata
-  ): Promise<Metadata> {
+): Promise<Metadata> {
     // read route params
     const id = params.id
-   
+
     // fetch data
     const booth = await GetBoothData(id)
     // optionally access and extend (rather than replace) parent metadata
-   
+
     return {
-      title: `${booth?.name}`,
-      description: `${booth?.event.name} 부스 인포`,
-      openGraph: {
-        title: `${booth?.name}`,
-        description: `${booth?.event.name} 부스 인포`,
-        images: [`https://www.kitebooth.com/api/og/booth?id=${id}`],
-        url: `https://www.kitebooth.com/booth/${id}`,
-      },
+        title: `${booth?.name} - ${booth?.event.name}`,
+        description: `${booth?.author.slice(0, 3).map((author: { name: string }) => author.name).join(', ')} 작가님의 ${booth?.event.name} ${booth?.date.length === 2
+            ? "양일"
+            : new Date(booth?.date).toLocaleDateString("ko-KR", {
+                weekday: "long",
+                timeZone: "Asia/Seoul"
+            })} ${booth?.genre.slice(0, 3).map((genre: { name: string }) => genre.name).join(', ')} 부스 인포`,
+
+        openGraph: {
+            title: `${booth?.name}`,
+            description: `${booth?.author.slice(0, 3).map((author: { name: string }) => author.name).join(', ')} 작가님의 ${booth?.event.name} ${booth?.date.length === 2
+                ? "양일"
+                : new Date(booth?.date).toLocaleDateString("ko-KR", {
+                    weekday: "long",
+                    timeZone: "Asia/Seoul"
+                })} 부스 인포`,
+            images: [`https://www.kitebooth.com/api/og/booth?id=${id}`],
+            url: `https://www.kitebooth.com/booth/${id}`,
+            type: 'article',
+            siteName: 'Kite',
+            locale: 'ko_KR',
+        },
     }
-  }
+}
 
 
-   
+
 
 export default async function Home({ params }: { params: { id: string } }) {
 
@@ -51,7 +65,7 @@ export default async function Home({ params }: { params: { id: string } }) {
     }
 
     return (
-        <>            
+        <>
             <div className="container m-0 p-0 pb-[160px] mx-auto">
                 <div className="flex flex-col gap-4 justify-center relative xl:mx-24">
                     <div className="p-0 m-0 w-full mx-auto relative">

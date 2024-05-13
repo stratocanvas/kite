@@ -2,6 +2,7 @@
 import * as React from "react"
 import { CheckIcon, ChevronDown } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -143,7 +144,7 @@ export function FilterWithThumb({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[250px] p-0" align="start">
+      <PopoverContent className="w-auto max-w-[300px] p-0" align="start">
         <Command>
           <CommandInput placeholder={`${title} 검색...`} />
           <CommandList>
@@ -180,12 +181,19 @@ export function FilterWithThumb({
                         </div>
 
                         <Avatar>
-                          <AvatarImage src={option.thumbnail} />
+                          <Image
+                            src={option?.thumbnail || ''}
+                            alt=''
+                            fill
+                            sizes="(max-width: 768px) 12vw, (max-width: 1200px) 9vw, 9vw"
+                            style={{ objectFit: "cover" }}
+                            className="rounded-full"
+                          />                          
                           <AvatarFallback>{option.name[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex justify-between items-center w-full">
                           <div className="flex flex-col">
-                            <p>{option.name}</p>
+                            <p className="overflow-hidden text-ellipsis">{option.name}</p>
                             <p className="text-sm text-muted-foreground">{option.sub}</p>
                           </div>
                         </div>
