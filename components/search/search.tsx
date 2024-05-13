@@ -45,7 +45,7 @@ export function SearchBar() {
     }
 
     return (
-        <div className="flex flex-col gap-2 w-full lg:w-auto max-w-full mx-8 justify-center">
+        <div className="flex flex-col gap-2 w-full md:w-auto max-w-full mx-8 justify-center">
             <div className="flex flex-row gap-2">
                 <Input placeholder="부스 이름 검색" className="text-[16px]" id="name" onChange={(e) => setBoothName(e.target.value)} />
                 <Button type="submit" size="default" className="w-auto" onClick={handleSearch}>
@@ -183,8 +183,8 @@ export function SearchBarSmall(params: typeof searchParams) {
     }, [selectedCharacters, selectedCategories, selectedGenres, selectedAuthors, selectedDOW, boothName]);
 
     return (
-        <div className="flex gap-2 w-full justify-center w-full lg:w-auto mx-8">
-            <Button className={`lg:hidden ${searchMode && "rounded-r-none"}`} type="submit" variant="secondary" size="sm" onClick={() => setSearchMode(!searchMode)}>
+        <div className="flex gap-2 w-full justify-center w-full md:w-auto mx-8">
+            <Button className={`md:hidden ${searchMode && "rounded-r-none"}`} type="submit" variant="secondary" size="sm" onClick={() => setSearchMode(!searchMode)}>
                 <Search className="w-4 h-4" />
             </Button>
             {searchMode &&
@@ -196,7 +196,7 @@ export function SearchBarSmall(params: typeof searchParams) {
                     autoFocus={true}
                     onChange={(e) => { handleChange(e); setSearchInput(e.target.value) }} />
             }
-            <div className="hidden sm:flex gap-2 items-center bg-muted pl-3 rounded-md">
+            <div className="hidden md:flex gap-2 items-center bg-muted pl-3 rounded-md">
                 <Search className="h-4 w-4" />
                 <Input
                     placeholder="부스 이름 검색"
