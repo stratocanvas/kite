@@ -32,6 +32,23 @@ export const metadata: Metadata = {
       url: '/kitelogo-dark.svg',
       media: '(prefers-color-scheme: dark)',
     },
+    {
+      rel: 'apple-touch-icon',
+      type: 'image/png',
+      url: '/kitelogo.svg',
+    },
+    {
+      rel: 'apple-icon',
+      type: 'image/png',
+      url: '/kitelogo.svg',
+      media: '(prefers-color-scheme: light)',
+    },
+    {
+      rel: 'apple-icon',
+      type: 'image/png',
+      url: '/kitelogo-dark.svg',
+      media: '(prefers-color-scheme: dark)',
+    },
   ],
 };
 
