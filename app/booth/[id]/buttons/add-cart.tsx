@@ -29,7 +29,7 @@ export default function AddCart({ product, boothId }: { product: any, boothId: s
                 product_id: product.product_id,
                 option_id: selectedOption.option_id,
                 quantity: 1,
-                price: selectedOption.price,
+                price: selectedOption.price || 0,
                 productName: product.name,
                 optionName: selectedOption.name,
             };

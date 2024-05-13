@@ -113,7 +113,7 @@ const formSchema = z.object({
         authors: z.array(z.number()).optional().nullable(),
         options: z.array(z.object({
             name: z.string().min(1, { message: "옵션 이름을 입력해 주세요" }),
-            price: z.number().min(0, { invalid: "가격을 입력해 주세요" }),
+            price: z.number().optional().nullable(),
             characters: z.array(z.number()).optional().nullable(),
             thumbnail: z.string().optional().nullable(),
         })).optional().nullable()
@@ -199,6 +199,10 @@ export default function RequestForm() {
     const [preorderType, setPreorderType] = useState('')
     const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
     const [twitterProfile, setTwitterProfile] = useState(false)
+
+    // This could be useState, useOptimistic, or other state
+    let pending = true;
+
     //twitter user fetch
     useEffect(() => {
         const fetchOptions = async () => {
@@ -611,12 +615,12 @@ export default function RequestForm() {
                     }
                 }
             }
-            const result = await SubmitBooth(values);
+            console.log(values)
+            //const result = await SubmitBooth(values);
             toast({
                 title: "부스 등록 성공!",
                 description: "등록된 부스 페이지로 이동합니다.",
             })
-            console.log(result.booth_id)
             router.replace(`/booth/${result.booth_id}`);
         } catch (error) {
             toast({
@@ -1794,9 +1798,7 @@ export default function RequestForm() {
                                                                                                         <div className="w-auto h-auto flex flex-col gap-1">
                                                                                                             <div className="flex justify-between items-center mb-1">
                                                                                                                 <Label htmlFor={`products.${index}.options.${optionIndex}.price`}>가격</Label>
-                                                                                                                <Badge>
-                                                                                                                    필수
-                                                                                                                </Badge>
+                                                                                                                
                                                                                                             </div>
                                                                                                             <Input
                                                                                                                 id={`products.${index}.options.${optionIndex}.price`}
@@ -1827,6 +1829,7 @@ export default function RequestForm() {
                                                                                                                     }
                                                                                                                 }}
                                                                                                             />
+                                                                                                        
                                                                                                         </div>
                                                                                                         <div className="w-auto h-auto flex flex-col gap-1">
                                                                                                             <Label htmlFor={`products.${index}.options.${optionIndex}.characters`}>캐릭터</Label>
