@@ -35,19 +35,12 @@ export const metadata: Metadata = {
     {
       rel: 'apple-touch-icon',
       type: 'image/png',
-      url: '/kitelogo.png',
+      url: '/kitelogo-touch.png',
     },
     {
       rel: 'apple-icon',
       type: 'image/png',
-      url: '/kitelogo.png',
-      media: '(prefers-color-scheme: light)',
-    },
-    {
-      rel: 'apple-icon',
-      type: 'image/png',
-      url: '/kitelogo-dark.png',
-      media: '(prefers-color-scheme: dark)',
+      url: '/kitelogo-apple.png',
     },
   ],
 };
