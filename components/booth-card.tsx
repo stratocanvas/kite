@@ -13,7 +13,7 @@ export default function BoothCard({ booth, displayEvent }: { booth: any, display
             <Card key={booth.booth_id} className="w-full mx-auto h-full">
                 <AspectRatio ratio={21 / 27} className="relative rounded-md" style={{ backgroundColor: booth.thumbnail ? `#${booth.thumbnail.split('-c(')[1].split(')')[0]}` : '#797979' }}>
                     {booth.thumbnail ? (
-                        <Image src={booth.thumbnail} alt="Image" fill className="rounded-md object-cover" priority={true} />
+                        <Image src={booth.thumbnail} alt="Image" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" fill className="rounded-md object-cover" priority={true} />
                     ) : (
                         <div className="rounded-md bg-muted flex justify-center items-center w-full h-full">
                             {/* You can place a placeholder image or text here */}
@@ -77,6 +77,7 @@ export default function BoothCard({ booth, displayEvent }: { booth: any, display
                                     {booth.author.map((author: { author_id: string, name: string, thumbnail: string }, index: number) => (
                                         <div className={`relative z-${booth.author.length - index} ${index !== booth.author.length - 1 ? '-mr-3' : ''}`} key={author.author_id}>
                                             <Avatar className="border-2" style={{ borderColor: booth.thumbnail ? `#${booth.thumbnail.split('-c(')[1].split(')')[0]}` : '#797979' }}>
+                                                    {author.thumbnail && (
                                                     <Image
                                                         src={author?.thumbnail || ''}
                                                         alt=''
@@ -84,7 +85,7 @@ export default function BoothCard({ booth, displayEvent }: { booth: any, display
                                                         sizes="(max-width: 768px) 33vw, (max-width: 1200px) 33vw, 33vw"
                                                         style={{ objectFit: "cover" }}
                                                         className="rounded-full"
-                                                    />
+                                                    />)}
                                                 <AvatarFallback>{author.name[0]}</AvatarFallback>
                                             </Avatar>
                                         </div>

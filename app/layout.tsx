@@ -19,6 +19,20 @@ const Pretendard = localFont({
 export const metadata: Metadata = {
   title: "Kite - 부스 인포 모음",
   description: "동인 행사 부스 정보들을 한 곳에. 캐릭터로 부스를 찾고, 마음에 드는 부스를 북마크에 추가해 보세요.",
+  icons: [
+    {
+      rel: 'icon',
+      type: 'image/x-icon',
+      url: '/kitelogo.svg',
+      media: '(prefers-color-scheme: light)',
+    },
+    {
+      rel: 'icon',
+      type: 'image/png',
+      url: '/kitelogo-dark.svg',
+      media: '(prefers-color-scheme: dark)',
+    },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

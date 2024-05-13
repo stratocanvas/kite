@@ -14,6 +14,8 @@ import { UserStateContext } from "@/providers"
 import { useContext, useEffect, useCallback, useState } from "react";
 import { deleteUser } from "@/app/api/auth/deleteuser";
 import { Dialog, DialogTrigger, DialogContent, DialogClose, DialogFooter, DialogDescription, DialogTitle, DialogHeader } from "@/components/ui/dialog"
+import kitelogo from "@/assets/kitelogo.svg"
+
 export function TopMenuDesktop() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname();
@@ -87,8 +89,10 @@ export function TopMenuDesktop() {
       <div className="flex justify-between mx-6 xl:mx-96">
         <div className="flex gap-2">
           <Link href="/">
-            <Button variant="ghost">
-              Kite
+            <Button variant="ghost" size="icon">
+              <svg width="18" height="18" viewBox="0 0 170 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M170 0H0V148.753L74.3734 74.3794L74.3765 74.3763L74.3796 74.3794L95.5725 74.4334L95.6265 95.6263L95.6304 95.6302L21.2606 170H170V0Z" fill="currentcolor" />
+              </svg>
             </Button>
           </Link>
           <Link href="/booth">
