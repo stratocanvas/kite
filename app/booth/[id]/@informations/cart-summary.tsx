@@ -107,7 +107,7 @@ export default function CartSummary({ boothId }: CartSummaryProps) {
                                                         {item.optionName} {/* 옵션 이름 표시 */}
                                                     </Label>
                                                     <Label className="text-muted-foreground text-sm">
-                                                        {item.price.toLocaleString()}원
+                                                        {item.price ? `${item.price.toLocaleString()} 원` : "가격 미정"}
                                                     </Label>
                                                 </div>
                                                 <div className="flex justify-end items-center">

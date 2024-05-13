@@ -423,7 +423,7 @@ export default function Cart() {
                                                                                         {option.optionName}
                                                                                     </Label>
                                                                                     <Label className="text-muted-foreground text-sm">
-                                                                                        {option.price.toLocaleString()}원
+                                                                                        {option.price ? `${option.price.toLocaleString()} 원` : "가격 미정"}
                                                                                     </Label>
                                                                                 </div>
                                                                                 <div className="flex justify-end items-center">

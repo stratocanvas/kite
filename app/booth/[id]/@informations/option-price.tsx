@@ -7,8 +7,11 @@ export default function OptionPrice({ productId }: { productId: string }) {
 
     return (
         <Label className="text-md mt-1">
-            {selectedOption ? 
-            selectedOption.price === 0 ? "무료" : `${selectedOption.price.toLocaleString()} 원` : "선택된 옵션이 없습니다."}
+            {selectedOption ? (
+                selectedOption.price ? (
+                    selectedOption.price === 0 ? "무료" : `${selectedOption.price.toLocaleString()} 원`
+                ) : "가격 미정"
+            ) : "선택된 옵션이 없습니다."}
         </Label>
     );
 };
