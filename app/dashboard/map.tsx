@@ -238,7 +238,16 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                 <div className="absolute bottom-0 w-full">
                     <Carousel>
                         <CarouselContent>
-                            {boothData.map((booth: any) => {
+                            {boothData.sort((a: any, b: any) => {
+                                const dateA = Array.isArray(a.date) ? a.date[0] : a.date;
+                                const dateB = Array.isArray(b.date) ? b.date[0] : b.date;
+                                const dayA = new Date(dateA).getDay();
+                                const dayB = new Date(dateB).getDay();
+
+                                if (dayA === 6 && dayB === 0) return -1; // 토요일이 일요일보다 앞에 옴
+                                if (dayA === 0 && dayB === 6) return 1;  // 일요일이 토요일보다 뒤에 옴
+                                return dayA - dayB; // 나머지 경우는 요일 순서대로 정렬
+                            }).map((booth: any) => {
                                 if (booth.locations.includes(selectedBooth)) {
                                     return (
                                         <CarouselItem>
