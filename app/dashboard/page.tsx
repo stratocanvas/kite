@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/carousel"
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
-import { Minus, Plus, Trash } from "lucide-react";
+import { ArrowDown, ArrowDownUp, ArrowUp, Filter, Minus, Plus, Trash } from "lucide-react";
 import useSWR from 'swr';
 import { GetCart, AddOrUpdateCart, DeleteCart, GetBookmarks } from '../api/auth/dashboard/actions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -46,6 +46,17 @@ import CountUp from 'react-countup'
 import { Toaster } from "@/components/ui/toaster"
 import { SquareArrowOutUpRight } from "lucide-react"
 import Link from "next/link"
+import {
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuRadioGroup,
+    DropdownMenuLabel,
+    DropdownMenuRadioItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface Event {
     value: string;
@@ -58,6 +69,7 @@ const MemoizedIndoorMap = memo(IndoorMap, (prevProps, nextProps) => {
         prevProps.boothLocations.every((loc, index) => loc === nextProps.boothLocations[index]);
 });
 export default function Cart() {
+
     const { data: items, mutate } = useSWR('cart', () => GetCart(), { revalidateOnMount: true, revalidateOnFocus: true, revalidateOnReconnect: true });
     const { data: wishlist } = useSWR('wishlist', () => GetBookmarks(), { revalidateOnMount: true, revalidateOnFocus: true, revalidateOnReconnect: true });
 
@@ -68,6 +80,8 @@ export default function Cart() {
     const [value, setValue] = useState("");
     const [events, setEvents] = useState<Event[]>([]);
 
+    const [sort, setSort] = useState("location-asc");
+    const [dayFilter, setDayFilter] = useState([]);
     const { userData } = React.useContext(UserStateContext);
 
     useLayoutEffect(() => {
@@ -149,20 +163,23 @@ export default function Cart() {
 
     //부스 위치 전달
     const allBoothLocations = useMemo(() => {
-        const cartBoothLocations = Object.values(booths).reduce((acc: any[], booth: any) => {
-            acc.push(...booth.boothLocationAll.map((location: string) => ({
-                id: location,
-                color: 'red',
-                type: 'cart'
-            })));
-            return acc;
-        }, []);
+        const cartBoothLocations = Object.values(booths)
+            .filter(booth => dayFilter.length === 0 || dayFilter.every(day => booth.date.some(date => new Date(date).getDay() === day)))
+            .reduce((acc: any[], booth: any) => {
+                acc.push(...booth.boothLocationAll.map((location: string) => ({
+                    id: location,
+                    color: 'rgb(255,59,48)',
+                    type: 'cart'
+                })));
+                return acc;
+            }, []);
 
         const wishlistBoothLocations = wishlist?.reduce((acc: any[], item: any) => {
-            if (item.booth?.event?.event_id === value) {
+            if (item.booth?.event?.event_id === value &&
+                (dayFilter.length === 0 || dayFilter.every(day => item.booth?.date.some(date => new Date(date).getDay() === day)))) {
                 acc.push(...item.booth.locations.map((location: string) => ({
                     id: location,
-                    color: 'blue',
+                    color: 'rgb(0,122,255)',
                     type: 'wishlist'
                 })));
             }
@@ -170,7 +187,7 @@ export default function Cart() {
         }, []) || [];
 
         return [...cartBoothLocations, ...wishlistBoothLocations];
-    }, [booths, wishlist, value]);
+    }, [booths, wishlist, value, dayFilter]);
 
     useEffect(() => {
         if (items && wishlist) {
@@ -297,54 +314,112 @@ export default function Cart() {
                                 </CardContent>
                             </Card>
                             <Tabs defaultValue="wishlist" className="w-full lg:w-1/2">
-                                <TabsList className="w-[calc(100%-3rem)] mx-6">
-                                    <TabsTrigger value="wishlist">위시리스트</TabsTrigger>
-                                    <TabsTrigger value="cart">장바구니</TabsTrigger>
-                                </TabsList>
+                                <div className="flex gap-2">
+                                    <TabsList className="w-auto ml-6">
+                                        <TabsTrigger value="wishlist">위시리스트</TabsTrigger>
+                                        <TabsTrigger value="cart">장바구니</TabsTrigger>
+                                    </TabsList>
+                                    <div className="flex gap-2 w-full">
+                                        <div>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger>
+                                                    <Button variant="outline" className="flex gap-2">
+                                                        <Filter className="w-4 h-4" />
+                                                        <p className="hidden md:block">필터</p>
+                                                        {dayFilter.length > 0 && <Badge variant="secondary">{dayFilter.length === 2 ? "양일" : dayFilter[0] === 6 ? "토": " 일"}</Badge>}
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent>
+                                                    <DropdownMenuLabel>요일</DropdownMenuLabel>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuCheckboxItem onCheckedChange={(checked) => {
+                                                        if (checked) {
+                                                            setDayFilter([...dayFilter, 6]);
+                                                        } else {
+                                                            setDayFilter(dayFilter.filter((day) => day !== 6));
+                                                        }
+                                                    }} checked={dayFilter.includes(6)}>토요일</DropdownMenuCheckboxItem>
+                                                    <DropdownMenuCheckboxItem onCheckedChange={(checked) => {
+                                                        if (checked) {
+                                                            setDayFilter([...dayFilter, 0]);
+                                                        } else {
+                                                            setDayFilter(dayFilter.filter((day) => day !== 0));
+                                                        }
+                                                    }} checked={dayFilter.includes(0)}>일요일</DropdownMenuCheckboxItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
+                                        <div>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger>
+                                                    <Button variant="outline" className="flex gap-2">
+                                                        {sort === 'location-asc' ? <ArrowUp className="w-4 h-4"/> : <ArrowDown className="w-4 h-4"/>}
+                                                        <p className="hidden md:block">{sort === 'location-asc' ? "A-Z" : "Z-A"}</p>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent>
+                                                    <DropdownMenuRadioGroup value={sort} onValueChange={setSort}>
+                                                        <DropdownMenuLabel>부스 위치</DropdownMenuLabel>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuRadioItem value="location-asc">A-Z</DropdownMenuRadioItem>
+                                                        <DropdownMenuRadioItem value="location-desc">Z-A</DropdownMenuRadioItem>
+                                                    </DropdownMenuRadioGroup>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
+                                    </div>
+                                </div>
                                 <TabsContent value="wishlist">
-                                    <TabsContent value="wishlist">
-                                        {wishlist
-                                            ?.filter((item) => item.booth?.event?.event_id === value)
-                                            .map((item) => (
-                                                <div key={item.booth_id}>
-                                                    <Card className="mx-6 my-2">
-                                                        <CardHeader>
-                                                            <div className="flex justify-between items-center">
-                                                                <CardTitle className="break-words overflow-hidden text-ellipsis font-bold">
-                                                                    <div className="flex gap-2 items-center">
-                                                                        {item.booth?.locations.length > 1 ? (
-                                                                            <>
-                                                                                {item.booth?.locations[0].replace(/\d+/g, '')}
-                                                                                {item.booth?.locations[0].replace(/\D+/g, '')}
-
-                                                                            </>
-                                                                        ) : (
-                                                                            item.booth?.locations[0]
-                                                                        )}
-                                                                        {item.booth?.date.some(date => [0, 6].includes(new Date(date).getDay())) && (
-                                                                            <Badge variant="secondary">
-                                                                                {item.booth?.date.length === 2 ? "양일" : new Date(item.booth?.date[0]).toLocaleDateString('ko-KR', { weekday: 'long' })}
-                                                                            </Badge>
-                                                                        )}
-                                                                    </div>
-                                                                </CardTitle>
-                                                                <Button variant="secondary" size="icon" className="ml-2">
-                                                                    <Link href={`/booth/${item.booth_id}`}>
-                                                                        <SquareArrowOutUpRight />
-                                                                    </Link>
-                                                                </Button>
-                                                            </div>
-                                                            <CardDescription className="text-md text-foreground">
-                                                                {item.booth?.name}
-                                                            </CardDescription>
-                                                        </CardHeader>
-                                                        <CardContent>
-
-                                                        </CardContent>
-                                                    </Card>
-                                                </div>
-                                            ))}
-                                    </TabsContent>
+                                    {wishlist
+                                        ?.filter((item) => item.booth?.event?.event_id === value)
+                                        .filter((item) => dayFilter.length === 0 || dayFilter.every(day => item.booth?.date.some(date => new Date(date).getDay() === day)))
+                                        .sort((a, b) => {
+                                            const locA = a.booth?.locations[0] || '';
+                                            const locB = b.booth?.locations[0] || '';
+                                            if (sort === 'location-asc') {
+                                                return locA.localeCompare(locB);
+                                            } else if (sort === 'location-desc') {
+                                                return locB.localeCompare(locA);
+                                            }
+                                            return 0;
+                                        })
+                                        .map((item) => (
+                                            <div key={item.booth_id}>
+                                                <Card className="mx-6 my-2">
+                                                    <CardHeader>
+                                                        <div className="flex justify-between items-center">
+                                                            <CardTitle className="break-words overflow-hidden text-ellipsis font-bold">
+                                                                <div className="flex gap-2 items-center">
+                                                                    {item.booth?.locations.length > 1 ? (
+                                                                        <>
+                                                                            {item.booth?.locations[0].replace(/\d+/g, '')}
+                                                                            {item.booth?.locations[0].replace(/\D+/g, '')}
+                                                                        </>
+                                                                    ) : (
+                                                                        item.booth?.locations[0]
+                                                                    )}
+                                                                    {item.booth?.date.some(date => [0, 6].includes(new Date(date).getDay())) && (
+                                                                        <Badge variant="secondary" className={item.booth?.date.length === 2 ? "bg-red-500" : new Date(item.booth?.date[0]).getDay() === 0 ? "bg-red-200 dark:bg-red-800" : "bg-blue-200 dark:bg-blue-800"}>
+                                                                            {item.booth?.date.length === 2 ? "양일" : new Date(item.booth?.date[0]).toLocaleDateString('ko-KR', { weekday: 'long' })}
+                                                                        </Badge>
+                                                                    )}
+                                                                </div>
+                                                            </CardTitle>
+                                                            <Button variant="secondary" size="icon" className="ml-2">
+                                                                <Link href={`/booth/${item.booth_id}`}>
+                                                                    <SquareArrowOutUpRight />
+                                                                </Link>
+                                                            </Button>
+                                                        </div>
+                                                        <CardDescription className="text-md text-foreground">
+                                                            {item.booth?.name}
+                                                        </CardDescription>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                    </CardContent>
+                                                </Card>
+                                            </div>
+                                        ))}
                                 </TabsContent>
                                 <TabsContent value="cart">
                                     <Card className="w-[calc(100%-3rem)] mx-6">
@@ -365,91 +440,102 @@ export default function Cart() {
                                                 []
                                             }>
                                             <CarouselContent className="ml-3 mr-6">
-                                                {Object.entries(booths).map(([boothId, booth]) => (
-                                                    <CarouselItem key={boothId} className="basis-auto pl-3">
-                                                        <Card className="w-[290px] h-[100%] flex flex-col">
-                                                            <CardHeader>
-                                                                <CardTitle className="break-words overflow-hidden text-ellipsis font-bold">
-                                                                    <div className="flex justify-between items-center">
-                                                                        <div className="flex gap-2 items-center">
-                                                                            {booth.boothLocation}
-                                                                            {booth.date.some(date => [0, 6].includes(new Date(date).getDay())) && (
-                                                                                <Badge variant="secondary">
-                                                                                    {booth.date.length === 2 ? "양일" : new Date(booth.date[0]).toLocaleDateString('ko-KR', { weekday: 'long' })}
-                                                                                </Badge>
-                                                                            )}
-                                                                        </div>
-                                                                        <Button variant="secondary" size="icon" className="ml-2">
-                                                                            <Link href={`/booth/${boothId}`}>
-                                                                                <SquareArrowOutUpRight />
-                                                                            </Link>
-                                                                        </Button>
-                                                                    </div>
-                                                                </CardTitle>
-
-                                                                <CardDescription className="text-lg text-foreground">
-                                                                    <div>{booth.boothName}</div>
-                                                                </CardDescription>
-                                                                <div className="flex gap-1">
-                                                                    <CardDescription className="text-md text-foreground">
-                                                                        <CountUp
-                                                                            start={prevBoothPrices.current[boothId] || 0}
-                                                                            end={boothPrices[boothId]}
-                                                                            duration={1}
-                                                                            separator=","
-                                                                            suffix="원"
-                                                                        />
-
-                                                                    </CardDescription>
-                                                                    <Label className="text-muted-foreground text-md">
-                                                                        {" - "}
-                                                                        {booth.products.reduce((acc, product) =>
-                                                                            acc + product.options.reduce((acc, option) => acc + option.quantity, 0)
-                                                                            , 0)}개 항목
-                                                                    </Label>
-                                                                </div>
-                                                                <Separator />
-                                                            </CardHeader>
-                                                            <CardContent className="flex flex-col gap-4">
-                                                                {booth.products.sort((a, b) => a.productName.localeCompare(b.productName)).map(product => (
-                                                                    <div key={product.productId}>
-                                                                        <Label className="text-md text-muted-foreground">
-                                                                            {product.productName}
-                                                                        </Label>
-                                                                        {product.options.sort((a, b) => a.optionName.localeCompare(b.optionName)).map(option => (
-                                                                            <div key={option.optionId} className="flex justify-between mb-2">
-                                                                                <div className="flex flex-col">
-                                                                                    <Label className="text-lg font-bold">
-                                                                                        {option.optionName}
-                                                                                    </Label>
-                                                                                    <Label className="text-muted-foreground text-sm">
-                                                                                        {option.price ? `${option.price.toLocaleString()} 원` : "가격 미정"}
-                                                                                    </Label>
-                                                                                </div>
-                                                                                <div className="flex justify-end items-center">
-                                                                                    <Button variant="secondary" className="w-8 h-8 p-0" onClick={() => handleQuantityChange(product.productId, option.optionId, option.quantity, false)}>
-                                                                                        {option.quantity > 1 ? <Minus className="h-4 w-4 m-0 p-0" /> : <Trash className="h-4 w-4 m-0 p-0" />}
-                                                                                    </Button>
-                                                                                    <Label className="mx-3 text-md">
-                                                                                        {option.quantity}
-                                                                                    </Label>
-                                                                                    <Button variant="secondary" className="w-8 h-8 p-0" onClick={() => handleQuantityChange(product.productId, option.optionId, option.quantity, true)}>
-                                                                                        <Plus className="h-4 w-4 m-0 p-0" />
-                                                                                    </Button>
-                                                                                </div>
+                                                {Object.entries(booths)
+                                                    .filter(([boothId, booth]) => dayFilter.length === 0 || dayFilter.every(day => booth.date.some(date => new Date(date).getDay() === day)))
+                                                    .sort(([boothIdA, boothA], [boothIdB, boothB]) => {
+                                                        const locA = boothA.boothLocation || '';
+                                                        const locB = boothB.boothLocation || '';
+                                                        if (sort === 'location-asc') {
+                                                            return locA.localeCompare(locB);
+                                                        } else if (sort === 'location-desc') {
+                                                            return locB.localeCompare(locA);
+                                                        }
+                                                        return 0;
+                                                    }).map(([boothId, booth]) => (
+                                                        <CarouselItem key={boothId} className="basis-auto pl-3">
+                                                            <Card className="w-[290px] h-[100%] flex flex-col">
+                                                                <CardHeader>
+                                                                    <CardTitle className="break-words overflow-hidden text-ellipsis font-bold">
+                                                                        <div className="flex justify-between items-center">
+                                                                            <div className="flex gap-2 items-center">
+                                                                                {booth.boothLocation}
+                                                                                {booth.date.some(date => [0, 6].includes(new Date(date).getDay())) && (
+                                                                                    <Badge variant="secondary" className={booth.date.length === 2 ? "bg-red-500" : new Date(booth.date[0]).getDay() === 0 ? "bg-red-200 dark:bg-red-800" : "bg-blue-200 dark:bg-blue-800"}>
+                                                                                        {booth.date.length === 2 ? "양일" : new Date(booth.date[0]).toLocaleDateString('ko-KR', { weekday: 'long' })}
+                                                                                    </Badge>
+                                                                                )}
                                                                             </div>
-                                                                        ))}
+                                                                            <Button variant="secondary" size="icon" className="ml-2">
+                                                                                <Link href={`/booth/${boothId}`}>
+                                                                                    <SquareArrowOutUpRight />
+                                                                                </Link>
+                                                                            </Button>
+                                                                        </div>
+                                                                    </CardTitle>
+
+                                                                    <CardDescription className="text-lg text-foreground">
+                                                                        <div>{booth.boothName}</div>
+                                                                    </CardDescription>
+                                                                    <div className="flex gap-1">
+                                                                        <CardDescription className="text-md text-foreground">
+                                                                            <CountUp
+                                                                                start={prevBoothPrices.current[boothId] || 0}
+                                                                                end={boothPrices[boothId]}
+                                                                                duration={1}
+                                                                                separator=","
+                                                                                suffix="원"
+                                                                            />
+
+                                                                        </CardDescription>
+                                                                        <Label className="text-muted-foreground text-md">
+                                                                            {" - "}
+                                                                            {booth.products.reduce((acc, product) =>
+                                                                                acc + product.options.reduce((acc, option) => acc + option.quantity, 0)
+                                                                                , 0)}개 항목
+                                                                        </Label>
                                                                     </div>
-                                                                ))}
-                                                            </CardContent>
-                                                            {/*
+                                                                    <Separator />
+                                                                </CardHeader>
+                                                                <CardContent className="flex flex-col gap-4">
+                                                                    {booth.products.sort((a, b) => a.productName.localeCompare(b.productName)).map(product => (
+                                                                        <div key={product.productId}>
+                                                                            <Label className="text-md text-muted-foreground">
+                                                                                {product.productName}
+                                                                            </Label>
+                                                                            {product.options.sort((a, b) => a.optionName.localeCompare(b.optionName)).map(option => (
+                                                                                <div key={option.optionId} className="flex justify-between mb-2">
+                                                                                    <div className="flex flex-col">
+                                                                                        <Label className="text-lg font-bold">
+                                                                                            {option.optionName}
+                                                                                        </Label>
+                                                                                        <Label className="text-muted-foreground text-sm">
+                                                                                            {option.price ? `${option.price.toLocaleString()} 원` : "가격 미정"}
+                                                                                        </Label>
+                                                                                    </div>
+                                                                                    <div className="flex justify-end items-center">
+                                                                                        <Button variant="secondary" className="w-8 h-8 p-0" onClick={() => handleQuantityChange(product.productId, option.optionId, option.quantity, false)}>
+                                                                                            {option.quantity > 1 ? <Minus className="h-4 w-4 m-0 p-0" /> : <Trash className="h-4 w-4 m-0 p-0" />}
+                                                                                        </Button>
+                                                                                        <Label className="mx-3 text-md">
+                                                                                            {option.quantity}
+                                                                                        </Label>
+                                                                                        <Button variant="secondary" className="w-8 h-8 p-0" onClick={() => handleQuantityChange(product.productId, option.optionId, option.quantity, true)}>
+                                                                                            <Plus className="h-4 w-4 m-0 p-0" />
+                                                                                        </Button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                    ))}
+                                                                </CardContent>
+                                                                {/*
                                                             <CardFooter className="flex items-center overflow-x-auto mt-auto">
                                                                 <Button className="w-full">수령 완료</Button>
                                                             </CardFooter>
                                                                         */}
-                                                        </Card>
-                                                    </CarouselItem>
-                                                ))}
+                                                            </Card>
+                                                        </CarouselItem>
+                                                    ))}
                                             </CarouselContent>
                                             <CarouselPrevious className="ml-16 w-10 h-10" />
                                             <CarouselNext className="mr-16 w-10 h-10" />
