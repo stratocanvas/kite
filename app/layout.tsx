@@ -24,6 +24,11 @@ export const metadata: Metadata = {
       {
         rel: 'icon',
         type: 'image/png',
+        url: '/favicon.png',
+      },
+      {
+        rel: 'icon',
+        type: 'image/png',
         url: '/icon.png',
         media: '(prefers-color-scheme: light)',
       },
@@ -44,10 +49,15 @@ export const metadata: Metadata = {
         url: '/apple-touch-icon.png',
       },
       {
+        rel: 'apple-touch-icon-precomposed',
+        type: 'image/png',
+        url: '/apple-touch-icon-precomposed.png',
+      },
+      {
         rel: 'shortcut icon',
         type: 'image/png',
-        url: '/apple-touch-icon.png'
-      }
+        url: '/apple-touch-icon.png',
+      },
     ],
   },
   openGraph: {
