@@ -22,23 +22,30 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
+        rel: 'icon',
+        type: 'image/png',
         url: '/icon.png',
         media: '(prefers-color-scheme: light)',
       },
       {
+        rel: 'icon',
+        type: 'image/png',
         url: '/icon2.png',
         media: '(prefers-color-scheme: dark)',
       },
       {
         rel: 'apple-icon',
+        type: 'image/png',
         url: '/apple-touch-icon.png',
       },
       {
         rel: 'apple-touch-icon',
+        type: 'image/png',
         url: '/apple-touch-icon.png',
       },
       {
         rel: 'shortcut icon',
+        type: 'image/png',
         url: '/apple-touch-icon.png'
       }
     ],
