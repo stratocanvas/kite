@@ -19,6 +19,37 @@ const Pretendard = localFont({
 export const metadata: Metadata = {
   title: "Kite",
   description: "동인 행사 부스 인포들을 한 곳에. 캐릭터로 부스를 찾고, 마음에 드는 부스를 북마크에 추가해 보세요.",
+  icons: {
+    icon: [
+      {
+        rel: 'icon',
+        type: 'image/png',
+        url: '/icon.png',
+        media: '(prefers-color-scheme: light)',
+      },
+      {
+        rel: 'icon',
+        type: 'image/png',
+        url: '/icon2.png',
+        media: '(prefers-color-scheme: dark)',
+      },
+      {
+        rel: 'apple-icon',
+        type: 'image/png',
+        url: '/apple-touch-icon.png',
+      },
+      {
+        rel: 'apple-touch-icon',
+        type: 'image/png',
+        url: '/apple-touch-icon.png',
+      },
+      {
+        rel: 'shortcut icon',
+        type: 'image/png',
+        url: '/apple-touch-icon.png'
+      }
+    ],
+  },
   openGraph: {
     title: 'Kite',
     description: '동인 행사 부스 정보, Kite에서 한 눈에.',
@@ -27,6 +58,7 @@ export const metadata: Metadata = {
     type: 'website',
     siteName: 'Kite',
     locale: 'ko_KR',
+
   },
 };
 
@@ -37,10 +69,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <html lang="ko" suppressHydrationWarning>
         <head>
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <link rel="icon" href="/icon.png" type="image/png" media="(prefers-color-scheme: light)"/>
-          <link rel="icon" href="/icon2.png" type="image/png" media="(prefers-color-scheme: dark)" />
-          <link rel="apple-icon" href="/apple-icon.png" type="image/png" />
-          <link rel="apple-touch-icon" href="/apple-touch-icon.png" type="image/png" />
         </head>
         <body className={Pretendard.className}>
           <ThemeProvider
