@@ -180,7 +180,7 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                         .text(d => d.properties.id)
                         .attr("pointer-events", "none")
                         .attr("font-weight", "bold")
-                        .attr("font-size", "6px")
+                        .attr("font-size", "30px")
                         .attr("fill", d => {
                             const location = boothLocations?.find(loc => loc.id === d.properties.id);
                             if (location) {
