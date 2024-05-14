@@ -2,12 +2,11 @@ import { ThemeProvider } from "@/components/theme-provider"
 import type { Metadata } from "next";
 import "./globals.css";
 import { TopMenuDesktop } from "@/app/navmenu";
-import { SpeedInsights } from "@vercel/speed-insights/next"
-import { Analytics } from "@vercel/analytics/react"
 import localFont from "next/font/local";
 import { Toaster } from "@/components/ui/toaster"
 import UserStateProvider from "@/providers";
 import Footer from "@/app/footer";
+import { GoogleAnalytics } from '@next/third-parties/google'
 
 const Pretendard = localFont({
   src: "./fonts/PretendardVariable.woff2",
@@ -71,7 +70,7 @@ export const metadata: Metadata = {
 
   },
 };
-
+const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS;
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 
   return (
@@ -99,9 +98,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </footer>
             </UserStateProvider>
           </ThemeProvider>
-          <Analytics />
-          <SpeedInsights />
         </body>
+        <GoogleAnalytics gaId={GA_TRACKING_ID} />
       </html>
     </>
   );
