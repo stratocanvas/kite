@@ -118,7 +118,7 @@ export async function GetBookmarks() {
 	const user = await GetUser();
 	const { data: wishlist, error: wishlistError } = await supabase
 	  .from("b_wishlists")
-	  .select("booth_id, booth(name, locations, event(event_id, name), date)")
+	  .select("booth_id, tag, booth(name, locations, event(event_id, name), date)")
 	  .eq("users_id", user);
 	if (wishlistError) {
 		return [];
@@ -157,6 +157,37 @@ export async function SetBookmark(boothId: string, action: boolean) {
 				.eq("users_id", user?.id)
 				.eq("booth_id", boothId);
 		}
+	} catch (error) {
+		return { errorType: "unexpectedError", cause: error };
+	}
+}
+
+export async function SetBookmarkTag(
+	tag: number,
+	boothId: string,
+	action: boolean,
+) {
+	const supabase = createClient();
+	try {
+		const {
+			data: { user },
+			error: userError,
+		} = await supabase.auth.getUser();
+		if (userError) {
+			return { errorType: "userError", cause: userError.cause }; // Return an object indicating a user error
+		}
+		// The rest of your SetBookmark logic...
+		if (action) {
+			// Add bookmark
+			const { error } = await supabase
+				.from("b_wishlists")
+				.update({
+					tag: tag,
+				})
+				.eq("users_id", user?.id)
+				.eq("booth_id", boothId);
+		}
+
 	} catch (error) {
 		return { errorType: "unexpectedError", cause: error };
 	}
