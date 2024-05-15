@@ -76,13 +76,13 @@ export const metadata: Metadata = {
   },
 };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS;
 
   return (
     <>
       <html lang="ko" suppressHydrationWarning>
         <head>
           <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <script defer src="https://cloud.umami.is/script.js" data-website-id="8a0979b9-08ea-4eb6-b7a9-da1d4f5fee8b"/>
         </head>
         <body className={Pretendard.className}>
           <ThemeProvider
@@ -104,7 +104,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </UserStateProvider>
           </ThemeProvider>
         </body>
-        {GA_TRACKING_ID && <GoogleAnalytics gaId={GA_TRACKING_ID} />}
       </html>
     </>
   );
