@@ -373,77 +373,82 @@ export default function Cart() {
                                     </TabsList>
                                     <ScrollArea className="flex-grow whitespace-nowrap rounded-md mr-6">
                                         <div className="flex gap-2">
-                                            <div>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger>
-                                                        <Button variant="outline" className="flex gap-2">
-                                                            <Filter className="w-4 h-4" />
-                                                            <p className="hidden md:block">필터</p>
-                                                            {dayFilter.length > 0 && <Badge variant="secondary">{dayFilter.length === 2 ? "양일" : dayFilter[0] === 6 ? "토" : " 일"}</Badge>}
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent>
-                                                        <DropdownMenuLabel>요일</DropdownMenuLabel>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger >
+                                                    <Button
+                                                        variant="outline"
+                                                        className="flex gap-2"
+
+                                                    >
+                                                        <Filter className="w-4 h-4" />
+                                                        <p className="hidden md:block">필터</p>
+                                                        {dayFilter.length > 0 && (
+                                                            <Badge variant="secondary">
+                                                                {dayFilter.length === 2 ? "양일" : dayFilter[0] === 6 ? "토" : "일"}
+                                                            </Badge>
+                                                        )}
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent>
+                                                    <DropdownMenuLabel>요일</DropdownMenuLabel>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuCheckboxItem onCheckedChange={(checked) => {
+                                                        if (checked) {
+                                                            setDayFilter([...dayFilter, 6]);
+                                                        } else {
+                                                            setDayFilter(dayFilter.filter((day) => day !== 6));
+                                                        }
+                                                    }} checked={dayFilter.includes(6)}>토요일</DropdownMenuCheckboxItem>
+                                                    <DropdownMenuCheckboxItem onCheckedChange={(checked) => {
+                                                        if (checked) {
+                                                            setDayFilter([...dayFilter, 0]);
+                                                        } else {
+                                                            setDayFilter(dayFilter.filter((day) => day !== 0));
+                                                        }
+                                                    }} checked={dayFilter.includes(0)}>일요일</DropdownMenuCheckboxItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger>
+                                                    <Button variant="outline" className="flex gap-2">
+                                                        <ArrowUpDown className="w-4 h-4" />
+                                                        <p className="hidden md:block">정렬</p>
+                                                        <Badge variant="secondary" className="flex">
+                                                            <MapPin className="w-4 h-4" />
+                                                            {sort === 'location-asc' ?
+                                                                (<ArrowUp className="w-4 h-4" />) :
+                                                                (<ArrowDown className="w-4 h-4" />)}
+                                                        </Badge>
+                                                        <Badge variant="secondary" className="flex">
+                                                            <Tag className="w-4 h-4" />
+                                                            {sortTag === 'tag-asc' ?
+                                                                (<ArrowUp className="w-4 h-4" />) :
+                                                                (<ArrowDown className="w-4 h-4" />)}
+                                                        </Badge>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent>
+                                                    <DropdownMenuRadioGroup value={sort} onValueChange={setSort}>
+                                                        <DropdownMenuLabel className="flex justify-between w-full items-center">
+                                                            <p>부스 위치</p>
+                                                            <MapPin className="h-4 w-4" />
+                                                        </DropdownMenuLabel>
                                                         <DropdownMenuSeparator />
-                                                        <DropdownMenuCheckboxItem onCheckedChange={(checked) => {
-                                                            if (checked) {
-                                                                setDayFilter([...dayFilter, 6]);
-                                                            } else {
-                                                                setDayFilter(dayFilter.filter((day) => day !== 6));
-                                                            }
-                                                        }} checked={dayFilter.includes(6)}>토요일</DropdownMenuCheckboxItem>
-                                                        <DropdownMenuCheckboxItem onCheckedChange={(checked) => {
-                                                            if (checked) {
-                                                                setDayFilter([...dayFilter, 0]);
-                                                            } else {
-                                                                setDayFilter(dayFilter.filter((day) => day !== 0));
-                                                            }
-                                                        }} checked={dayFilter.includes(0)}>일요일</DropdownMenuCheckboxItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </div>
-                                            <div>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger>
-                                                        <Button variant="outline" className="flex gap-2">
-                                                            <ArrowUpDown className="w-4 h-4" />
-                                                            <p className="hidden md:block">정렬</p>
-                                                            <Badge variant="secondary" className="flex">
-                                                                <MapPin className="w-4 h-4" />
-                                                                {sort === 'location-asc' ?
-                                                                    (<ArrowUp className="w-4 h-4" />) :
-                                                                    (<ArrowDown className="w-4 h-4" />)}
-                                                            </Badge>
-                                                            <Badge variant="secondary" className="flex">
-                                                                <Tag className="w-4 h-4" />
-                                                                {sortTag === 'tag-asc' ?
-                                                                    (<ArrowUp className="w-4 h-4" />) :
-                                                                    (<ArrowDown className="w-4 h-4" />)}
-                                                            </Badge>
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent>
-                                                        <DropdownMenuRadioGroup value={sort} onValueChange={setSort}>
-                                                            <DropdownMenuLabel className="flex justify-between w-full items-center">
-                                                                <p>부스 위치</p>
-                                                                <MapPin className="h-4 w-4" />
-                                                            </DropdownMenuLabel>
-                                                            <DropdownMenuSeparator />
-                                                            <DropdownMenuRadioItem value="location-asc">A-Z</DropdownMenuRadioItem>
-                                                            <DropdownMenuRadioItem value="location-desc">Z-A</DropdownMenuRadioItem>
-                                                        </DropdownMenuRadioGroup>
-                                                        <DropdownMenuRadioGroup value={sortTag} onValueChange={setSortTag}>
-                                                            <DropdownMenuLabel className="flex justify-between w-full items-center">
-                                                                <p>태그</p>
-                                                                <Tag className="h-4 w-4" />
-                                                            </DropdownMenuLabel>
-                                                            <DropdownMenuSeparator />
-                                                            <DropdownMenuRadioItem value="tag-asc">1-5</DropdownMenuRadioItem>
-                                                            <DropdownMenuRadioItem value="tag-desc">5-1</DropdownMenuRadioItem>
-                                                        </DropdownMenuRadioGroup>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </div>
+                                                        <DropdownMenuRadioItem value="location-asc">A-Z</DropdownMenuRadioItem>
+                                                        <DropdownMenuRadioItem value="location-desc">Z-A</DropdownMenuRadioItem>
+                                                    </DropdownMenuRadioGroup>
+                                                    <DropdownMenuRadioGroup value={sortTag} onValueChange={setSortTag}>
+                                                        <DropdownMenuLabel className="flex justify-between w-full items-center">
+                                                            <p>태그</p>
+                                                            <Tag className="h-4 w-4" />
+                                                        </DropdownMenuLabel>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuRadioItem value="tag-asc">1-5</DropdownMenuRadioItem>
+                                                        <DropdownMenuRadioItem value="tag-desc">5-1</DropdownMenuRadioItem>
+                                                    </DropdownMenuRadioGroup>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </div>
                                         <ScrollBar orientation="horizontal" />
                                     </ScrollArea>
@@ -623,17 +628,7 @@ export default function Cart() {
                                                         }
                                                         return 0;
                                                     })
-                                                    .sort(([boothIdA, boothA], [boothIdB, boothB]) => {
-                                                        const locA = boothA.boothLocation || '';
-                                                        const locB = boothB.boothLocation || '';
-
-                                                        if (sort === 'location-asc') {
-                                                            return locA.localeCompare(locB);
-                                                        } if (sort === 'location-desc') {
-                                                            return locB.localeCompare(locA);
-                                                        }
-                                                        return 0;
-                                                    }).map(([boothId, booth]) => (
+                                                    .map(([boothId, booth]) => (
                                                         <CarouselItem key={boothId} className="basis-auto pl-3">
                                                             <Card className="w-[290px] h-[100%] flex flex-col">
                                                                 <CardHeader>
