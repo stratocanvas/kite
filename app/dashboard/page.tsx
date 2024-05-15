@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/carousel"
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
-import { ArrowDown, ArrowDownUp, ArrowUp, Filter, Minus, Plus, Trash } from "lucide-react";
+import { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Circle, Filter, HeartOff, MapPin, Minus, Plus, Tag, Trash } from "lucide-react";
 import useSWR from 'swr';
 import { GetCart, AddOrUpdateCart, DeleteCart, GetBookmarks } from '../api/auth/dashboard/actions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -57,6 +57,8 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { SetBookmarkTag, SetCartTag, SetBookmark } from "@/app/api/auth/dashboard/actions";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 interface Event {
     value: string;
@@ -71,7 +73,7 @@ const MemoizedIndoorMap = memo(IndoorMap, (prevProps, nextProps) => {
 export default function Cart() {
 
     const { data: items, mutate } = useSWR('cart', () => GetCart(), { revalidateOnMount: true, revalidateOnFocus: true, revalidateOnReconnect: true });
-    const { data: wishlist } = useSWR('wishlist', () => GetBookmarks(), { revalidateOnMount: true, revalidateOnFocus: true, revalidateOnReconnect: true });
+    const { data: wishlist, mutate: wishlistMutate } = useSWR('wishlist', () => GetBookmarks(), { revalidateOnMount: true, revalidateOnFocus: true, revalidateOnReconnect: true });
 
     const router = useRouter()
     const pathname = usePathname()
@@ -81,7 +83,46 @@ export default function Cart() {
     const [events, setEvents] = useState<Event[]>([]);
 
     const [sort, setSort] = useState("location-asc");
+    const [sortTag, setSortTag] = useState("tag-asc");
     const [dayFilter, setDayFilter] = useState([]);
+
+    const unsetWishlist = useCallback(async (boothId: string) => {
+        const updatedWishlist = (wishlist || []).filter((item) => item.booth_id !== boothId);
+        wishlistMutate(updatedWishlist, false); // 로컬 데이터를 업데이트
+        try {
+            const result = await SetBookmark(boothId, false);
+            wishlistMutate(); // 서버에서 최신 데이터를 다시 가져옴
+        } catch (error) {
+            console.error("Error setting bookmark:", error);
+            wishlistMutate(wishlist); // 오류 발생 시 원래 데이터로 되돌리기
+        }
+    }, [wishlist, wishlistMutate]);
+
+    const changeBookmarkColor = useCallback(async (tag: number, boothId: string) => {
+        const updatedWishlist = (wishlist || []).map((item) => item.booth_id === boothId ? { ...item, tag } : item);
+        wishlistMutate(updatedWishlist, false); // 로컬 데이터를 업데이트
+        try {
+            const result = await SetBookmarkTag(tag, boothId);
+            wishlistMutate(); // 서버에서 최신 데이터를 다시 가져옴
+        } catch (error) {
+            console.error("Error setting bookmark:", error);
+            wishlistMutate(wishlist); // 오류 발생 시 원래 데이터로 되돌리기
+        }
+    }, [wishlist, wishlistMutate]);
+
+    const changeCartColor = useCallback(async (tag: number, productId: number[]) => {
+        const updatedCart = (items || []).map((item) => productId.includes(item.product_id) ? { ...item, tag } : item);
+        mutate(updatedCart, false); // 로컬 데이터를 업데이트
+        try {
+            const result = await SetCartTag(tag, productId);
+            mutate(); // 서버에서 최신 데이터를 다시 가져옴
+        } catch (error) {
+            console.error("Error setting cart:", error);
+            mutate(items); // 오류 발생 시 원래 데이터로 되돌리기
+        }
+    }, [items, mutate]);
+
+
     const { userData } = React.useContext(UserStateContext);
 
     useLayoutEffect(() => {
@@ -126,7 +167,8 @@ export default function Cart() {
                         date: item.date,
                         products: [],
                         boothLocation: item.boothLocation[0],
-                        boothLocationAll: item.boothLocation
+                        boothLocationAll: item.boothLocation,
+                        tag: item.tag
                     };
                 } else {
                     acc[boothId].boothLocationAll = [...new Set([...acc[boothId].boothLocationAll, ...item.boothLocation])];
@@ -166,9 +208,14 @@ export default function Cart() {
         const cartBoothLocations = Object.values(booths)
             .filter(booth => dayFilter.length === 0 || dayFilter.every(day => booth.date.some(date => new Date(date).getDay() === day)))
             .reduce((acc: any[], booth: any) => {
+                const tagColor = booth.tag === 0 ? 'rgb(255,59,48)' :
+                    booth.tag === 1 ? 'rgb(255,204,0)' :
+                        booth.tag === 2 ? 'rgb(52,199,89)' :
+                            booth.tag === 3 ? 'rgb(0,122,255)' :
+                                'rgb(175,82,222)';
                 acc.push(...booth.boothLocationAll.map((location: string) => ({
                     id: location,
-                    color: 'rgb(255,59,48)',
+                    color: tagColor,
                     type: 'cart'
                 })));
                 return acc;
@@ -177,9 +224,14 @@ export default function Cart() {
         const wishlistBoothLocations = wishlist?.reduce((acc: any[], item: any) => {
             if (item.booth?.event?.event_id === value &&
                 (dayFilter.length === 0 || dayFilter.every(day => item.booth?.date.some(date => new Date(date).getDay() === day)))) {
+                const tagColor = item.tag === 0 ? 'rgb(255,59,48)' :
+                    item.tag === 1 ? 'rgb(255,204,0)' :
+                        item.tag === 2 ? 'rgb(52,199,89)' :
+                            item.tag === 3 ? 'rgb(0,122,255)' :
+                                'rgb(175,82,222)';
                 acc.push(...item.booth.locations.map((location: string) => ({
                     id: location,
-                    color: 'rgb(0,122,255)',
+                    color: tagColor,
                     type: 'wishlist'
                 })));
             }
@@ -315,70 +367,120 @@ export default function Cart() {
                             </Card>
                             <Tabs defaultValue="wishlist" className="w-full lg:w-1/2">
                                 <div className="flex gap-2">
-                                    <TabsList className="w-auto ml-6">
+                                    <TabsList className="w-auto ml-6 flex-shrink-0">
                                         <TabsTrigger value="wishlist">위시리스트</TabsTrigger>
                                         <TabsTrigger value="cart">장바구니</TabsTrigger>
                                     </TabsList>
-                                    <div className="flex gap-2 w-full">
-                                        <div>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger>
-                                                    <Button variant="outline" className="flex gap-2">
-                                                        <Filter className="w-4 h-4" />
-                                                        <p className="hidden md:block">필터</p>
-                                                        {dayFilter.length > 0 && <Badge variant="secondary">{dayFilter.length === 2 ? "양일" : dayFilter[0] === 6 ? "토": " 일"}</Badge>}
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent>
-                                                    <DropdownMenuLabel>요일</DropdownMenuLabel>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuCheckboxItem onCheckedChange={(checked) => {
-                                                        if (checked) {
-                                                            setDayFilter([...dayFilter, 6]);
-                                                        } else {
-                                                            setDayFilter(dayFilter.filter((day) => day !== 6));
-                                                        }
-                                                    }} checked={dayFilter.includes(6)}>토요일</DropdownMenuCheckboxItem>
-                                                    <DropdownMenuCheckboxItem onCheckedChange={(checked) => {
-                                                        if (checked) {
-                                                            setDayFilter([...dayFilter, 0]);
-                                                        } else {
-                                                            setDayFilter(dayFilter.filter((day) => day !== 0));
-                                                        }
-                                                    }} checked={dayFilter.includes(0)}>일요일</DropdownMenuCheckboxItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </div>
-                                        <div>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger>
-                                                    <Button variant="outline" className="flex gap-2">
-                                                        {sort === 'location-asc' ? <ArrowUp className="w-4 h-4"/> : <ArrowDown className="w-4 h-4"/>}
-                                                        <p className="hidden md:block">{sort === 'location-asc' ? "A-Z" : "Z-A"}</p>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent>
-                                                    <DropdownMenuRadioGroup value={sort} onValueChange={setSort}>
-                                                        <DropdownMenuLabel>부스 위치</DropdownMenuLabel>
+                                    <ScrollArea className="flex-grow whitespace-nowrap rounded-md mr-6">
+                                        <div className="flex gap-2">
+                                            <div>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger>
+                                                        <Button variant="outline" className="flex gap-2">
+                                                            <Filter className="w-4 h-4" />
+                                                            <p className="hidden md:block">필터</p>
+                                                            {dayFilter.length > 0 && <Badge variant="secondary">{dayFilter.length === 2 ? "양일" : dayFilter[0] === 6 ? "토" : " 일"}</Badge>}
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent>
+                                                        <DropdownMenuLabel>요일</DropdownMenuLabel>
                                                         <DropdownMenuSeparator />
-                                                        <DropdownMenuRadioItem value="location-asc">A-Z</DropdownMenuRadioItem>
-                                                        <DropdownMenuRadioItem value="location-desc">Z-A</DropdownMenuRadioItem>
-                                                    </DropdownMenuRadioGroup>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
+                                                        <DropdownMenuCheckboxItem onCheckedChange={(checked) => {
+                                                            if (checked) {
+                                                                setDayFilter([...dayFilter, 6]);
+                                                            } else {
+                                                                setDayFilter(dayFilter.filter((day) => day !== 6));
+                                                            }
+                                                        }} checked={dayFilter.includes(6)}>토요일</DropdownMenuCheckboxItem>
+                                                        <DropdownMenuCheckboxItem onCheckedChange={(checked) => {
+                                                            if (checked) {
+                                                                setDayFilter([...dayFilter, 0]);
+                                                            } else {
+                                                                setDayFilter(dayFilter.filter((day) => day !== 0));
+                                                            }
+                                                        }} checked={dayFilter.includes(0)}>일요일</DropdownMenuCheckboxItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </div>
+                                            <div>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger>
+                                                        <Button variant="outline" className="flex gap-2">
+                                                            <ArrowUpDown className="w-4 h-4" />
+                                                            <p className="hidden md:block">정렬</p>
+                                                            <Badge variant="secondary" className="flex">
+                                                                <MapPin className="w-4 h-4" />
+                                                                {sort === 'location-asc' ?
+                                                                    (<ArrowUp className="w-4 h-4" />) :
+                                                                    (<ArrowDown className="w-4 h-4" />)}
+                                                            </Badge>
+                                                            <Badge variant="secondary" className="flex">
+                                                                <Tag className="w-4 h-4" />
+                                                                {sortTag === 'tag-asc' ?
+                                                                    (<ArrowUp className="w-4 h-4" />) :
+                                                                    (<ArrowDown className="w-4 h-4" />)}
+                                                            </Badge>
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent>
+                                                        <DropdownMenuRadioGroup value={sort} onValueChange={setSort}>
+                                                            <DropdownMenuLabel className="flex justify-between w-full items-center">
+                                                                <p>부스 위치</p>
+                                                                <MapPin className="h-4 w-4" />
+                                                            </DropdownMenuLabel>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuRadioItem value="location-asc">A-Z</DropdownMenuRadioItem>
+                                                            <DropdownMenuRadioItem value="location-desc">Z-A</DropdownMenuRadioItem>
+                                                        </DropdownMenuRadioGroup>
+                                                        <DropdownMenuRadioGroup value={sortTag} onValueChange={setSortTag}>
+                                                            <DropdownMenuLabel className="flex justify-between w-full items-center">
+                                                                <p>태그</p>
+                                                                <Tag className="h-4 w-4" />
+                                                            </DropdownMenuLabel>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuRadioItem value="tag-asc">1-5</DropdownMenuRadioItem>
+                                                            <DropdownMenuRadioItem value="tag-desc">5-1</DropdownMenuRadioItem>
+                                                        </DropdownMenuRadioGroup>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </div>
                                         </div>
-                                    </div>
+                                        <ScrollBar orientation="horizontal" />
+                                    </ScrollArea>
                                 </div>
                                 <TabsContent value="wishlist">
                                     {wishlist
                                         ?.filter((item) => item.booth?.event?.event_id === value)
+
                                         .filter((item) => dayFilter.length === 0 || dayFilter.every(day => item.booth?.date.some(date => new Date(date).getDay() === day)))
                                         .sort((a, b) => {
+                                            const tagA = a.tag || 0;
+                                            const tagB = b.tag || 0;
                                             const locA = a.booth?.locations[0] || '';
                                             const locB = b.booth?.locations[0] || '';
-                                            if (sort === 'location-asc') {
+
+                                            if (sortTag === 'tag-asc' && sort === 'location-asc') {
+                                                if (tagA !== tagB) {
+                                                    return tagA - tagB;
+                                                }
                                                 return locA.localeCompare(locB);
-                                            } else if (sort === 'location-desc') {
+                                            }
+                                            if (sortTag === 'tag-asc' && sort === 'location-desc') {
+                                                if (tagA !== tagB) {
+                                                    return tagA - tagB;
+                                                }
+                                                return locB.localeCompare(locA);
+                                            }
+                                            if (sortTag === 'tag-desc' && sort === 'location-asc') {
+                                                if (tagA !== tagB) {
+                                                    return tagB - tagA;
+                                                }
+                                                return locA.localeCompare(locB);
+                                            }
+                                            if (sortTag === 'tag-desc' && sort === 'location-desc') {
+                                                if (tagA !== tagB) {
+                                                    return tagB - tagA;
+                                                }
                                                 return locB.localeCompare(locA);
                                             }
                                             return 0;
@@ -399,17 +501,64 @@ export default function Cart() {
                                                                         item.booth?.locations[0]
                                                                     )}
                                                                     {item.booth?.date.some(date => [0, 6].includes(new Date(date).getDay())) && (
-                                                                        <Badge variant="secondary" className={item.booth?.date.length === 2 ? "bg-red-500" : new Date(item.booth?.date[0]).getDay() === 0 ? "bg-red-200 dark:bg-red-800" : "bg-blue-200 dark:bg-blue-800"}>
+                                                                        <Badge variant="secondary" className={item.booth?.date.length === 2 ? "" : new Date(item.booth?.date[0]).getDay() === 0 ? "bg-red-100 hover:bg-red-200 dark:bg-red-900 hover:dark:bg-red-800" : "bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 hover:dark:bg-blue-800"}>
                                                                             {item.booth?.date.length === 2 ? "양일" : new Date(item.booth?.date[0]).toLocaleDateString('ko-KR', { weekday: 'long' })}
                                                                         </Badge>
                                                                     )}
+
                                                                 </div>
                                                             </CardTitle>
-                                                            <Button variant="secondary" size="icon" className="ml-2">
-                                                                <Link href={`/booth/${item.booth_id}`}>
-                                                                    <SquareArrowOutUpRight />
-                                                                </Link>
-                                                            </Button>
+                                                            <div className="flex gap-2">
+
+                                                                <DropdownMenu >
+                                                                    <DropdownMenuTrigger>
+                                                                        <Button size="icon" variant="outline" className="h-8 w-8">
+                                                                            <div className={`w-full h-full rounded-md ${item.tag === 0 ? "bg-[#ff3b30]" : item.tag === 1 ? "bg-[#ffcc00]" : item.tag === 2 ? "bg-[#34c759]" : item.tag === 3 ? "bg-[#007bff]" : "bg-[#af52de]"}`} />
+                                                                        </Button>
+                                                                    </DropdownMenuTrigger>
+                                                                    <DropdownMenuContent className="w-full">
+                                                                        <DropdownMenuRadioGroup value={item.tag.toString()} onValueChange={(tag) => changeBookmarkColor(Number(tag), item.booth_id)}>
+                                                                            <DropdownMenuLabel>
+                                                                                태그
+                                                                            </DropdownMenuLabel>
+                                                                            <DropdownMenuSeparator />
+                                                                            <DropdownMenuRadioItem value={"0"} className="flex justify-between">
+                                                                                <p>빨간색</p>
+                                                                                <Badge className="h-4 bg-[#ff3b30] hover:bg-[#ff3b30]">1</Badge>
+                                                                            </DropdownMenuRadioItem>
+                                                                            <DropdownMenuRadioItem value={"1"} className="flex justify-between">
+                                                                                <p>노란색</p>
+                                                                                <Badge className="h-4 bg-[#ffcc00] hover:bg-[#ffcc00]">2</Badge>
+                                                                            </DropdownMenuRadioItem>
+                                                                            <DropdownMenuRadioItem value={"2"} className="flex justify-between">
+                                                                                <p>초록색</p>
+                                                                                <Badge className="h-4 bg-[#34c759] hover:bg-[#34c759]">3</Badge>
+                                                                            </DropdownMenuRadioItem>
+                                                                            <DropdownMenuRadioItem value={"3"} className="flex justify-between">
+                                                                                <p>파란색</p>
+                                                                                <Badge className="h-4 bg-[#007bff] hover:bg-[#007bff]">4</Badge>
+                                                                            </DropdownMenuRadioItem>
+                                                                            <DropdownMenuRadioItem value={"4"} className="flex justify-between">
+                                                                                <p>보라색</p>
+                                                                                <Badge className="h-4 bg-[#af52de] hover:bg-[#af52de]">5</Badge>
+                                                                            </DropdownMenuRadioItem>
+                                                                        </DropdownMenuRadioGroup>
+                                                                    </DropdownMenuContent>
+                                                                </DropdownMenu>
+                                                                <Button size="icon"
+                                                                    variant="secondary"
+                                                                    className="h-8 w-8"
+                                                                    onClick={() => {
+                                                                        unsetWishlist(item.booth_id);
+                                                                    }}>
+                                                                    <HeartOff className="h-5 w-5" />
+                                                                </Button>
+                                                                <Button variant="secondary" size="icon" className="h-8 w-8">
+                                                                    <Link href={`/booth/${item.booth_id}`}>
+                                                                        <SquareArrowOutUpRight className="h-5 w-5" />
+                                                                    </Link>
+                                                                </Button>
+                                                            </div>
                                                         </div>
                                                         <CardDescription className="text-md text-foreground">
                                                             {item.booth?.name}
@@ -445,9 +594,42 @@ export default function Cart() {
                                                     .sort(([boothIdA, boothA], [boothIdB, boothB]) => {
                                                         const locA = boothA.boothLocation || '';
                                                         const locB = boothB.boothLocation || '';
+                                                        const tagA = boothA.tag || 0;
+                                                        const tagB = boothB.tag || 0;
+
+                                                        if (sortTag === 'tag-asc' && sort === 'location-asc') {
+                                                            if (tagA !== tagB) {
+                                                                return tagA - tagB;
+                                                            }
+                                                            return locA.localeCompare(locB);
+                                                        }
+                                                        if (sortTag === 'tag-asc' && sort === 'location-desc') {
+                                                            if (tagA !== tagB) {
+                                                                return tagA - tagB;
+                                                            }
+                                                            return locB.localeCompare(locA);
+                                                        }
+                                                        if (sortTag === 'tag-desc' && sort === 'location-asc') {
+                                                            if (tagA !== tagB) {
+                                                                return tagB - tagA;
+                                                            }
+                                                            return locA.localeCompare(locB);
+                                                        }
+                                                        if (sortTag === 'tag-desc' && sort === 'location-desc') {
+                                                            if (tagA !== tagB) {
+                                                                return tagB - tagA;
+                                                            }
+                                                            return locB.localeCompare(locA);
+                                                        }
+                                                        return 0;
+                                                    })
+                                                    .sort(([boothIdA, boothA], [boothIdB, boothB]) => {
+                                                        const locA = boothA.boothLocation || '';
+                                                        const locB = boothB.boothLocation || '';
+
                                                         if (sort === 'location-asc') {
                                                             return locA.localeCompare(locB);
-                                                        } else if (sort === 'location-desc') {
+                                                        } if (sort === 'location-desc') {
                                                             return locB.localeCompare(locA);
                                                         }
                                                         return 0;
@@ -460,16 +642,53 @@ export default function Cart() {
                                                                             <div className="flex gap-2 items-center">
                                                                                 {booth.boothLocation}
                                                                                 {booth.date.some(date => [0, 6].includes(new Date(date).getDay())) && (
-                                                                                    <Badge variant="secondary" className={booth.date.length === 2 ? "bg-red-500" : new Date(booth.date[0]).getDay() === 0 ? "bg-red-200 dark:bg-red-800" : "bg-blue-200 dark:bg-blue-800"}>
+                                                                                    <Badge variant="secondary" className={booth.date.length === 2 ? "" : new Date(booth.date[0]).getDay() === 0 ? "bg-red-100 hover:bg-red-200 dark:bg-red-900 hover:dark:bg-red-800" : "bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 hover:dark:bg-blue-700"}>
                                                                                         {booth.date.length === 2 ? "양일" : new Date(booth.date[0]).toLocaleDateString('ko-KR', { weekday: 'long' })}
                                                                                     </Badge>
                                                                                 )}
                                                                             </div>
-                                                                            <Button variant="secondary" size="icon" className="ml-2">
-                                                                                <Link href={`/booth/${boothId}`}>
-                                                                                    <SquareArrowOutUpRight />
-                                                                                </Link>
-                                                                            </Button>
+                                                                            <div className="flex gap-2">
+                                                                                <DropdownMenu>
+                                                                                    <DropdownMenuTrigger>
+                                                                                        <Button size="icon" variant="outline" className="h-8 w-8 rounded-full">
+                                                                                            <div className={`w-full h-full rounded-md ${booth.tag === 0 ? "bg-[#ff3b30]" : booth.tag === 1 ? "bg-[#ffcc00]" : booth.tag === 2 ? "bg-[#34c759]" : booth.tag === 3 ? "bg-[#007bff]" : "bg-[#af52de]"}`} />
+                                                                                        </Button>
+                                                                                    </DropdownMenuTrigger>
+                                                                                    <DropdownMenuContent>
+                                                                                        <DropdownMenuRadioGroup value={booth.tag.toString()} onValueChange={(tag) => changeCartColor(Number(tag), booth.products.map((item) => item.productId))}>
+                                                                                            <DropdownMenuLabel>
+                                                                                                태그
+                                                                                            </DropdownMenuLabel>
+                                                                                            <DropdownMenuSeparator />
+                                                                                            <DropdownMenuRadioItem value={"0"} className="flex justify-between">
+                                                                                                <p>빨간색</p>
+                                                                                                <Badge className="h-4 bg-[#ff3b30] hover:bg-[#ff3b30]">1</Badge>
+                                                                                            </DropdownMenuRadioItem>
+                                                                                            <DropdownMenuRadioItem value={"1"} className="flex justify-between">
+                                                                                                <p>노란색</p>
+                                                                                                <Badge className="h-4 bg-[#ffcc00] hover:bg-[#ffcc00]">2</Badge>
+                                                                                            </DropdownMenuRadioItem>
+                                                                                            <DropdownMenuRadioItem value={"2"} className="flex justify-between">
+                                                                                                <p>초록색</p>
+                                                                                                <Badge className="h-4 bg-[#34c759] hover:bg-[#34c759]">3</Badge>
+                                                                                            </DropdownMenuRadioItem>
+                                                                                            <DropdownMenuRadioItem value={"3"} className="flex justify-between">
+                                                                                                <p>파란색</p>
+                                                                                                <Badge className="h-4 bg-[#007bff] hover:bg-[#007bff]">4</Badge>
+                                                                                            </DropdownMenuRadioItem>
+                                                                                            <DropdownMenuRadioItem value={"4"} className="flex justify-between">
+                                                                                                <p>보라색</p>
+                                                                                                <Badge className="h-4 bg-[#af52de] hover:bg-[#af52de]">5</Badge>
+                                                                                            </DropdownMenuRadioItem>
+                                                                                        </DropdownMenuRadioGroup>
+                                                                                    </DropdownMenuContent>
+                                                                                </DropdownMenu>
+                                                                                <Button variant="secondary" size="icon" className="h-8 w-8">
+                                                                                    <Link href={`/booth/${boothId}`}>
+                                                                                        <SquareArrowOutUpRight className="h-5 w-5" />
+                                                                                    </Link>
+                                                                                </Button>
+                                                                            </div>
                                                                         </div>
                                                                     </CardTitle>
 
