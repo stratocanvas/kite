@@ -32,7 +32,8 @@ import {
     CommandGroup,
     CommandInput,
     CommandItem,
-    CommandList
+    CommandList,
+    CommandSeparator
 } from "@/components/ui/command"
 import {
     Popover,
@@ -373,8 +374,8 @@ export default function Cart() {
                                     </TabsList>
                                     <ScrollArea className="flex-grow whitespace-nowrap rounded-md mr-6">
                                         <div className="flex gap-2">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
                                                     <Button
                                                         variant="outline"
                                                         className="flex gap-2"
@@ -387,28 +388,45 @@ export default function Cart() {
                                                             </Badge>
                                                         )}
                                                     </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent>
-                                                    <DropdownMenuLabel>요일</DropdownMenuLabel>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuCheckboxItem onCheckedChange={(checked) => {
-                                                        if (checked) {
-                                                            setDayFilter([...dayFilter, 6]);
-                                                        } else {
-                                                            setDayFilter(dayFilter.filter((day) => day !== 6));
-                                                        }
-                                                    }} checked={dayFilter.includes(6)}>토요일</DropdownMenuCheckboxItem>
-                                                    <DropdownMenuCheckboxItem onCheckedChange={(checked) => {
-                                                        if (checked) {
-                                                            setDayFilter([...dayFilter, 0]);
-                                                        } else {
-                                                            setDayFilter(dayFilter.filter((day) => day !== 0));
-                                                        }
-                                                    }} checked={dayFilter.includes(0)}>일요일</DropdownMenuCheckboxItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="p-0 w-32">
+                                                    <Command>
+                                                        <CommandList>
+                                                            <CommandGroup heading="요일">
+                                                                <CommandItem onSelect={() => {
+                                                                    if (dayFilter.includes(6)) {
+                                                                        setDayFilter(dayFilter.filter((day) => day !== 6));
+                                                                    } else {
+                                                                        setDayFilter([...dayFilter, 6]);
+                                                                    }
+                                                                }}>
+                                                                    <Check className={cn(
+                                                                        "mr-2 h-4 w-4",
+                                                                        dayFilter.includes(6) ? "opacity-100" : "opacity-0"
+                                                                    )} />
+                                                                    토요일
+                                                                </CommandItem>
+                                                                <CommandItem onSelect={() => {
+                                                                    if (dayFilter.includes(0)) {
+                                                                        setDayFilter(dayFilter.filter((day) => day !== 0));
+                                                                    } else {
+                                                                        setDayFilter([...dayFilter, 0]);
+                                                                    }
+                                                                }}>
+                                                                    <Check className={cn(
+                                                                        "mr-2 h-4 w-4",
+                                                                        dayFilter.includes(0) ? "opacity-100" : "opacity-0"
+                                                                    )} />
+                                                                    일요일
+                                                                </CommandItem>
+                                                            </CommandGroup>
+                                                        </CommandList>
+                                                    </Command>
+                                                </PopoverContent>
+                                            </Popover>
+
+                                            <Popover>
+                                                <PopoverTrigger asChild>
                                                     <Button variant="outline" className="flex gap-2">
                                                         <ArrowUpDown className="w-4 h-4" />
                                                         <p className="hidden md:block">정렬</p>
@@ -425,28 +443,59 @@ export default function Cart() {
                                                                 (<ArrowDown className="w-4 h-4" />)}
                                                         </Badge>
                                                     </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent>
-                                                    <DropdownMenuRadioGroup value={sort} onValueChange={setSort}>
-                                                        <DropdownMenuLabel className="flex justify-between w-full items-center">
-                                                            <p>부스 위치</p>
-                                                            <MapPin className="h-4 w-4" />
-                                                        </DropdownMenuLabel>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuRadioItem value="location-asc">A-Z</DropdownMenuRadioItem>
-                                                        <DropdownMenuRadioItem value="location-desc">Z-A</DropdownMenuRadioItem>
-                                                    </DropdownMenuRadioGroup>
-                                                    <DropdownMenuRadioGroup value={sortTag} onValueChange={setSortTag}>
-                                                        <DropdownMenuLabel className="flex justify-between w-full items-center">
-                                                            <p>태그</p>
-                                                            <Tag className="h-4 w-4" />
-                                                        </DropdownMenuLabel>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuRadioItem value="tag-asc">1-5</DropdownMenuRadioItem>
-                                                        <DropdownMenuRadioItem value="tag-desc">5-1</DropdownMenuRadioItem>
-                                                    </DropdownMenuRadioGroup>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-32 p-0">
+                                                    <Command>
+                                                        <CommandList>
+                                                            <CommandGroup heading="부스 위치">
+                                                                <CommandItem onSelect={() => setSort("location-asc")}>
+                                                                    <Circle
+                                                                        fill="currentColor"
+                                                                        className={cn(
+                                                                            "mr-2 h-2 w-2",
+                                                                            sort === "location-asc" ? "opacity-100" : "opacity-0"
+                                                                        )}
+                                                                    />
+                                                                    <p>A-Z</p>
+                                                                </CommandItem>
+                                                                <CommandItem onSelect={() => setSort("location-desc")}>
+                                                                    <Circle
+                                                                        fill="currentColor"
+                                                                        className={cn(
+                                                                            "mr-2 h-2 w-2",
+                                                                            sort === "location-desc" ? "opacity-100" : "opacity-0"
+                                                                        )}
+                                                                    />
+                                                                    <p>Z-A</p>
+                                                                </CommandItem>
+                                                            </CommandGroup>
+                                                            <CommandSeparator />
+                                                            <CommandGroup heading="태그">
+                                                                <CommandItem onSelect={() => setSortTag("tag-asc")}>
+                                                                    <Circle
+                                                                        fill="currentColor"
+                                                                        className={cn(
+                                                                            "mr-2 h-2 w-2",
+                                                                            sortTag === "tag-asc" ? "opacity-100" : "opacity-0"
+                                                                        )}
+                                                                    />
+                                                                    <p>1-5</p>
+                                                                </CommandItem>
+                                                                <CommandItem onSelect={() => setSortTag("tag-desc")}>
+                                                                    <Circle
+                                                                        fill="currentColor"
+                                                                        className={cn(
+                                                                            "mr-2 h-2 w-2",
+                                                                            sortTag === "tag-desc" ? "opacity-100" : "opacity-0"
+                                                                        )}
+                                                                    />
+                                                                    <p>5-1</p>
+                                                                </CommandItem>
+                                                            </CommandGroup>
+                                                        </CommandList>
+                                                    </Command>
+                                                </PopoverContent>
+                                            </Popover>
                                         </div>
                                         <ScrollBar orientation="horizontal" />
                                     </ScrollArea>
