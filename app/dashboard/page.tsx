@@ -11,6 +11,7 @@ import { useMemo, useCallback, useState, useEffect, useRef, Suspense, memo, useL
 import { Button } from "@/components/ui/button";
 import {
     Carousel,
+    CarouselApi,
     CarouselContent,
     CarouselItem,
     CarouselNext,
@@ -72,7 +73,6 @@ const MemoizedIndoorMap = memo(IndoorMap, (prevProps, nextProps) => {
         prevProps.boothLocations.every((loc, index) => loc === nextProps.boothLocations[index]);
 });
 export default function Cart() {
-
     const { data: items, mutate } = useSWR('cart', () => GetCart(), { revalidateOnMount: true, revalidateOnFocus: true, revalidateOnReconnect: true });
     const { data: wishlist, mutate: wishlistMutate } = useSWR('wishlist', () => GetBookmarks(), { revalidateOnMount: true, revalidateOnFocus: true, revalidateOnReconnect: true });
 
@@ -117,6 +117,7 @@ export default function Cart() {
         try {
             const result = await SetCartTag(tag, productId);
             mutate(); // 서버에서 최신 데이터를 다시 가져옴
+
         } catch (error) {
             console.error("Error setting cart:", error);
             mutate(items); // 오류 발생 시 원래 데이터로 되돌리기
@@ -676,7 +677,8 @@ export default function Cart() {
                                                         return 0;
                                                     })
                                                     .map(([boothId, booth]) => (
-                                                        <CarouselItem key={boothId} className="basis-auto pl-3">
+                                                        <CarouselItem key={`${boothId}-${booth.tag}`}
+                                                            className="basis-auto pl-3">
                                                             <Card className="w-[290px] h-[100%] flex flex-col">
                                                                 <CardHeader>
                                                                     <CardTitle className="break-words overflow-hidden text-ellipsis font-bold">
