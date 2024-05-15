@@ -374,11 +374,10 @@ export default function Cart() {
                                     <ScrollArea className="flex-grow whitespace-nowrap rounded-md mr-6">
                                         <div className="flex gap-2">
                                             <DropdownMenu>
-                                                <DropdownMenuTrigger >
+                                                <DropdownMenuTrigger asChild>
                                                     <Button
                                                         variant="outline"
                                                         className="flex gap-2"
-
                                                     >
                                                         <Filter className="w-4 h-4" />
                                                         <p className="hidden md:block">필터</p>
@@ -408,9 +407,8 @@ export default function Cart() {
                                                     }} checked={dayFilter.includes(0)}>일요일</DropdownMenuCheckboxItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
-
                                             <DropdownMenu>
-                                                <DropdownMenuTrigger>
+                                                <DropdownMenuTrigger asChild>
                                                     <Button variant="outline" className="flex gap-2">
                                                         <ArrowUpDown className="w-4 h-4" />
                                                         <p className="hidden md:block">정렬</p>
