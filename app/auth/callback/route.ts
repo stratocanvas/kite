@@ -44,7 +44,8 @@ export async function GET(request: Request) {
 					// 일치하는 Twitter ID가 있는 경우, seller 테이블에 추가
 					const { error: sellerInsertError } = await supabase
 						.from("seller")
-						.insert({ author_id: authorData.author_id });
+						.upsert({ author_id: authorData.author_id })
+						.eq("author_id", authorData.author_id);
 					if (sellerInsertError) {
 						console.error("Error inserting seller:", sellerInsertError);
 					} else {

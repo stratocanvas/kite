@@ -38,6 +38,7 @@ export async function GetCart() {
             quantity,
             product_id,
             option_id,
+			tag,
             product(
                 name,
                 booth(
@@ -69,6 +70,7 @@ export async function GetCart() {
 		eventName: item.product.booth.event.name,
 		eventId: item.product.booth.event.event_id,
 		date: item.product.booth.date,
+		tag: item.tag,
 	}));
 }
 
@@ -134,7 +136,9 @@ export async function GetBookmarks() {
 	const user = await GetUser();
 	const { data: wishlist, error: wishlistError } = await supabase
 		.from("b_wishlists")
-		.select("booth_id, booth(name, locations, event(event_id, name), date)")
+		.select(
+			"booth_id, tag, booth(name, locations, event(event_id, name), date)",
+		)
 		.eq("users_id", user);
 	if (wishlistError) {
 		return [];
@@ -174,4 +178,54 @@ export async function SetBookmark(boothId: string, action: boolean) {
 				.eq("booth_id", boothId);
 		}
 	} catch (error) {}
+}
+
+export async function SetBookmarkTag(tag: number, boothId: string) {
+    const supabase = createClient();
+    try {
+        const {
+            data: { user },
+            error: userError,
+        } = await supabase.auth.getUser();
+        if (userError) {
+            throw new Error(userError.message);
+        }
+        // Update bookmark tag
+        const { data, error } = await supabase
+            .from("b_wishlists")
+            .update({tag: tag})
+            .eq("users_id", user?.id)
+            .eq("booth_id", boothId)
+        if (error) {
+            throw new Error(error.message);
+        }
+    } catch (error) {
+        console.error("Error setting bookmark tag:", error);
+        throw error;
+    }
+}
+
+export async function SetCartTag(tag: number, productId: number[]) {
+    const supabase = createClient();
+    try {
+        const {
+            data: { user },
+            error: userError,
+        } = await supabase.auth.getUser();
+        if (userError) {
+            throw new Error(userError.message);
+        }
+        // Update bookmark tag
+        const { data, error } = await supabase
+            .from("cart")
+            .update({tag: tag})
+            .eq("users_id", user?.id)
+            .in("product_id", productId)
+        if (error) {
+            throw new Error(error.message);
+        }
+    } catch (error) {
+        console.error("Error setting bookmark tag:", error);
+        throw error;
+    }
 }
