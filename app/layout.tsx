@@ -82,8 +82,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <html lang="ko" suppressHydrationWarning>
         <head>
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <script defer src="https://cloud.umami.is/script.js" data-website-id="8a0979b9-08ea-4eb6-b7a9-da1d4f5fee8b"/>
-        </head>
+          <script defer src="https://va.kitebooth.com/script.js" data-website-id="b87732c6-1a9f-41df-a964-8f08705f7116"/>        </head>
         <body className={Pretendard.className}>
           <ThemeProvider
             attribute="class"
