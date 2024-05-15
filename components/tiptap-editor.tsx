@@ -53,7 +53,8 @@ const Tiptap = ({ onChange, initValue }: TiptapProps) => {
     extensions: [
       Placeholder.configure({
         // Use a placeholder:
-        placeholder: '인포 이미지를 꼭 올려주세요!',
+        placeholder: `인포 이미지를 꼭 올려주세요!
+세로 길이가 8192보다 큰 이미지는 화질이 저하될 수 있습니다. 긴 인포 이미지 업로드시 주의해 주세요.`,
         emptyEditorClass: 'is-editor-empty',
       }),
       StarterKit.configure({
