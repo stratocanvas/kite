@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster"
 import UserStateProvider from "@/providers";
 import Footer from "@/app/footer";
 import { GoogleAnalytics } from '@next/third-parties/google'
+import { GoogleTagManager } from '@next/third-parties/google'
 
 const Pretendard = localFont({
   src: "./fonts/PretendardVariable.woff2",
@@ -70,8 +71,8 @@ export const metadata: Metadata = {
 
   },
 };
-const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS;
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS;
 
   return (
     <>
@@ -99,7 +100,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </UserStateProvider>
           </ThemeProvider>
         </body>
-        <GoogleAnalytics gaId={GA_TRACKING_ID} />
+        {GA_TRACKING_ID && <GoogleAnalytics gaId={GA_TRACKING_ID} />}
       </html>
     </>
   );

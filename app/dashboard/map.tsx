@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import * as d3 from "d3";
 import { geoIdentity, geoPath } from "d3-geo";
 import { feature } from "topojson-client";
@@ -10,12 +10,9 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { LikeButton } from '../booth/[id]/buttons/booth-menu';
-import { X } from 'lucide-react';
+import { X, Eye, ShoppingBag, Heart } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
-const preventMapReset = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-    event.preventDefault(); // 추가: 기본 이벤트도 방지
-};
 const supabase = createClient()
 
 interface MapData {
@@ -34,6 +31,7 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
     const [mapData, setMapData] = useState<MapData | null>(null);
     const [selectedBooth, setSelectedBooth] = useState<string | null>(null);
     const [boothData, setBoothData] = useState<any>(null);
+    const [view, setView] = useState<'all' | 'wishlist' | 'cart'>('all');
     const svgRef = useRef<SVGSVGElement>(null);
     const zoom = d3.zoom()
         .scaleExtent([1, 8])
@@ -41,9 +39,15 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
             d3.select(svgRef.current).selectAll('g').attr('transform', event.transform);
         });
 
-
     const searchParams = useSearchParams();
     const search = searchParams.get('event');
+
+    const filteredBoothLocations = useMemo(() => {
+        if (view === 'all') {
+            return boothLocations;
+        }
+        return boothLocations.filter((booth: any) => booth.type === view);
+    }, [boothLocations, view]);
 
     useEffect(() => {
         const fetchMapData = async () => {
@@ -121,7 +125,7 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                         .append("path")
                         .attr("d", pathGenerator)
                         .attr("fill", (d) => {
-                            const location = boothLocations?.find(loc => loc.id === d.properties.id);
+                            const location = filteredBoothLocations?.find(loc => loc.id === d.properties.id);
                             const boothExists = boothData.some((booth: any) => booth.locations.includes(d.properties.id));
 
                             if (location) {
@@ -142,7 +146,7 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                                 .duration(1000)
                                 .attr("fill", function (d) {
                                     if (selectedBooth && boothData.some((booth: any) => booth.locations.includes(selectedBooth) && booth.locations.includes(d.properties.id))) {
-                                        const location = boothLocations?.find(loc => loc.id === d.properties.id);
+                                        const location = filteredBoothLocations?.find(loc => loc.id === d.properties.id);
                                         if (location) {
                                             return d3.hsl(location.color).brighter(1).toString();
                                         }
@@ -155,7 +159,7 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                                 .duration(1000)
                                 .attr("fill", function (d) {
                                     if (selectedBooth && boothData.some((booth: any) => booth.locations.includes(selectedBooth) && booth.locations.includes(d.properties.id))) {
-                                        const location = boothLocations?.find(loc => loc.id === d.properties.id);
+                                        const location = filteredBoothLocations?.find(loc => loc.id === d.properties.id);
                                         if (location) {
                                             return location.color;
                                         }
@@ -180,9 +184,12 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                         .text(d => d.properties.id)
                         .attr("pointer-events", "none")
                         .attr("font-weight", "bold")
-                        .attr("font-size", "30px")
-                        .attr("fill", d => {
-                            const location = boothLocations?.find(loc => loc.id === d.properties.id);
+                        .attr("font-size", d => {
+                            const bounds = pathGenerator.bounds(d);
+                            const height = bounds[1][1] - bounds[0][1];
+                            return `${height * 0.6}px`; // 높이의 80%로 폰트 크기 설정
+                        }).attr("fill", d => {
+                            const location = filteredBoothLocations?.find(loc => loc.id === d.properties.id);
                             if (location) {
                                 return "white";
                             }
@@ -223,7 +230,7 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
         };
 
         drawMap();
-    }, [mapData, boothLocations, selectedBooth]);
+    }, [mapData, filteredBoothLocations, selectedBooth]);
 
     if (!mapData) {
         return <div className="w-full h-full flex items-center justify-center">
@@ -233,7 +240,25 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
     return (
         <div className="w-full h-full relative">
             <svg ref={svgRef} className="w-full h-full rounded-lg" />
-
+            <div className='absolute top-4 right-4'>
+            <DropdownMenu>
+                <DropdownMenuTrigger>
+                    <Button size="sm" variant="outline" className="flex gap-2">
+                        {view === 'all' ? <Eye className="w-4 h-4" /> : view === 'wishlist' ? <Heart className="w-4 h-4" /> : <ShoppingBag className="w-4 h-4" />}
+                        <p className="hidden md:block">{view === 'all' ? "전체" : view === 'wishlist' ? "위시리스트" : "장바구니"}</p>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    <DropdownMenuRadioGroup value={view} onValueChange={setView}>
+                        <DropdownMenuLabel>보기</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuRadioItem value="all">전체</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="wishlist">위시리스트</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="cart">장바구니</DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+            </DropdownMenu>
+            </div>
             {selectedBooth && boothData && (
                 <div className="absolute bottom-0 w-full">
                     <Carousel>
