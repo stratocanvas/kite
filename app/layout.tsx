@@ -16,6 +16,10 @@ const Pretendard = localFont({
   weight: "45 920"
 })
 
+export const viewport = {
+  themeColor: "#ffffff",
+};
+
 export const metadata: Metadata = {
   title: "Kite",
   description: "동인 행사 부스 인포들을 한 곳에. 캐릭터로 부스를 찾고, 마음에 드는 부스를 북마크에 추가해 보세요.",
