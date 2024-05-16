@@ -45,7 +45,7 @@ export default async function Home() {
       </div>
       {Object.entries(groupedBooths).map(([eventName, booths]) => (
         <React.Fragment key={eventName}>
-          <div className="ml-10 mt-10 py-1 w-auto">
+          <div className="ml-10 xl:ml-28 mt-10 xl:mt-14 py-1 w-auto">
             <Button className="w-auto pl-0 hover:bg-transparent" variant="ghost">
               <Link href={`/event?event=${booths[0].event.event_id}`} className="w-auto">
                 <div className="flex gap-1 items-center w-auto">
@@ -65,7 +65,7 @@ export default async function Home() {
             plugins={
               []
             }>
-            <CarouselContent className="ml-6 mt-4 mb-10 mr-10">
+            <CarouselContent className="ml-6 xl:ml-24 mt-4 mb-10 mr-10">
               {booths?.map((booth) => (
                 <CarouselItem key={booth.booth_id} className="basis-auto pl-4 w-[300px] lg:w-[350px]">
                   <BoothCard booth={booth} displayEvent={false} />
