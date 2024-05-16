@@ -23,7 +23,7 @@ export default function AuthError() {
     return (
         <>
             <div className='mx-4 mt-4'>
-                <Alert className='w-full md:w-1/2 mx-auto'>
+                <Alert className='w-full md:w-1/2 lg:w-1/3 mx-auto border-none'>
                     <TriangleAlert className='w-7 h-7 mt-1 ml-0' />
                     <AlertTitle className=' ml-4 text-3xl'>
                         {errorCode ? errorCode : '로그인 오류'}
@@ -34,7 +34,7 @@ export default function AuthError() {
                     </AlertDescription>
                 </Alert>
                 {errorDescription === 'Error getting user email from external provider' && (
-                    <Alert className='w-full md:w-1/2 mx-auto mt-4'>
+                    <Alert className='w-full md:w-1/2 lg:w-1/3 mx-auto mt-4'>
                         <>
                             <ArrowRight className='w-7 h-7' />
                             <AlertTitle className='ml-4 text-lg'>
@@ -47,11 +47,11 @@ export default function AuthError() {
                     </Alert>
                 )}
                 {errorDescription === 'Flow state not found' && (
-                    <Alert className='w-full md:w-1/2 mx-auto mt-4'>
+                    <Alert className='w-full md:w-1/2 lg:w-1/3 mx-auto mt-4'>
                         <>
                             <ArrowRight className='w-7 h-7' />
                             <AlertTitle className='ml-4 text-lg'>
-                                인터넷 사용 기록을 삭제해 주세요.
+                                인터넷 사용 기록을 삭제한 후 다시 시도해 주세요.
                             </AlertTitle>
                             <AlertDescription className='ml-4'>
                                 현재 이 문제의 원인을 조사하고 있습니다. 불편을 드려 죄송합니다.
@@ -59,6 +59,7 @@ export default function AuthError() {
                         </>
                     </Alert>
                 )}
+ 
             </div>
             <div>
                 
