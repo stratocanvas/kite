@@ -69,7 +69,7 @@ export default async function Home({ params }: { params: { id: string } }) {
         <>
         <Image src={`https://www.kitebooth.com/api/og/booth?id=${booth.booth_id}`} alt={booth.name} width={1200} height={630} className="hidden object-cover"/>
             <div className="container m-0 p-0 pb-[160px] mx-auto">
-                <div className="flex flex-col gap-4 justify-center relative xl:mx-24">
+                <div className="flex flex-col gap-4 justify-center relative xl:mx-36">
                     <div className="p-0 m-0 w-full mx-auto relative">
                         <Suspense fallback={<AspectRatio ratio={3 / 4} className="bg-muted w-full"><Skeleton className="h-full" /></AspectRatio>}>
                             <BoothProfile data={booth} color={booth.thumbnail ? `#${booth.thumbnail?.split('-c(')[1]?.split(')')[0]}` : '#797979'} />
