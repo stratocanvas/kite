@@ -66,7 +66,6 @@ export async function GET(request: Request) {
 			return NextResponse.redirect(`${origin}/auth/error`);
 		}
 	}
-
-	// return the user to an error page with instructions
+	console.error("Error: code is null");
 	return NextResponse.redirect(`${origin}/auth/error`);
 }
