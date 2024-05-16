@@ -624,7 +624,7 @@ export default function Cart() {
                                         ))}
                                 </TabsContent>
                                 <TabsContent value="cart">
-                                    <Card className="w-[calc(100%-3rem)] mx-6">
+                                    <Card className="w-[calc(100%-3rem)] mx-1 border-none shadow-none">
                                         <CardContent className="flex flex-col gap-2">
                                             <Label className="mt-6 text-muted-foreground">장바구니 합계</Label>
                                             <Label className="text-3xl font-bold mt-1">
