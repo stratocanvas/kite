@@ -34,13 +34,6 @@ export const metadata: Metadata = {
         rel: 'icon',
         type: 'image/png',
         url: '/icon.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        rel: 'icon',
-        type: 'image/png',
-        url: '/icon2.png',
-        media: '(prefers-color-scheme: dark)',
       },
       {
         rel: 'apple-icon',
