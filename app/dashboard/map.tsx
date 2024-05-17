@@ -200,7 +200,7 @@ function IndoorMap({ boothLocations, items }: { boothLocations: BoothLocation[],
                             const height = bounds[1][1] - bounds[0][1];
                             const checkSize = Math.min(width, height) * 0.8;
                             const cartSize = Math.min(width, height) * 0.3;
-                            const inCart = items?.some(item => item.product.booth.locations?.includes(d.properties.id));
+                            const inCart = filteredBoothLocations?.some(loc => loc.id === d.properties.id && loc.type === 'cart');
                             if (inCart && view !== 'wishlist') {
                                 const iconGroup = d3.select(this).append("svg")
                                     .attr("xmlns", "http://www.w3.org/2000/svg")
@@ -213,8 +213,8 @@ function IndoorMap({ boothLocations, items }: { boothLocations: BoothLocation[],
                                     .attr("stroke-linecap", "round")
                                     .attr("stroke-linejoin", "round")
                                     .attr("class", "lucide lucide-shopping-bag")
-                                    .attr("x", width/2 - cartSize*1.15) // 오른쪽 끝에 위치하도록 x 좌표 설정
-                                    .attr("y", height/2 - cartSize*1.15); // 아래쪽 끝에 위치하도록 y 좌표 설정
+                                    .attr("x", width / 2 - cartSize * 1.15) // 오른쪽 끝에 위치하도록 x 좌표 설정
+                                    .attr("y", height / 2 - cartSize * 1.15); // 아래쪽 끝에 위치하도록 y 좌표 설정
 
                                 iconGroup.append("path")
                                     .attr("d", "M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z");
