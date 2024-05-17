@@ -39,9 +39,11 @@ export function SearchBar() {
         if (selectedDOW.length > 0) {
             params.set('dow', selectedDOW.join(','));
         }
+        /*
         if (selectedPreorder.length > 0) {
             params.set('preorder', selectedPreorder.join(','));
         }
+        */
         if (boothName.length > 0) {
             params.set('name', boothName);
         }
@@ -96,12 +98,14 @@ export function SearchBar() {
                         type="dow"
                         onSelectedOptionsChange={setSelectedDOW}
                     />
+                    {/*
                     <FilterLight
                         title="구입 방법"
                         table="preorder"
                         type="preorder"
                         onSelectedOptionsChange={setSelectedPreorder}
                     />
+    */}
                 </div>
                 <ScrollBar orientation="horizontal" />
             </ScrollArea>
@@ -149,13 +153,15 @@ export function SearchBarSmall(params: typeof searchParams) {
         if (selectedDOW.length > 0) {
             params.set('dow', selectedDOW.join(','));
         } else {
-            params.delete('dow'); // 변경된 부분
+            params.delete('dow');
         }
+        /*
         if (selectedPreorder.length > 0) {
             params.set('preorder', selectedPreorder.join(','));
         } else {
-            params.delete('preorder'); // 변경된 부분
+            params.delete('preorder');
         }
+        */
         if (boothName) {
             params.set('name', boothName);
         } else {
@@ -268,12 +274,14 @@ export function SearchBarSmall(params: typeof searchParams) {
                         type="dow"
                         onSelectedOptionsChange={setSelectedDOW}
                     />
+                    {/*
                     <FilterLight
                         title="구입 방법"
                         table="preorder"
                         type="preorder"
                         onSelectedOptionsChange={setSelectedPreorder}
                     />
+        */}
                 </div>
                 <ScrollBar orientation="horizontal" />
             </ScrollArea>
