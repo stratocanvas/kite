@@ -27,7 +27,7 @@ interface BoothLocation {
     type: 'wishlist' | 'cart';
 }
 
-function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
+function IndoorMap({ boothLocations, items }: { boothLocations: BoothLocation[], items: any }) {
     const [mapData, setMapData] = useState<MapData | null>(null);
     const [selectedBooth, setSelectedBooth] = useState<string | null>(null);
     const [boothData, setBoothData] = useState<any>(null);
@@ -198,14 +198,39 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                             const bounds = pathGenerator.bounds(d);
                             const width = bounds[1][0] - bounds[0][0];
                             const height = bounds[1][1] - bounds[0][1];
-                            const size = Math.min(width, height) * 0.7; 
+                            const checkSize = Math.min(width, height) * 0.8;
+                            const cartSize = Math.min(width, height) * 0.3;
+                            const inCart = items?.some(item => item.product.booth.locations?.includes(d.properties.id));
+                            if (inCart && view !== 'wishlist') {
+                                const iconGroup = d3.select(this).append("svg")
+                                    .attr("xmlns", "http://www.w3.org/2000/svg")
+                                    .attr("width", cartSize)
+                                    .attr("height", cartSize)
+                                    .attr("viewBox", "0 0 24 24")
+                                    .attr("fill", "none")
+                                    .attr("stroke", "white")
+                                    .attr("stroke-width", "2")
+                                    .attr("stroke-linecap", "round")
+                                    .attr("stroke-linejoin", "round")
+                                    .attr("class", "lucide lucide-shopping-bag")
+                                    .attr("x", width/2 - cartSize*1.15) // 오른쪽 끝에 위치하도록 x 좌표 설정
+                                    .attr("y", height/2 - cartSize*1.15); // 아래쪽 끝에 위치하도록 y 좌표 설정
 
+                                iconGroup.append("path")
+                                    .attr("d", "M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z");
+
+                                iconGroup.append("path")
+                                    .attr("d", "M3 6h18");
+
+                                iconGroup.append("path")
+                                    .attr("d", "M16 10a4 4 0 0 1-8 0");
+                            }
                             const completed = filteredBoothLocations.find(loc => loc.id === d.properties.id)?.completed;
                             if (completed) {
                                 d3.select(this).append("svg")
                                     .attr("xmlns", "http://www.w3.org/2000/svg")
-                                    .attr("width", size)
-                                    .attr("height", size)
+                                    .attr("width", checkSize)
+                                    .attr("height", checkSize)
                                     .attr("viewBox", "0 0 24 24")
                                     .attr("fill", "none")
                                     .attr("stroke", "white")
@@ -213,8 +238,8 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                                     .attr("stroke-linecap", "round")
                                     .attr("stroke-linejoin", "round")
                                     .attr("class", "lucide lucide-check")
-                                    .attr("x", -size / 2) 
-                                    .attr("y", -size / 2)
+                                    .attr("x", -checkSize / 2)
+                                    .attr("y", -checkSize / 2)
                                     .append("path")
                                     .attr("d", "M20 6 9 17l-5-5");
                             } else {
@@ -223,7 +248,7 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                                     .attr("alignment-baseline", "central")
                                     .text(d.properties.id)
                                     .attr("font-weight", "bold")
-                                    .attr("font-size", `${height * 0.6}px`)
+                                    .attr("font-size", `${height * 0.55}px`)
                                     .attr("fill", () => {
                                         const location = filteredBoothLocations?.find(loc => loc.id === d.properties.id);
                                         if (location) {
@@ -308,7 +333,9 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                                 if (dayA === 0 && dayB === 6) return 1;  // 일요일이 토요일보다 뒤에 옴
                                 return dayA - dayB; // 나머지 경우는 요일 순서대로 정렬
                             }).map((booth: any) => {
+                                const isBoothInCart = items.some(item => item.boothId === booth.booth_id);
                                 if (booth.locations.includes(selectedBooth)) {
+
                                     return (
                                         <CarouselItem>
                                             <Card key={booth.booth_id} className='bg-background/80 backdrop-blur-md'>
@@ -328,8 +355,10 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                                                     </CardDescription>
                                                 </CardHeader>
                                                 <CardFooter className="flex gap-2 justify-between items-center">
-                                                    <LikeButton booth={booth}
-                                                    />
+                                                    <div className='flex gap-4 items-center'>
+                                                        <LikeButton booth={booth} />
+                                                        {isBoothInCart && <ShoppingBag className='w-6 h-6' />}
+                                                    </div>
                                                     <div className='flex gap-2'>
                                                         <Link href={`/booth/${booth.booth_id}`}>
                                                             <Button >자세히 보기</Button>
