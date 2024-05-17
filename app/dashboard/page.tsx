@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/carousel"
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
-import { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Circle, Filter, HeartOff, MapPin, Minus, Plus, Tag, Trash } from "lucide-react";
+import { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, CheckIcon, Circle, Filter, HeartOff, MapPin, Minus, Plus, Tag, Trash, Undo2 } from "lucide-react";
 import useSWR from 'swr';
 import { GetCart, AddOrUpdateCart, DeleteCart, GetBookmarks } from '../api/auth/dashboard/actions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -59,8 +59,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { SetBookmarkTag, SetCartTag, SetBookmark } from "@/app/api/auth/dashboard/actions";
+import { SetBookmarkTag, SetCartTag, SetBookmark, SetCartStatus, DeleteBoothCart } from "@/app/api/auth/dashboard/actions";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import { interpolateRgb } from 'd3-interpolate';
 
 interface Event {
     value: string;
@@ -124,6 +126,32 @@ export default function Cart() {
         }
     }, [items, mutate]);
 
+    const changeCartStatus = useCallback(async (completed: boolean, productId: number[]) => {
+        const updatedCart = (items || []).map((item) => productId.includes(item.product_id) ? { ...item, completed } : item);
+        mutate(updatedCart, false); // 로컬 데이터를 업데이트
+        try {
+            const result = await SetCartStatus(completed, productId);
+            mutate(); // 서버에서 최신 데이터를 다시 가져옴
+
+        } catch (error) {
+            console.error("Error setting cart:", error);
+            mutate(items); // 오류 발생 시 원래 데이터로 되돌리기
+        }
+    }, [items, mutate]);
+
+    const deleteBoothCart = useCallback(async (productId: number[]) => {
+        const updatedCart = (items || []).filter((item) => !productId.includes(item.product_id));
+        mutate(updatedCart, false); // 로컬 데이터를 업데이트
+        try {
+            const result = await DeleteBoothCart(productId);
+            mutate(); // 서버에서 최신 데이터를 다시 가져옴
+
+        } catch (error) {
+            console.error("Error setting cart:", error);
+            mutate(items); // 오류 발생 시 원래 데이터로 되돌리기
+        }
+    }, [items, mutate]);
+
 
     const { userData } = React.useContext(UserStateContext);
 
@@ -170,7 +198,8 @@ export default function Cart() {
                         products: [],
                         boothLocation: item.boothLocation[0],
                         boothLocationAll: item.boothLocation,
-                        tag: item.tag
+                        tag: item.tag,
+                        completed: item.completed,
                     };
                 } else {
                     acc[boothId].boothLocationAll = [...new Set([...acc[boothId].boothLocationAll, ...item.boothLocation])];
@@ -218,7 +247,8 @@ export default function Cart() {
                 acc.push(...booth.boothLocationAll.map((location: string) => ({
                     id: location,
                     color: tagColor,
-                    type: 'cart'
+                    type: 'cart',
+                    completed: booth.completed
                 })));
                 return acc;
             }, []);
@@ -234,7 +264,7 @@ export default function Cart() {
                 acc.push(...item.booth.locations.map((location: string) => ({
                     id: location,
                     color: tagColor,
-                    type: 'wishlist'
+                    type: 'wishlist',
                 })));
             }
             return acc;
@@ -283,6 +313,18 @@ export default function Cart() {
         }, 100);
     }, [totalPrice]);
 
+    const prevCompletedTotalPrice = useRef(0);
+    const completedTotalPrice = useMemo(() =>
+        items?.reduce((acc, item) => item.eventId === value && item.completed ? acc + (item.price * item.quantity) : acc, 0) || 0,
+        [items, value]
+    );
+    useEffect(() => {
+        const newPrevCompletedTotal = completedTotalPrice;
+        setTimeout(() => {
+            prevCompletedTotalPrice.current = newPrevCompletedTotal;
+        }, 100);
+    }, [completedTotalPrice]);
+
     const prevBoothPrices = useRef<{ [boothId: string]: number }>({});
 
     // 개별 부스에 대한 현재 가격 계산
@@ -304,6 +346,28 @@ export default function Cart() {
         }
     }, [boothPrices]);
 
+
+    const totalItems = useMemo(() => items?.length || 0, [items]);
+    const completedItems = useMemo(() => items?.filter(item => item.completed).length || 0, [items]);
+    const completionPercentage = useMemo(() => totalItems > 0 ? (completedItems / totalItems) * 100 : 0, [totalItems, completedItems]);
+    const prevCompletionPercentage = useRef(0);
+    useEffect(() => {
+        const newPrevCompletion = completionPercentage;
+        setTimeout(() => {
+            prevCompletionPercentage.current = newPrevCompletion;
+        }, 100);
+    }, [completionPercentage]);
+
+    const getColor = (percentage: number) => {
+        const colors = [
+            [255, 0, 0],    // 빨강 
+            [255, 204, 0],  // 노랑
+            [52, 199, 89],  // 초록
+        ];
+        if (percentage < 33) return `rgb(${colors[0]})`;
+        if (percentage < 66) return `rgb(${colors[1]})`;
+        return `rgb(${colors[2]})`;
+    };
     return (
         <>
             <Card className="border-none shadow-none">
@@ -502,6 +566,18 @@ export default function Cart() {
                                     </ScrollArea>
                                 </div>
                                 <TabsContent value="wishlist">
+                                    {wishlist?.length === 0 &&
+                                        <div className="flex flex-col items-center gap-2">
+                                            <Label className="text-md text-muted-foreground mt-4 text-center">
+                                                위시리스트가 비어 있습니다
+                                            </Label>
+                                            <Link href={'/booth'}>
+                                                <Button variant="secondary">
+                                                    부스 둘러보기
+                                                </Button>
+                                            </Link>
+                                        </div>
+                                    }
                                     {wishlist
                                         ?.filter((item) => item.booth?.event?.event_id === value)
 
@@ -617,19 +693,40 @@ export default function Cart() {
                                                             {item.booth?.name}
                                                         </CardDescription>
                                                     </CardHeader>
-                                                    <CardContent>
-                                                    </CardContent>
+
                                                 </Card>
                                             </div>
                                         ))}
                                 </TabsContent>
                                 <TabsContent value="cart">
+                                    {totalPrice === 0 && (
+                                        <div className="flex flex-col items-center gap-2">
+                                            <Label className="text-md text-muted-foreground mt-4 text-center">
+                                                장바구니가 비어 있습니다
+                                            </Label>
+                                            <Link href={`/event?event=${value}`}>
+                                                <Button variant="secondary">
+                                                    굿즈 둘러보기
+                                                </Button>
+                                            </Link>
+                                        </div>
+                                    )}
                                     <Card className="w-[calc(100%-3rem)] mx-1 border-none shadow-none">
                                         <CardContent className="flex flex-col gap-2">
-                                            <Label className="mt-6 text-muted-foreground">장바구니 합계</Label>
-                                            <Label className="text-3xl font-bold mt-1">
-                                                <CountUp suffix="원" start={prevTotalPrice.current} end={totalPrice} duration={1} />
-                                            </Label>
+                                            {totalPrice > 0 &&
+                                                <>
+                                                    <Label className="mt-6 text-muted-foreground">장바구니 합계</Label>
+                                                    <Label className="text-3xl font-bold mt-1">
+                                                        <CountUp suffix="원" start={prevTotalPrice.current} end={totalPrice} duration={1} />
+                                                    </Label>
+                                                </>
+
+                                            }
+                                            {completedTotalPrice > 0 && (
+                                                <Label className="text-md text-muted-foreground">
+                                                    완료된 항목 <CountUp suffix="원" start={prevCompletedTotalPrice.current} end={completedTotalPrice} duration={1} /> 포함
+                                                </Label>
+                                            )}
                                         </CardContent>
                                     </Card>
                                     <Suspense>
@@ -644,6 +741,7 @@ export default function Cart() {
                                             <CarouselContent className="ml-3 mr-6">
                                                 {Object.entries(booths)
                                                     .filter(([boothId, booth]) => dayFilter.length === 0 || dayFilter.every(day => booth.date.some(date => new Date(date).getDay() === day)))
+                                                    .filter(([boothId, booth]) => !booth.completed)
                                                     .sort(([boothIdA, boothA], [boothIdB, boothB]) => {
                                                         const locA = boothA.boothLocation || '';
                                                         const locB = boothB.boothLocation || '';
@@ -690,8 +788,9 @@ export default function Cart() {
                                                                                         {booth.date.length === 2 ? "양일" : new Date(booth.date[0]).toLocaleDateString('ko-KR', { weekday: 'long' })}
                                                                                     </Badge>
                                                                                 )}
+
                                                                             </div>
-                                                                            <div className="flex gap-2">
+                                                                            <div className="flex gap-2 items-center">
                                                                                 <DropdownMenu>
                                                                                     <DropdownMenuTrigger>
                                                                                         <Button size="icon" variant="outline" className="h-8 w-8 rounded-full">
@@ -739,23 +838,27 @@ export default function Cart() {
                                                                     <CardDescription className="text-lg text-foreground">
                                                                         <div>{booth.boothName}</div>
                                                                     </CardDescription>
-                                                                    <div className="flex gap-1">
-                                                                        <CardDescription className="text-md text-foreground">
-                                                                            <CountUp
-                                                                                start={prevBoothPrices.current[boothId] || 0}
-                                                                                end={boothPrices[boothId]}
-                                                                                duration={1}
-                                                                                separator=","
-                                                                                suffix="원"
-                                                                            />
+                                                                    <div className="flex justify-between">
+                                                                        <div className="flex gap-1">
+                                                                            <CardDescription className="text-md text-foreground">
+                                                                                <CountUp
+                                                                                    start={prevBoothPrices.current[boothId] || 0}
+                                                                                    end={boothPrices[boothId]}
+                                                                                    duration={1}
+                                                                                    separator=","
+                                                                                    suffix="원"
+                                                                                />
 
-                                                                        </CardDescription>
-                                                                        <Label className="text-muted-foreground text-md">
-                                                                            {" - "}
-                                                                            {booth.products.reduce((acc, product) =>
-                                                                                acc + product.options.reduce((acc, option) => acc + option.quantity, 0)
-                                                                                , 0)}개 항목
-                                                                        </Label>
+                                                                            </CardDescription>
+                                                                            <Label className="text-muted-foreground text-md">
+                                                                                {" - "}
+                                                                                {booth.products.reduce((acc, product) =>
+                                                                                    acc + product.options.reduce((acc, option) => acc + option.quantity, 0)
+                                                                                    , 0)}개 항목
+                                                                            </Label>
+
+                                                                        </div>
+
                                                                     </div>
                                                                     <Separator />
                                                                 </CardHeader>
@@ -791,19 +894,211 @@ export default function Cart() {
                                                                         </div>
                                                                     ))}
                                                                 </CardContent>
-                                                                {/*
-                                                            <CardFooter className="flex items-center overflow-x-auto mt-auto">
-                                                                <Button className="w-full">수령 완료</Button>
-                                                            </CardFooter>
-                                                                        */}
+
+                                                                <CardFooter className="flex items-center gap-2 overflow-x-auto mt-auto">
+                                                                    <Button variant="outline" size="icon" className="w-10 h-10" onClick={() => deleteBoothCart(booth.products.map((item) => item.productId))}>
+                                                                        <Trash className="h-4 w-4" />
+                                                                    </Button>
+                                                                    <Button variant="secondary" className="flex-1" onClick={() => changeCartStatus(true, booth.products.map((item) => item.productId))}>
+                                                                        <CheckIcon className="h-4 w-4 mr-2" /> 완료로 표시
+                                                                    </Button>
+                                                                </CardFooter>
+
                                                             </Card>
                                                         </CarouselItem>
                                                     ))}
                                             </CarouselContent>
-                                            <CarouselPrevious className="ml-16 w-10 h-10" />
-                                            <CarouselNext className="mr-16 w-10 h-10" />
-
+                                            {totalPrice > 0 && (
+                                                <>
+                                                    <CarouselPrevious className="ml-16 w-10 h-10" />
+                                                    <CarouselNext className="mr-16 w-10 h-10" />
+                                                </>
+                                            )}
                                         </Carousel>
+                                        {completedTotalPrice > 0 && (
+                                            <>
+                                                <div className="flex gap-2 items-center mt-12">
+                                                    <h2 className="ml-6 text-2xl font-bold">완료된 항목</h2>
+                                                    <div className="relative w-8 h-8">
+                                                        <CircularProgressbar
+                                                            value={completionPercentage}
+                                                            strokeWidth={10}
+                                                            styles={{
+                                                                path: {
+                                                                    stroke: getColor(completionPercentage),
+                                                                    strokeLinecap: "round",
+                                                                    transition: "stroke-dashoffset 0.5s ease 0s",
+                                                                },
+                                                                trail: {
+                                                                    stroke: '#d6d6d6',
+                                                                },
+                                                                text: {
+                                                                    fill: 'currentColor',
+                                                                    fontSize: '40px',
+                                                                    fontWeight: 'bold',
+                                                                    dominantBaseline: 'central',
+                                                                    textAnchor: 'middle',
+                                                                },
+                                                                background: {
+                                                                    fill: '#3e98c7',
+                                                                },
+                                                            }}
+                                                        />
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <CountUp
+                                                                className="text-xs font-bold"
+                                                                start={prevCompletionPercentage.current}
+                                                                end={completionPercentage}
+                                                                duration={1}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <Carousel className="w-full mt-4"
+                                                    opts={{
+                                                        align: 'start',
+                                                        dragFree: true
+                                                    }}
+                                                    plugins={
+                                                        []
+                                                    }>
+                                                    <CarouselContent className="ml-3 mr-6">
+                                                        {Object.entries(booths)
+                                                            .filter(([boothId, booth]) => dayFilter.length === 0 || dayFilter.every(day => booth.date.some(date => new Date(date).getDay() === day)))
+                                                            .filter(([boothId, booth]) => booth.completed)
+                                                            .sort(([boothIdA, boothA], [boothIdB, boothB]) => {
+                                                                const locA = boothA.boothLocation || '';
+                                                                const locB = boothB.boothLocation || '';
+                                                                const tagA = boothA.tag || 0;
+                                                                const tagB = boothB.tag || 0;
+
+                                                                if (sortTag === 'tag-asc' && sort === 'location-asc') {
+                                                                    if (tagA !== tagB) {
+                                                                        return tagA - tagB;
+                                                                    }
+                                                                    return locA.localeCompare(locB);
+                                                                }
+                                                                if (sortTag === 'tag-asc' && sort === 'location-desc') {
+                                                                    if (tagA !== tagB) {
+                                                                        return tagA - tagB;
+                                                                    }
+                                                                    return locB.localeCompare(locA);
+                                                                }
+                                                                if (sortTag === 'tag-desc' && sort === 'location-asc') {
+                                                                    if (tagA !== tagB) {
+                                                                        return tagB - tagA;
+                                                                    }
+                                                                    return locA.localeCompare(locB);
+                                                                }
+                                                                if (sortTag === 'tag-desc' && sort === 'location-desc') {
+                                                                    if (tagA !== tagB) {
+                                                                        return tagB - tagA;
+                                                                    }
+                                                                    return locB.localeCompare(locA);
+                                                                }
+                                                                return 0;
+                                                            })
+                                                            .map(([boothId, booth]) => (
+                                                                <CarouselItem key={`${boothId}-${booth.tag}`}
+                                                                    className="basis-auto pl-3">
+                                                                    <Card className="w-[290px] h-[100%] flex flex-col">
+                                                                        <CardHeader>
+                                                                            <CardTitle className="break-words overflow-hidden text-ellipsis font-bold">
+                                                                                <div className="flex justify-between items-center">
+                                                                                    <div className="flex gap-2 items-center">
+                                                                                        {booth.boothLocation}
+                                                                                        {booth.date.some(date => [0, 6].includes(new Date(date).getDay())) && (
+                                                                                            <Badge variant="secondary" className={booth.date.length === 2 ? "" : new Date(booth.date[0]).getDay() === 0 ? "bg-red-100 hover:bg-red-200 dark:bg-red-900 hover:dark:bg-red-800" : "bg-blue-100 hover:bg-blue-200 dark:bg-blue-800 hover:dark:bg-blue-700"}>
+                                                                                                {booth.date.length === 2 ? "양일" : new Date(booth.date[0]).toLocaleDateString('ko-KR', { weekday: 'long' })}
+                                                                                            </Badge>
+                                                                                        )}
+
+                                                                                    </div>
+                                                                                    <div className="flex gap-2 items-center">
+
+                                                                                        <Button variant="secondary" size="icon" className="h-8 w-8">
+                                                                                            <Link href={`/booth/${boothId}`}>
+                                                                                                <SquareArrowOutUpRight className="h-5 w-5" />
+                                                                                            </Link>
+                                                                                        </Button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </CardTitle>
+
+                                                                            <CardDescription className="text-lg text-foreground">
+                                                                                <div>{booth.boothName}</div>
+                                                                            </CardDescription>
+                                                                            <div className="flex justify-between">
+                                                                                <div className="flex gap-1">
+                                                                                    <CardDescription className="text-md text-foreground">
+                                                                                        <CountUp
+                                                                                            start={prevBoothPrices.current[boothId] || 0}
+                                                                                            end={boothPrices[boothId]}
+                                                                                            duration={1}
+                                                                                            separator=","
+                                                                                            suffix="원"
+                                                                                        />
+
+                                                                                    </CardDescription>
+                                                                                    <Label className="text-muted-foreground text-md">
+                                                                                        {" - "}
+                                                                                        {booth.products.reduce((acc, product) =>
+                                                                                            acc + product.options.reduce((acc, option) => acc + option.quantity, 0)
+                                                                                            , 0)}개 항목
+                                                                                    </Label>
+
+                                                                                </div>
+
+                                                                            </div>
+                                                                            <Separator />
+                                                                        </CardHeader>
+                                                                        <CardContent className="flex flex-col gap-4">
+                                                                            {booth.products.sort((a, b) => a.productName.localeCompare(b.productName)).map(product => (
+                                                                                <div key={product.productId}>
+                                                                                    <Label className="text-md text-muted-foreground">
+                                                                                        {product.productName}
+                                                                                    </Label>
+                                                                                    {product.options.sort((a, b) => a.optionName.localeCompare(b.optionName)).map(option => (
+                                                                                        <div key={option.optionId} className="flex justify-between mb-2">
+                                                                                            <div className="flex flex-col">
+                                                                                                <Label className="text-lg font-bold">
+                                                                                                    {option.optionName}
+                                                                                                </Label>
+                                                                                                <Label className="text-muted-foreground text-sm">
+                                                                                                    {option.price ? `${option.price.toLocaleString()} 원` : "가격 미정"}
+                                                                                                </Label>
+                                                                                            </div>
+                                                                                            <div className="flex justify-end items-center">
+
+                                                                                                <Label className="mx-3 text-md">
+                                                                                                    {option.quantity}
+                                                                                                </Label>
+
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            ))}
+                                                                        </CardContent>
+
+                                                                        <CardFooter className="flex items-center gap-2 overflow-x-auto mt-auto">
+                                                                            <Button variant="outline" size="icon" onClick={() => changeCartStatus(false, booth.products.map((item) => item.productId))}>
+                                                                                <Undo2 className="h-4 w-4" />
+                                                                            </Button>
+                                                                            <Button className="flex-1" variant="secondary" onClick={() => deleteBoothCart(booth.products.map((item) => item.productId))}>
+                                                                                <Trash className="h-4 w-4 mr-2" />삭제
+                                                                            </Button>
+                                                                        </CardFooter>
+
+                                                                    </Card>
+                                                                </CarouselItem>
+                                                            ))}
+                                                    </CarouselContent>
+                                                    <CarouselPrevious className="ml-16 w-10 h-10" />
+                                                    <CarouselNext className="mr-16 w-10 h-10" />
+                                                </Carousel>
+                                            </>
+                                        )}
                                     </Suspense>
                                 </TabsContent>
                             </Tabs>

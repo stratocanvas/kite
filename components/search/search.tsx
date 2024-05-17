@@ -17,6 +17,7 @@ export function SearchBar() {
     const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
     const [selectedAuthors, setSelectedAuthors] = useState<string[]>([]);
     const [selectedDOW, setSelectedDOW] = useState<string[]>([]);
+    const [selectedPreorder, setSelectedPreorder] = useState<string[]>([]);
     const [boothName, setBoothName] = useState<string>("");
     const searchParams = useSearchParams();
     const { replace } = useRouter();
@@ -37,6 +38,9 @@ export function SearchBar() {
         }
         if (selectedDOW.length > 0) {
             params.set('dow', selectedDOW.join(','));
+        }
+        if (selectedPreorder.length > 0) {
+            params.set('preorder', selectedPreorder.join(','));
         }
         if (boothName.length > 0) {
             params.set('name', boothName);
@@ -89,7 +93,14 @@ export function SearchBar() {
                     <FilterLight
                         title="요일"
                         table="dow"
+                        type="dow"
                         onSelectedOptionsChange={setSelectedDOW}
+                    />
+                    <FilterLight
+                        title="구입 방법"
+                        table="preorder"
+                        type="preorder"
+                        onSelectedOptionsChange={setSelectedPreorder}
                     />
                 </div>
                 <ScrollBar orientation="horizontal" />
@@ -107,6 +118,7 @@ export function SearchBarSmall(params: typeof searchParams) {
     const [boothName, setBoothName] = useState<string>("");
     const [searchMode, setSearchMode] = useState(false);
     const [searchInput, setSearchInput] = useState("");
+    const [selectedPreorder, setSelectedPreorder] = useState<string[]>([]);
 
     const parameters = params
     const searchParams = useSearchParams();
@@ -139,6 +151,11 @@ export function SearchBarSmall(params: typeof searchParams) {
         } else {
             params.delete('dow'); // 변경된 부분
         }
+        if (selectedPreorder.length > 0) {
+            params.set('preorder', selectedPreorder.join(','));
+        } else {
+            params.delete('preorder'); // 변경된 부분
+        }
         if (boothName) {
             params.set('name', boothName);
         } else {
@@ -155,6 +172,7 @@ export function SearchBarSmall(params: typeof searchParams) {
         const authorParams = params.get('author')?.split(',') || [];
         const dowParams = params.get('dow')?.split(',') || [];
         const nameParams = params.get('name') || "";
+        const preorderParams = params.get('preorder')?.split(',') || [];
         console.log(nameParams);
         setSelectedCharacters(characterParams);
         setSelectedCategories(categoryParams);
@@ -163,6 +181,7 @@ export function SearchBarSmall(params: typeof searchParams) {
         setSelectedDOW(dowParams.map(Number));
         setBoothName(nameParams);
         setSearchInput(nameParams);
+        setSelectedPreorder(preorderParams);
     }, []);
 
     function setQuery(name: string) {
@@ -246,7 +265,14 @@ export function SearchBarSmall(params: typeof searchParams) {
                     <FilterLight
                         title="요일"
                         table="dow"
+                        type="dow"
                         onSelectedOptionsChange={setSelectedDOW}
+                    />
+                    <FilterLight
+                        title="구입 방법"
+                        table="preorder"
+                        type="preorder"
+                        onSelectedOptionsChange={setSelectedPreorder}
                     />
                 </div>
                 <ScrollBar orientation="horizontal" />
