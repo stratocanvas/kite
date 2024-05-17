@@ -127,12 +127,17 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                         .attr("fill", (d) => {
                             const location = filteredBoothLocations?.find(loc => loc.id === d.properties.id);
                             const boothExists = boothData.some((booth: any) => booth.locations.includes(d.properties.id));
-
+                            const completed = filteredBoothLocations.find(loc => loc.id === d.properties.id)?.completed;
+                            if (completed) {
+                                return "rgb(174,174,178)";
+                            }
                             if (location) {
                                 return location.color;
-                            } if (boothExists) {
+                            }
+                            if (boothExists) {
                                 return "white";
                             }
+
                             return d.properties.layer === "background" ? "none" : "gray";
                         })
                         .attr("stroke", d => d.properties.id !== "bg" ? "black" : "none")
@@ -147,8 +152,12 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                                 .attr("fill", function (d) {
                                     if (selectedBooth && boothData.some((booth: any) => booth.locations.includes(selectedBooth) && booth.locations.includes(d.properties.id))) {
                                         const location = filteredBoothLocations?.find(loc => loc.id === d.properties.id);
+                                        const completed = filteredBoothLocations.find(loc => loc.id === d.properties.id)?.completed;
+                                        if (completed) {
+                                            return d3.hsl("rgb(174,174,178)").brighter(0.5).toString();
+                                        }
                                         if (location) {
-                                            return d3.hsl(location.color).brighter(1).toString();
+                                            return d3.hsl(location.color).brighter(0.5).toString();
                                         }
                                         return d3.hsl("white").darker(0.5).toString();
 
@@ -160,6 +169,10 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                                 .attr("fill", function (d) {
                                     if (selectedBooth && boothData.some((booth: any) => booth.locations.includes(selectedBooth) && booth.locations.includes(d.properties.id))) {
                                         const location = filteredBoothLocations?.find(loc => loc.id === d.properties.id);
+                                        const completed = filteredBoothLocations.find(loc => loc.id === d.properties.id)?.completed;
+                                        if (completed) {
+                                            return "rgb(174,174,178)";
+                                        }
                                         if (location) {
                                             return location.color;
                                         }
@@ -176,31 +189,53 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
                     pathGroup.selectAll("text")
                         .data(feature(topojsonData, topojsonData.objects['event-map']).features)
                         .enter()
-                        .append("text")
-                        .attr("x", d => pathGenerator.centroid(d)[0])
-                        .attr("y", d => pathGenerator.centroid(d)[1])
-                        .attr("text-anchor", "middle")
-                        .attr("alignment-baseline", "central")
-                        .text(d => d.properties.id)
-                        .attr("pointer-events", "none")
-                        .attr("font-weight", "bold")
-                        .attr("font-size", d => {
-                            const bounds = pathGenerator.bounds(d);
-                            const height = bounds[1][1] - bounds[0][1];
-                            return `${height * 0.6}px`; // 높이의 80%로 폰트 크기 설정
-                        }).attr("fill", d => {
-                            const location = filteredBoothLocations?.find(loc => loc.id === d.properties.id);
-                            if (location) {
-                                return "white";
-                            }
-                            const boothExists = boothData.some((booth: any) => booth.locations.includes(d.properties.id));
-                            return boothExists ? "black" : "none";
-                        })
+                        .append("g")
                         .attr("transform", d => {
+                            const [x, y] = pathGenerator.centroid(d);
+                            return `translate(${x}, ${y})`;
+                        })
+                        .each(function (d) {
                             const bounds = pathGenerator.bounds(d);
                             const width = bounds[1][0] - bounds[0][0];
                             const height = bounds[1][1] - bounds[0][1];
-                            return height > width ? `rotate(90 ${pathGenerator.centroid(d)})` : "";
+                            const size = Math.min(width, height) * 0.7; 
+
+                            const completed = filteredBoothLocations.find(loc => loc.id === d.properties.id)?.completed;
+                            if (completed) {
+                                d3.select(this).append("svg")
+                                    .attr("xmlns", "http://www.w3.org/2000/svg")
+                                    .attr("width", size)
+                                    .attr("height", size)
+                                    .attr("viewBox", "0 0 24 24")
+                                    .attr("fill", "none")
+                                    .attr("stroke", "white")
+                                    .attr("stroke-width", "2")
+                                    .attr("stroke-linecap", "round")
+                                    .attr("stroke-linejoin", "round")
+                                    .attr("class", "lucide lucide-check")
+                                    .attr("x", -size / 2) 
+                                    .attr("y", -size / 2)
+                                    .append("path")
+                                    .attr("d", "M20 6 9 17l-5-5");
+                            } else {
+                                d3.select(this).append("text")
+                                    .attr("text-anchor", "middle")
+                                    .attr("alignment-baseline", "central")
+                                    .text(d.properties.id)
+                                    .attr("font-weight", "bold")
+                                    .attr("font-size", `${height * 0.6}px`)
+                                    .attr("fill", () => {
+                                        const location = filteredBoothLocations?.find(loc => loc.id === d.properties.id);
+                                        if (location) {
+                                            return "white";
+                                        }
+                                        const boothExists = boothData.some((booth: any) => booth.locations.includes(d.properties.id));
+                                        return boothExists ? "black" : "none";
+                                    })
+                                    .attr("transform", () => {
+                                        return height > width ? `rotate(90 ${pathGenerator.centroid(d)})` : "";
+                                    });
+                            }
                         });
 
 
@@ -241,23 +276,23 @@ function IndoorMap({ boothLocations }: { boothLocations: BoothLocation[] }) {
         <div className="w-full h-full relative">
             <svg ref={svgRef} className="w-full h-full rounded-lg" />
             <div className='absolute top-4 right-4'>
-            <DropdownMenu>
-                <DropdownMenuTrigger>
-                    <Button size="sm" variant="outline" className="flex gap-2">
-                        {view === 'all' ? <Eye className="w-4 h-4" /> : view === 'wishlist' ? <Heart className="w-4 h-4" /> : <ShoppingBag className="w-4 h-4" />}
-                        <p className="hidden md:block">{view === 'all' ? "전체" : view === 'wishlist' ? "위시리스트" : "장바구니"}</p>
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                    <DropdownMenuRadioGroup value={view} onValueChange={setView}>
-                        <DropdownMenuLabel>보기</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuRadioItem value="all">전체</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="wishlist">위시리스트</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="cart">장바구니</DropdownMenuRadioItem>
-                    </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-            </DropdownMenu>
+                <DropdownMenu>
+                    <DropdownMenuTrigger>
+                        <Button size="sm" variant="outline" className="flex gap-2">
+                            {view === 'all' ? <Eye className="w-4 h-4" /> : view === 'wishlist' ? <Heart className="w-4 h-4" /> : <ShoppingBag className="w-4 h-4" />}
+                            <p className="hidden md:block">{view === 'all' ? "전체" : view === 'wishlist' ? "위시리스트" : "장바구니"}</p>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuRadioGroup value={view} onValueChange={setView}>
+                            <DropdownMenuLabel>보기</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuRadioItem value="all">전체</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="wishlist">위시리스트</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="cart">장바구니</DropdownMenuRadioItem>
+                        </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
             {selectedBooth && boothData && (
                 <div className="absolute bottom-0 w-full">
