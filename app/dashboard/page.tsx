@@ -427,7 +427,7 @@ export default function Cart() {
                             <Card className="w-[calc(100%-3rem)] ml-6 mb-3 lg:w-1/2 h-[330px] lg:h-[700px]">
                                 <CardContent className="w-full h-full p-0 m-0">
                                     <Suspense>
-                                        <MemoizedIndoorMap boothLocations={allBoothLocations} />
+                                        <MemoizedIndoorMap boothLocations={allBoothLocations} items={items}/>
                                     </Suspense>
                                 </CardContent>
                             </Card>
