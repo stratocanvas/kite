@@ -15,6 +15,7 @@ export default async function SearchResult({
 		event?: number;
 		dow?: string;
 		name?: string;
+		preorder?: string;
 	};
 }) {
 	const supabase = createClient();
