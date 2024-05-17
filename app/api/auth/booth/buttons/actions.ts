@@ -118,7 +118,7 @@ export async function GetBookmarks() {
 	const user = await GetUser();
 	const { data: wishlist, error: wishlistError } = await supabase
 	  .from("b_wishlists")
-	  .select("booth_id, tag, booth(name, locations, event(event_id, name), date)")
+	  .select("booth_id, tag, booth(name, locations, event(event_id, name), date, preorder(type))")
 	  .eq("users_id", user);
 	if (wishlistError) {
 		return [];

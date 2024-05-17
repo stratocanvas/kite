@@ -39,6 +39,7 @@ export async function GetCart() {
             product_id,
             option_id,
 			tag,
+			completed,
             product(
                 name,
                 booth(
@@ -71,6 +72,7 @@ export async function GetCart() {
 		eventId: item.product.booth.event.event_id,
 		date: item.product.booth.date,
 		tag: item.tag,
+		completed: item.completed,
 	}));
 }
 
@@ -137,7 +139,7 @@ export async function GetBookmarks() {
 	const { data: wishlist, error: wishlistError } = await supabase
 		.from("b_wishlists")
 		.select(
-			"booth_id, tag, booth(name, locations, event(event_id, name), date)",
+			"booth_id, tag, booth(name, locations, event(event_id, name), date, preorder(type))",
 		)
 		.eq("users_id", user);
 	if (wishlistError) {
@@ -159,7 +161,6 @@ export async function SetBookmark(boothId: string, action: boolean) {
 		} = await supabase.auth.getUser();
 		if (userError) {
 		}
-
 		// The rest of your SetBookmark logic...
 		if (action) {
 			// Add bookmark
@@ -219,6 +220,56 @@ export async function SetCartTag(tag: number, productId: number[]) {
         const { data, error } = await supabase
             .from("cart")
             .update({tag: tag})
+            .eq("users_id", user?.id)
+            .in("product_id", productId)
+        if (error) {
+            throw new Error(error.message);
+        }
+    } catch (error) {
+        console.error("Error setting bookmark tag:", error);
+        throw error;
+    }
+}
+
+export async function SetCartStatus(completed: boolean, productId: number[]) {
+    const supabase = createClient();
+    try {
+        const {
+            data: { user },
+            error: userError,
+        } = await supabase.auth.getUser();
+        if (userError) {
+            throw new Error(userError.message);
+        }
+        // Update bookmark tag
+        const { data, error } = await supabase
+            .from("cart")
+            .update({completed: completed})
+            .eq("users_id", user?.id)
+            .in("product_id", productId)
+        if (error) {
+            throw new Error(error.message);
+        }
+    } catch (error) {
+        console.error("Error setting bookmark tag:", error);
+        throw error;
+    }
+}
+
+export async function DeleteBoothCart(productId: number[]) {
+    const supabase = createClient();
+    try {
+        const {
+            data: { user },
+            error: userError,
+        } = await supabase.auth.getUser();
+        if (userError) {
+            throw new Error(userError.message);
+        }
+        // Update bookmark tag
+        const { data, error } = await supabase
+            .from("cart")
+            .delete()
             .eq("users_id", user?.id)
             .in("product_id", productId)
         if (error) {
