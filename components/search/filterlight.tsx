@@ -28,11 +28,6 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { createClient } from '@/utils/supabase/client'
 import { useRouter, useSearchParams } from "next/navigation";
 
-const supabase = createClient()
-
-
-
-
 interface CategoryFilterProps {
     title?: string;
     table: string;
@@ -41,6 +36,7 @@ interface CategoryFilterProps {
     onSelectedOptionsChange: (selectedOptions: string[]) => void;
     params?: URLSearchParams
     className?: string;
+    type: string;
 }
 
 interface CategoryOption {
@@ -56,17 +52,15 @@ export function FilterLight({
     title,
     table,
     onSelectedOptionsChange,
-
+    type
 }: CategoryFilterProps) {
-    const options = [
-        {
-            id: "6",
-            name: "토요일",
-        },
-        {
-            id: "7",
-            name: "일요일",
-        },
+    const options = type === "dow" ? [
+        { id: "6", name: "토요일" },
+        { id: "7", name: "일요일" },
+    ] : [
+        { id: "0", name: "수요조사" },
+        { id: "1", name: "선입금" },
+        { id: "2", name: "통판" },
     ];
 
     const searchParams = useSearchParams();
@@ -101,7 +95,7 @@ export function FilterLight({
                                 {selectedValues.size}
                             </Badge>
                             <div className="hidden space-x-1 lg:flex">
-                                {selectedValues.size > 1 ? (
+                                {selectedValues.size > 1 && type === "dow" ? (
                                     <Badge
                                         variant="secondary"
                                         className="rounded-sm px-1 text-md"
