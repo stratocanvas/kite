@@ -85,7 +85,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             disableTransitionOnChange
           >
             <UserStateProvider>
-<h2 className="p-2 font-bold text-md text-center bg-blue-500">공지 기능 테스트 중...</h2>
+{/*<h2 className="p-2 font-bold text-md text-center bg-blue-500 text-white">공지 기능 테스트 중...</h2>*/}
               <TopMenuDesktop />
               <main className="flex flex-col min-h-screen">
                 {children}
