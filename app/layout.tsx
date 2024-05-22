@@ -85,9 +85,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             disableTransitionOnChange
           >
             <UserStateProvider>
-<Link href="https://x.com/marimo_jh/status/1792129460311040198">
-<h2 className="p-2 font-bold text-md text-center bg-blue-500 text-white">일요일 16번 "마코토랑하스미좋아함" 부스에서 계좌이체로 구입하신 분들은 송금내역을 다시 한 번 확인해 주시기 바랍니다. 자세한 내용은 여기를 클릭해 주세요.</h2>
-              </Link>
 <TopMenuDesktop />
               <main className="flex flex-col min-h-screen">
                 {children}
