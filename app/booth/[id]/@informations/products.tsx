@@ -23,28 +23,13 @@ import OptionImage from "./option-image";
 //export const revalidate = 0
 
 
-export async function GetProductData(boothId: string) {
-
-
-    const supabase = createClient();
-    const { data: product } = await supabase
-        .from("product")
-        .select(`product_id, name, adult, 
-                 category(name),
-                 author(name),
-                 p_option(option_id, name, price, thumbnail, character(name, thumbnail))`)
-        .eq("booth_id", boothId);
-    return product;
-}
-
-
-export default async function BoothProducts({ params }: { params: { id: string } }) {
-    const product = await GetProductData(params.id);
+export default async function BoothProducts({ data }: { data: any }) {
+    const product = data.product
     return (
         <>
             {product && product.length > 0 && (
                 <>
-                <Card key={product?.product_id} className="h-[100%] flex flex-col border-none shadow-none" id="goods">
+                <Card key={product?._id} className="h-[100%] flex flex-col border-none shadow-none" id="goods">
                     <CardContent className="flex-grow mt-6 flex items-center overflow-x-auto">
                         <Label className="text-xl font-bold">굿즈</Label>
                     </CardContent>
@@ -59,13 +44,13 @@ export default async function BoothProducts({ params }: { params: { id: string }
                             }>
                             <CarouselContent className="ml-3 mr-6">
                                 {product?.map((product: any) => (
-                                    <CarouselItem key={product.product_id} className="basis-auto pl-3">
+                                    <CarouselItem key={product._id} className="basis-auto pl-3">
                                         <Card
 
                                             className="w-[290px] h-[100%] flex flex-col"
                                         >
 
-                                            <OptionImage productId={product.product_id} options={product.p_option} />
+                                            <OptionImage productId={product._id} options={product.option} />
                                             <CardHeader>
                                                 <CardDescription>
                                                     {product.author.length > 2
@@ -85,11 +70,11 @@ export default async function BoothProducts({ params }: { params: { id: string }
                                             <CardContent className="flex-grow -mt-2 flex items-start justify-start overflow-x-auto">
                                                 <SelectOptionsButton
                                                     product={product}
-                                                    options={product.p_option}
+                                                    options={product.option}
                                                 />
                                             </CardContent>
                                             <CardFooter className="flex items-center overflow-x-auto mt-auto">
-                                                <AddCart product={product} boothId={params.id} />
+                                                <AddCart product={product} boothId={data._id} />
                                             </CardFooter>
                                         </Card>
                                     </CarouselItem>

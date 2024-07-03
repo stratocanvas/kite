@@ -703,8 +703,8 @@ export default function RequestForm() {
                 <Tabs defaultValue="basic" className="w-full">
                     <div className="w-full flex gap-2">
                         <TabsList className="grid w-full grid-cols-4">
-                            <TabsTrigger value="basic">기본 정보</TabsTrigger>
                             <TabsTrigger value="info">인포</TabsTrigger>
+                            <TabsTrigger value="basic">기본 정보</TabsTrigger>
                             <TabsTrigger value="goods">굿즈</TabsTrigger>
                             <TabsTrigger value="etc">기타</TabsTrigger>
                         </TabsList>
@@ -902,6 +902,7 @@ export default function RequestForm() {
                                                                                                     setSelectedAuthors([...selectedAuthors, author]);
                                                                                                 }
                                                                                             }}
+                                                                                            
                                                                                         >
                                                                                             <Check
                                                                                                 className={cn(
@@ -1547,88 +1548,8 @@ export default function RequestForm() {
 
                                                                                                     <Dialog open={authorDialogOpen} onOpenChange={() => setAuthorDialogOpen(!authorDialogOpen)}>
                                                                                                         <div className="flex flex-col gap-2 items-center">
-                                                                                                            검색된 작가 없음
-                                                                                                            <DialogTrigger asChild>
-                                                                                                                {/*<Button variant="secondary" onClick={() => setAuthorDialogOpen(true)}>
-                                                                                                                    작가 등록
-                                                                                            </Button> */}
-                                                                                                            </DialogTrigger>
-                                                                                                        </div>
-                                                                                                        {/*
-                                                                                                        <DialogContent className="sm:max-w-[425px]">
-                                                                                                            <DialogHeader>
-                                                                                                                <DialogTitle>작가 등록</DialogTitle>
-                                                                                                            </DialogHeader>
-                                                                                                            <form onSubmit={(e) => {
-                                                                                                                e.preventDefault();
-                                                                                                                e.stopPropagation();
-                                                                                                                const form = e.target as HTMLFormElement;
-                                                                                                                const formData = new FormData(form);
-                                                                                                                const name = formData.get('name') as string;
-                                                                                                                const sns_x = formData.get('sns_x') as string;
-                                                                                                                const isBoothAuthor = formData.get('isBoothAuthor') as boolean;
-                                                                                                                RegisterAuthor({ name, sns_x })
-                                                                                                                    .then((data) => {
-                                                                                                                        const { author_id } = data;
-                                                                                                                        const newProducts = [...field.value];
-                                                                                                                        newProducts[index].authors.push(author_id);
-                                                                                                                        field.onChange(newProducts);
-                                                                                                                        if (isBoothAuthor) {
-                                                                                                                            setSelectedAuthors([...selectedAuthors, { value: author_id, label: name, sns_x: sns_x }]);
-                                                                                                                        }
-                                                                                                                        setAuthorFetched(false);
-                                                                                                                        setAuthorDialogOpen(false);
-                                                                                                                        toast({ title: "작가 등록 완료!" })
-
-
-                                                                                                                    })
-                                                                                                                    .catch((error) => {
-                                                                                                                        toast({ variant: "destructive", title: "작가 등록에 실패했어요.", description: "잠시 후 다시 시도해 주세요." })
-
-                                                                                                                    });
-                                                                                                            }}>
-                                                                                                                <div className="flex flex-col gap-6 py-4 justify-start">
-                                                                                                                    <div className="flex flex-col gap-2">
-                                                                                                                        <Label htmlFor="name">
-                                                                                                                            이름
-                                                                                                                        </Label>
-                                                                                                                        <Input
-                                                                                                                            id="name"
-                                                                                                                            name="name"
-                                                                                                                            placeholder="작가 활동명 입력"
-                                                                                                                            autoComplete="off"
-                                                                                                                            required
-                                                                                                                        />
-                                                                                                                    </div>
-                                                                                                                    <div className="flex flex-col gap-2">
-                                                                                                                        <Label htmlFor="sns_x">
-                                                                                                                            SNS 아이디
-                                                                                                                        </Label>
-                                                                                                                        <Input
-                                                                                                                            id="sns_x"
-                                                                                                                            name="sns_x"
-                                                                                                                            autoComplete="off"
-
-                                                                                                                            placeholder="X(Twitter) 아이디 입력"
-                                                                                                                            required
-                                                                                                                        />
-                                                                                                                    </div>
-                                                                                                                    <div className="flex gap-2">
-                                                                                                                        <Checkbox id="isBoothAuthor" name="isBoothAuthor" />
-                                                                                                                        <Label
-                                                                                                                            htmlFor="isBoothAuthor"
-                                                                                                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                                                                                                        >
-                                                                                                                            부스 참여 작가에도 추가
-                                                                                                                        </Label>
-                                                                                                                    </div>
-                                                                                                                </div>
-                                                                                                                <DialogFooter>
-                                                                                                                    <Button type="submit">등록</Button>
-                                                                                                                </DialogFooter>
-                                                                                                            </form>
-                                                                                                        </DialogContent>
-                                                                                                        */}
+                                                                                                            검색된 작가 없음                                                                                          
+                                                                                                        </div>                                                                                             
                                                                                                     </Dialog>
                                                                                                 </CommandEmpty>
                                                                                                 <CommandGroup heading="이 부스의 작가">

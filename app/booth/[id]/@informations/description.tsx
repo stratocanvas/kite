@@ -117,7 +117,7 @@ export default function BoothDescription({ data }: { data: any }) {
     return (
         <>
             <Card
-                key={data?.booth_id}
+                key={data?._id}
                 className="h-[100%] flex flex-col border-none shadow-none"
             >
                 <Suspense fallback={<Skeleton />}>
