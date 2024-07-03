@@ -41,7 +41,7 @@ export default function BoothProfile({ data, color }: { data: any, color: string
         };
     }, []);
 
-    const sortedLocations = useMemo(() => data?.locations?.sort((a: string, b: string) => a.localeCompare(b)) || [], [data?.locations]);
+    const sortedLocations = useMemo(() => data?.location?.sort((a: string, b: string) => a.localeCompare(b)) || [], [data?.locations]);
     const locationDisplay = useMemo(() => {
         if (sortedLocations.length === 0) {
             return "위치 미정";
@@ -52,9 +52,11 @@ export default function BoothProfile({ data, color }: { data: any, color: string
         return sortedLocations[0];
     }, [sortedLocations]);
 
+    console.log(data)
+
     return (
         <>
-            <Card key={data?.booth_id} className="h-auto border-none shadow-none relative" ref={buttonRef}>
+            <Card key={data?._id} className="h-auto border-none shadow-none relative" ref={buttonRef}>
                 <div className="relative">
                     <Suspense>
                         <BoothMenu data={data} />

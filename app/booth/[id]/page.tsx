@@ -8,7 +8,7 @@ const CartSummary = dynamic(() => import("./@informations/cart-summary"));
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Skeleton } from "@/components/ui/skeleton";
 import { notFound } from "next/navigation";
-import { GetBoothData } from "./fetch";
+import { GetBoothData, GetBooth } from "./fetch";
 import type { Metadata, ResolvingMetadata } from "next"
 import Image from "next/image";
 
@@ -60,7 +60,7 @@ export async function generateMetadata(
 
 export default async function Home({ params }: { params: { id: string } }) {
 
-    const booth = await GetBoothData(params.id);
+    const booth = await GetBooth(params.id);
     if (!booth) {
         notFound();
     }
@@ -77,7 +77,7 @@ export default async function Home({ params }: { params: { id: string } }) {
                     </div>
                     <div className="p-0 m-0 w-full mx-auto flex flex-col gap-4">
                         <BoothDescription data={booth} />
-                        <BoothProducts params={params} />
+                        <BoothProducts data={booth} />
                         <BoothPreorders params={params} />
                     </div>
                 </div>
