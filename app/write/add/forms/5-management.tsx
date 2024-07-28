@@ -13,7 +13,7 @@ import { CircleHelp, Package, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { randomBytes } from "node:crypto";
+import CryptoJS from "crypto-js";
 import { useActiveTabStore } from "@/store/addform";
 import { Badge } from "@/components/ui/badge";
 import { useMediaQuery } from "react-responsive";
@@ -171,11 +171,12 @@ const ObjectId = (): string => {
 	const timestamp = Math.floor(new Date().getTime() / 1000)
 		.toString(16)
 		.padStart(8, "0");
-	const randomPart = randomBytes(8).toString("hex");
+	const randomPart = CryptoJS.lib.WordArray.random(8).toString(
+		CryptoJS.enc.Hex,
+	);
 
 	return timestamp + randomPart;
 };
-
 
 export default function ManagementForm() {
 	return (
