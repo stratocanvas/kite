@@ -41,8 +41,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { NumericFormat, removeNumericFormat } from "react-number-format";
 import { Separator } from "@/components/ui/separator";
-import { randomBytes } from "node:crypto";
-import { useEditModeStore } from "@/store/addform";
+import CryptoJS from "crypto-js";
 import { DeleteButton, EditButton } from "../components/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { RequiredBadge } from "../components/badge";
@@ -51,11 +50,12 @@ const ObjectId = (): string => {
 	const timestamp = Math.floor(new Date().getTime() / 1000)
 		.toString(16)
 		.padStart(8, "0");
-	const randomPart = randomBytes(8).toString("hex");
+	const randomPart = CryptoJS.lib.WordArray.random(8).toString(
+		CryptoJS.enc.Hex,
+	);
 
 	return timestamp + randomPart;
 };
-
 const optionSchema = {
 	image: undefined,
 	name: "",
@@ -73,7 +73,7 @@ const productSchema = {
 	option: [optionSchema],
 };
 
-const category: {_id: string, name: string}[] = [
+const category: { _id: string; name: string }[] = [
 	{
 		name: "아크릴 스탠드",
 		_id: "acr111",
@@ -83,8 +83,6 @@ const category: {_id: string, name: string}[] = [
 		_id: "acr112",
 	},
 ];
-
-
 
 type Character = {
 	_id: string;
