@@ -90,7 +90,7 @@
     "jsqr": "^1.4.0",
     "lucide-react": "^0.354.0",
     "lucide-static": "^0.378.0",
-    "mongodb": "6.7",
+    "mongodb": "^6.8.0",
     "multiparty": "^4.2.3",
     "next": "^14.2.3",
     "next-pwa": "^5.6.0",
