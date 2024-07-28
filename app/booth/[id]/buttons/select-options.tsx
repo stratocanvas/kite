@@ -9,7 +9,7 @@ import { useEffect } from "react";
 
 export default function SelectOptionsButton({ product, options }: { product: any, options: any }) {
     const { selectedOptions, selectOption } = useOptionsStore();
-    const selectedOption = selectedOptions[product.product_id];
+    const selectedOption = selectedOptions[product._id];
     const resetOptions = useOptionsStore((state) => state.resetOptions);
 
     useEffect(() => {
@@ -24,11 +24,11 @@ export default function SelectOptionsButton({ product, options }: { product: any
             <div className="flex flex-wrap gap-2 justify-start">
                 <ToggleGroup variant="outline" type="single" className="flex flex-wrap gap-2 justify-start">
                     {options
-                        .sort((a: any, b: any) => a.option_id - b.option_id)
+                        .sort((a: any, b: any) => a._id - b._id)
                         .map((option: any) => (
-                            <div key={option.option_id}>
+                            <div key={option._id}>
                                 <ToggleGroupItem
-                                    value={option.option_id}
+                                    value={option._id}
                                     onClick={() => selectOption(product, option)}
                                     className="text-left truncate"
                                 >
