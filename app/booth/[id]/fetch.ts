@@ -1,6 +1,5 @@
 "use server";
-import { connectDB } from "@/utils/mongodb/database";
-import { ObjectId } from "mongodb";
+
 import { createClient } from "@/utils/supabase/server";
 
 export async function GetBoothData(boothId: string) {
@@ -15,14 +14,6 @@ export async function GetBoothData(boothId: string) {
         .single();
     return booth;
 }
-
-export async function GetBooth(boothId: string) {
-    const client = await connectDB;
-    const db = client.db("kiteapp");
-    const data = await db.collection("booth").findOne({ _id: new ObjectId(boothId) });
-    return data;
-}
-
 
 export async function GetProductData(boothId: string) {
 	const supabase = createClient();

@@ -8,9 +8,17 @@ const CartSummary = dynamic(() => import("./@informations/cart-summary"));
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Skeleton } from "@/components/ui/skeleton";
 import { notFound } from "next/navigation";
-import { GetBoothData, GetBooth } from "./fetch";
+import { GetBoothData } from "./fetch";
 import type { Metadata, ResolvingMetadata } from "next"
 import Image from "next/image";
+import { connectDB } from "@/utils/mongodb/database";
+import { ObjectId } from "mongodb";
+async function GetBooth(boothId: string) {
+    const client = await connectDB;
+    const db = client.db("kiteapp");
+    const data = await db.collection("booth").findOne({ _id: new ObjectId(boothId) });
+    return data;
+}
 
 //export const revalidate = 0
 type Props = {
