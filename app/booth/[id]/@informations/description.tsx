@@ -137,7 +137,7 @@ export default function BoothDescription({ data }: { data: any }) {
                 </Suspense>
                 <Suspense fallback={<Skeleton />}>
 
-                    {data?.author.length > 0 && (
+                    {data?.artist.length > 0 && (
                         <>
                             <CardContent className="flex-grow mt-6 flex items-center overflow-x-auto">
                                 <Label className="text-xl font-bold">작가</Label>
@@ -146,17 +146,17 @@ export default function BoothDescription({ data }: { data: any }) {
                                 <ScrollArea className="w-full whitespace-nowrap rounded-md overflow-y-hidden">
                                     <div className="flex flex-row items-start justify-start space-x-4 pl-6 pr-6">
 
-                                        {data?.author.map((author: any) => (
+                                        {data?.artist.map((artist: any) => (
 
                                             <div
                                                 className="flex flex-col items-center justify-center"
                                             >
-                                                <Link href={`https://x.com/${author?.sns_x}`}>
+                                                <Link href={`https://x.com/${artist?.sns_x}`}>
 
                                                     <Avatar className="h-28 w-28 relative rounded-full overflow-hidden">
-                                                        {author?.thumbnail && (
+                                                        {artist?.thumbnail && (
                                                         <Image
-                                                            src={author?.thumbnail || ''}
+                                                            src={artist?.thumbnail || ''}
                                                             alt=''
                                                             fill
                                                             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 50vw, 33vw"
@@ -164,13 +164,13 @@ export default function BoothDescription({ data }: { data: any }) {
                                                             className="rounded-full"
                                                         />)}
                                                         <AvatarFallback className="text-4xl text-muted-foreground">
-                                                            {author.name[0]}
+                                                            {artist.name[0]}
                                                         </AvatarFallback>
                                                     </Avatar>
                                                 </Link>
 
                                                 <Label className="mt-2 text-center w-16 break-words whitespace-normal max-h-12 overflow-y-hidden">
-                                                    {author.name}
+                                                    {artist.name}
                                                 </Label>
                                             </div>
                                         ))}

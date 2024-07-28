@@ -30,7 +30,7 @@ export async function generateMetadata(
     // optionally access and extend (rather than replace) parent metadata
 
     return {
-        title: `${booth?.name} - ${booth?.event.name}`,
+        title: `${booth?.name} - ${booth?.exhibition.name}`,
         description: `${booth?.author.slice(0, 3).map((author: { name: string }) => author.name).join(', ')} 작가님의 ${booth?.event.name} ${booth?.date.length === 2
             ? "양일"
             : new Date(booth?.date).toLocaleDateString("ko-KR", {
@@ -40,7 +40,7 @@ export async function generateMetadata(
 
         openGraph: {
             title: `${booth?.name}`,
-            description: `${booth?.author.slice(0, 3).map((author: { name: string }) => author.name).join(', ')} 작가님의 ${booth?.event.name} ${booth?.date.length === 2
+            description: `${booth?.artist.slice(0, 3).map((author: { name: string }) => author.name).join(', ')} 작가님의 ${booth?.event.name} ${booth?.date.length === 2
                 ? "양일"
                 : new Date(booth?.date).toLocaleDateString("ko-KR", {
                     weekday: "long",
@@ -67,7 +67,7 @@ export default async function Home({ params }: { params: { id: string } }) {
 
     return (
         <>
-        <Image src={`https://www.kitebooth.com/api/og/booth?id=${booth.booth_id}`} alt={booth.name} width={1200} height={630} className="hidden object-cover"/>
+        <Image src={`https://www.kitebooth.com/api/og/booth?id=${booth._id}`} alt={booth.name} width={1200} height={630} className="hidden object-cover"/>
             <div className="container m-0 p-0 pb-[160px] mx-auto">
                 <div className="flex flex-col gap-4 justify-center relative xl:mx-36">
                     <div className="p-0 m-0 w-full mx-auto relative">

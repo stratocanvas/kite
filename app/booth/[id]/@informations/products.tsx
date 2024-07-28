@@ -53,13 +53,13 @@ export default async function BoothProducts({ data }: { data: any }) {
                                             <OptionImage productId={product._id} options={product.option} />
                                             <CardHeader>
                                                 <CardDescription>
-                                                    {product.author.length > 2
-                                                        ? `${product.author[0].name}, ${product.author[1].name
-                                                        } 외 ${product.author.length - 2}명`
-                                                        : product.author.map((author: any, index: number) =>
-                                                            index !== product.author.length - 1
-                                                                ? `${author.name}, `
-                                                                : author.name,
+                                                    {product.artist.length > 2
+                                                        ? `${product.artist[0].name}, ${product.artist[1].name
+                                                        } 외 ${product.artist.length - 2}명`
+                                                        : product.artist.map((artist: any, index: number) =>
+                                                            index !== product.artist.length - 1
+                                                                ? `${artist.name}, `
+                                                                : artist.name,
                                                         )}
                                                 </CardDescription>
                                                 <CardTitle className="break-words overflow-hidden text-ellipsis">

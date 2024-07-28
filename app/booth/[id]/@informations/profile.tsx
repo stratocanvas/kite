@@ -112,7 +112,7 @@ export default function BoothProfile({ data, color }: { data: any, color: string
                             <div className="md:pb-10 absolute bottom-4 rounded-b-md w-full flex flex-col items-center md:items-start">
                                 <CardHeader className="md:pl-12 text-center md:text-left">
                                     <CardDescription className="text-white text-sm md:text-md">
-                                        {data?.event?.name}
+                                        {data?.exhibition?.name}
                                     </CardDescription>
                                     <CardTitle className="text-white text-2xl md:text-3xl break-words overflow-hidden text-ellipsis">
                                         {data?.name}
