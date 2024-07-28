@@ -29,6 +29,18 @@ interface FileUploadProps extends ControllerRenderProps {
 	ratio: number;
 }
 
+/**
+ * Renders a file upload component.
+ *
+ * @component
+ * @param {Object} props - The component props.
+ * @param {Function} props.onChange - The callback function triggered when a file is selected.
+ * @param {File | null} props.value - The selected file.
+ * @param {number} props.maxSize - The maximum file size allowed in bytes.
+ * @param {number} props.maxFiles - The maximum number of files allowed to be uploaded.
+ * @param {number} props.ratio - The aspect ratio of the preview image.
+ * @returns {JSX.Element} The rendered FileUpload component.
+ */
 function FileUpload({
 	onChange,
 	value,
