@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { NumericFormat } from "react-number-format";
-import { randomBytes } from "node:crypto";
+import CryptoJS from "crypto-js";
 import { useEditModeStore } from "@/store/addform";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -60,7 +60,9 @@ const ObjectId = (): string => {
 	const timestamp = Math.floor(new Date().getTime() / 1000)
 		.toString(16)
 		.padStart(8, "0");
-	const randomPart = randomBytes(8).toString("hex");
+	const randomPart = CryptoJS.lib.WordArray.random(8).toString(
+		CryptoJS.enc.Hex,
+	);
 
 	return timestamp + randomPart;
 };
