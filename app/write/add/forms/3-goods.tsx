@@ -45,6 +45,7 @@ import CryptoJS from "crypto-js";
 import { DeleteButton, EditButton } from "../components/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { RequiredBadge } from "../components/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ObjectId = (): string => {
 	const timestamp = Math.floor(new Date().getTime() / 1000)
@@ -84,91 +85,14 @@ const category: { _id: string; name: string }[] = [
 	},
 ];
 
-type Character = {
-	_id: string;
-	name: string;
-	alias: string[];
-	genre: { _id: string; name: string };
-	thumbnail: string;
-};
-
 type Artist = {
 	_id: string;
 	name: string;
 	alias: string[];
 	sns: { x: string };
 	thumbnail: string;
+	group: string;
 };
-
-const artist: Artist[] = [
-	{
-		_id: "abcdef0a1",
-		name: "카이저 PMC 이사",
-		alias: ["박민철"],
-		sns: {
-			x: "parkmincheol",
-		},
-		thumbnail: "x",
-	},
-	{
-		_id: "abadefa01",
-		name: "검은 양복",
-		alias: [],
-		sns: {
-			x: "bsuit",
-		},
-		thumbnail: "x",
-	},
-	{
-		_id: "abceef021",
-		name: "두근두근 문예부",
-		alias: [],
-		sns: {
-			x: "ddlc2024",
-		},
-		thumbnail: "x",
-	},
-	{
-		_id: "abcdegae01",
-		name: "카이저 코퍼레이션",
-		alias: [],
-		sns: {
-			x: "kaisercorp_arts",
-		},
-		thumbnail: "x",
-	},
-] as const;
-
-const character: Character[] = [
-	{
-		_id: "bbcdef0a1",
-		name: "아케보시 히마리",
-		alias: [],
-		genre: { _id: "bluearchive", name: "블루 아카이브" },
-		thumbnail: "x",
-	},
-	{
-		_id: "bbadefa01",
-		name: "시로코-테러",
-		alias: ["쿠로코", "아누비스"],
-		genre: { _id: "bluearchive", name: "블루 아카이브" },
-		thumbnail: "x",
-	},
-	{
-		_id: "bbceef021",
-		name: "푸리나",
-		alias: ["포칼로스"],
-		genre: { _id: "genshin", name: "원신" },
-		thumbnail: "x",
-	},
-	{
-		_id: "bbcdegae01",
-		name: "Mar. 7th",
-		alias: ["마치세븐스", "삼칠이"],
-		genre: { _id: "starrail", name: "붕괴: 스타레일" },
-		thumbnail: "x",
-	},
-] as const;
 
 export default function GoodsForm() {
 	//행사가 변경되었을 때 날짜 초기화
@@ -177,17 +101,11 @@ export default function GoodsForm() {
 		control,
 		name: "product",
 	});
-	const allArtists = artist.map((item) => ({
-		...item,
-		group: "모든 작가",
-	}));
-
 	const boothArtists: Artist[] = getValues("artist").map((item: Artist) => ({
 		...item,
 		group: "이 부스의 작가",
 	}));
-
-	const combinedArtists = [...boothArtists, ...allArtists];
+	console.log(boothArtists);
 	const pos = getValues("pos.enabled");
 	return (
 		<>
@@ -212,6 +130,7 @@ export default function GoodsForm() {
 					</Button>
 				</div>
 			</div>
+
 			<Carousel
 				className="w-full"
 				opts={{
@@ -254,7 +173,7 @@ export default function GoodsForm() {
 												<FormControl>
 													<ComboBox
 														name={field.name}
-														data={category}
+														search="category"
 														list={(item) => (
 															<div className="flex flex-col">
 																<p>{item.name}</p>
@@ -298,7 +217,7 @@ export default function GoodsForm() {
 												<FormControl>
 													<ComboBox
 														name={field.name}
-														data={combinedArtists}
+														search="artist"
 														list={(item) => (
 															<div className="flex items-center gap-2">
 																<Avatar>
@@ -322,6 +241,7 @@ export default function GoodsForm() {
 														})}
 														multiple={true}
 														onChange={(value) => field.onChange(value)}
+														predefined={boothArtists}
 														group="group"
 													/>
 												</FormControl>
@@ -547,7 +467,7 @@ function OptionFields({ productIndex }: { productIndex: number }) {
 													<FormControl>
 														<ComboBox
 															name={field.name}
-															data={character}
+															search="character"
 															list={(item) => (
 																<div className="flex items-center gap-2">
 																	<Avatar>

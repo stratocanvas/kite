@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import { useForm, FormProvider, Form } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { create } from "zustand";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 //UI 컴포넌트
@@ -35,6 +34,7 @@ import GoodsForm from "./forms/3-goods";
 import EtcForm from "./forms/4-etc";
 import ManagementForm from "./forms/5-management";
 import { useActiveTabStore } from "@/store/addform";
+
 //폼 스키마
 const contentSchema: z.ZodType<unknown> = z.lazy(() =>
 	z
@@ -239,8 +239,6 @@ const tabLabels = {
 };
 
 //상태 관리
-const formState = create((set) => ({}));
-
 export const fetchData = async (type: string) => {
 	const response = await fetch(`/api/write/${type}`);
 	if (!response.ok) {
@@ -259,7 +257,7 @@ export default function boothForm() {
 		defaultValues: {
 			exhibition: {},
 			name: "",
-			date: [],
+			date: [], 
 			location: [],
 			artist: [],
 			thumbnail: undefined,

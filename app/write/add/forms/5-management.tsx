@@ -258,7 +258,7 @@ function DepositField() {
 									<ComboBox
 										disabled={!active}
 										name={field.name}
-										data={bank}
+										predefined={bank}
 										list={(item) => (
 											<div className="flex flex-col">
 												<p>{item.name}</p>
