@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 // App router includes @vercel/og.
 // No need to install it.
-import { GetOgData } from "../../../booth/[id]/fetch";
+import { GetBooth } from "../../../booth/[id]/fetch";
 export const runtime = "edge"
 
 

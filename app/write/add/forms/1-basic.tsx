@@ -18,6 +18,7 @@ import { create } from "zustand";
 import ComboBox from "@/components/combobox/combobox";
 import { ItemBadge } from "./3-goods";
 import { RequiredBadge } from "../components/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 interface LocationState {
 	inputValue: string;
 	setInputValue: (value: string) => void;
@@ -43,21 +44,6 @@ type Exhibition = {
 	date: number[];
 };
 //임시 데이터
-const exhibition: Exhibition[] = [
-	{
-		group: "서울 코믹월드",
-		name: "코믹월드 2024 SUMMER",
-		_id: "seco24s",
-		date: [1721437200000, 1721548800000],
-	},
-	{
-		group: "일러스타 페스",
-		name: "일러스타 페스 5",
-		_id: "ilfs005",
-		date: [1724461200000, 1724572800000],
-	},
-];
-
 const artist: Artist[] = [
 	{
 		_id: "abcdef0a1",
@@ -119,12 +105,22 @@ export default function BasicForm() {
 								<FormControl>
 									<ComboBox
 										name={field.name}
-										data={exhibition}
+										search="exhibition"
 										list={(item) => (
 											<div className="flex flex-col">
 												<p>{item.name}</p>
 												<p className="text-sm text-muted-foreground">
-													{item.date}
+													{item.date.length > 0 && (
+														<div>
+															{`${format(
+																item.date[0],
+																"yyyy년 M월 d일",
+															)} - ${format(
+																item.date[item.date.length - 1],
+																"yyyy년 M월 d일",
+															)}`}
+														</div>
+													)}{" "}
 												</p>
 											</div>
 										)}
@@ -250,7 +246,7 @@ export default function BasicForm() {
 								<FormControl>
 									<ComboBox
 										name={field.name}
-										data={artist}
+										search="artist"
 										list={(item) => (
 											<div className="flex items-center gap-2">
 												<Avatar>
@@ -272,6 +268,7 @@ export default function BasicForm() {
 											_id: item._id,
 											name: item.name,
 											thumbnail: item.thumbnail,
+											sns: { x: item.sns.x },
 										})}
 										multiple={true}
 									/>

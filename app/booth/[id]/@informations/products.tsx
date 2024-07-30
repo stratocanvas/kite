@@ -17,14 +17,10 @@ import {
     CarouselItem,
 } from "@/components/ui/carousel"
 import AddCart from "../buttons/add-cart";
-import { createClient } from '@/utils/supabase/server'
 import OptionImage from "./option-image";
 
-//export const revalidate = 0
-
-
 export default async function BoothProducts({ data }: { data: any }) {
-    const product = data.product
+    const product = data?.product
     return (
         <>
             {product && product.length > 0 && (
