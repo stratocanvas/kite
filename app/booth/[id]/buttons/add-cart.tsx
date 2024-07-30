@@ -12,7 +12,7 @@ export default function AddCart({ product, boothId }: { product: any, boothId: s
     const { userData } = useContext(UserStateContext);
     const { toast } = useToast()
     const { selectedOptions } = useOptionsStore();
-    const selectedOption = selectedOptions[product.product_id];
+    const selectedOption = selectedOptions[product._id];
     const router = useRouter();
 
     const handleAddToCart = async () => {
@@ -26,8 +26,8 @@ export default function AddCart({ product, boothId }: { product: any, boothId: s
 
         if (userData && selectedOption && boothId) {
             const optimisticItem = {
-                product_id: product.product_id,
-                option_id: selectedOption.option_id,
+                productId: product._id,
+                optionId: selectedOption._id,
                 quantity: 1,
                 price: selectedOption.price || 0,
                 productName: product.name,
@@ -37,7 +37,7 @@ export default function AddCart({ product, boothId }: { product: any, boothId: s
             // Optimistic UI update
             await mutate(['getCart', boothId], async (currentItems: any[] | undefined) => {
                 // Check if the item already exists in the cart
-                const existingItemIndex = currentItems?.findIndex(item => item.option_id === selectedOption.option_id);
+                const existingItemIndex = currentItems?.findIndex(item => item._id === selectedOption._id);
 
                 let updatedItems;
                 if (existingItemIndex !== -1 && currentItems) {
@@ -52,7 +52,7 @@ export default function AddCart({ product, boothId }: { product: any, boothId: s
 
                 try {
                     // Update the cart with the new item or updated quantity
-                    await AddOrUpdateCart(product.product_id, selectedOption.option_id, updatedItems[existingItemIndex]?.quantity || 1);
+                    await AddOrUpdateCart(product._id, selectedOption._id, updatedItems[existingItemIndex]?.quantity || 1);
                     return updatedItems;
                 } catch (error) {
                     console.error("Failed to add to cart:", error);
@@ -61,7 +61,7 @@ export default function AddCart({ product, boothId }: { product: any, boothId: s
             }, {
                 optimisticData: currentItems => {
                     // Similar logic for optimistic update
-                    const existingItemIndex = currentItems?.findIndex(item => item.option_id === selectedOption.option_id);
+                    const existingItemIndex = currentItems?.findIndex(item => item._id === selectedOption._id);
                     if (existingItemIndex !== -1 && currentItems) {
                         const updatedItem = { ...currentItems[existingItemIndex], quantity: currentItems[existingItemIndex].quantity + 1 };
                         const updatedItems = [...currentItems];

@@ -26,7 +26,7 @@ export const useCartStore = create<CartState>((set, get) => ({
 
     addItem: async (newItem) => set((state) => {
         const existingItemIndex = state.items.findIndex(item =>
-            item.product.product_id === newItem.product.product_id &&
+            item.product._id === newItem.product._id &&
             item.optionId === newItem.optionId);
 
         if (existingItemIndex >= 0) {
@@ -36,17 +36,17 @@ export const useCartStore = create<CartState>((set, get) => ({
                 quantity: updatedItems[existingItemIndex].quantity + newItem.quantity,
             };
             // 데이터베이스에 수량 업데이트
-            UpdateCart(updatedItems[existingItemIndex].product.product_id, updatedItems[existingItemIndex].optionId, updatedItems[existingItemIndex].quantity);
+            UpdateCart(updatedItems[existingItemIndex].product._id, updatedItems[existingItemIndex].optionId, updatedItems[existingItemIndex].quantity);
             return { items: updatedItems };
         } else {
             // 데이터베이스에 새 항목 추가
-            AddCart(newItem.product.product_id, newItem.optionId, newItem.quantity);
+            AddCart(newItem.product._id, newItem.optionId, newItem.quantity);
             return { items: [...state.items, newItem] };
         }
     }),
 
     increaseQuantity: async (productId, optionId) => set((state) => {
-        const itemIndex = state.items.findIndex(item => item.product.product_id === productId && item.optionId === optionId);
+        const itemIndex = state.items.findIndex(item => item.product._id === productId && item.optionId === optionId);
         if (itemIndex >= 0) {
             const updatedItems = [...state.items];
             updatedItems[itemIndex].quantity += 1;
@@ -56,7 +56,7 @@ export const useCartStore = create<CartState>((set, get) => ({
         }
     }),
     decreaseQuantity: async (productId, optionId) => set((state) => {
-        const itemIndex = state.items.findIndex(item => item.product.product_id === productId && item.optionId === optionId && item.quantity > 1);
+        const itemIndex = state.items.findIndex(item => item.product._id === productId && item.optionId === optionId && item.quantity > 1);
         if (itemIndex >= 0) {
             const updatedItems = [...state.items];
             updatedItems[itemIndex].quantity -= 1;
@@ -66,7 +66,7 @@ export const useCartStore = create<CartState>((set, get) => ({
         }
     }),
     removeItem: async (productId, optionId) => set((state) => {
-        const updatedItems = state.items.filter(item => !(item.product.product_id === productId && item.optionId === optionId));
+        const updatedItems = state.items.filter(item => !(item.product._id === productId && item.optionId === optionId));
         // 데이터베이스에서 항목 제거
         DeleteCart(productId, optionId);
         return { items: updatedItems };

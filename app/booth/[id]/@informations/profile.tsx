@@ -41,7 +41,7 @@ export default function BoothProfile({ data, color }: { data: any, color: string
         };
     }, []);
 
-    const sortedLocations = useMemo(() => data?.locations?.sort((a: string, b: string) => a.localeCompare(b)) || [], [data?.locations]);
+    const sortedLocations = useMemo(() => data?.location?.sort((a: string, b: string) => a.localeCompare(b)) || [], [data?.locations]);
     const locationDisplay = useMemo(() => {
         if (sortedLocations.length === 0) {
             return "위치 미정";
@@ -52,9 +52,11 @@ export default function BoothProfile({ data, color }: { data: any, color: string
         return sortedLocations[0];
     }, [sortedLocations]);
 
+    console.log(data)
+
     return (
         <>
-            <Card key={data?.booth_id} className="h-auto border-none shadow-none relative" ref={buttonRef}>
+            <Card key={data?._id} className="h-auto border-none shadow-none relative" ref={buttonRef}>
                 <div className="relative">
                     <Suspense>
                         <BoothMenu data={data} />
@@ -110,7 +112,7 @@ export default function BoothProfile({ data, color }: { data: any, color: string
                             <div className="md:pb-10 absolute bottom-4 rounded-b-md w-full flex flex-col items-center md:items-start">
                                 <CardHeader className="md:pl-12 text-center md:text-left">
                                     <CardDescription className="text-white text-sm md:text-md">
-                                        {data?.event?.name}
+                                        {data?.exhibition?.name}
                                     </CardDescription>
                                     <CardTitle className="text-white text-2xl md:text-3xl break-words overflow-hidden text-ellipsis">
                                         {data?.name}

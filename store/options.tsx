@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 interface Option {
-  option_id: string;
+  _id: string;
   name: string;
   price: number;
 }
@@ -18,7 +18,7 @@ const useOptionsStore = create<OptionState>((set) => ({
     set((state) => ({
       selectedOptions: {
         ...state.selectedOptions,
-        [product.product_id]: option, // product_id를 key로 사용
+        [product._id]: option, // product_id를 key로 사용
       },
     })),
   resetOptions: () => set(() => ({ selectedOptions: {} })), // Implement the reset method
