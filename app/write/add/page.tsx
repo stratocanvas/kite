@@ -238,18 +238,9 @@ const tabLabels = {
 	[TabValue.Management]: "운영",
 };
 
-//상태 관리
-export const fetchData = async (type: string) => {
-	const response = await fetch(`/api/write/${type}`);
-	if (!response.ok) {
-		throw new Error(`Failed to fetch ${type}`);
-	}
-	return response.json();
-};
-
 const queryClient = new QueryClient();
 
-export default function boothForm() {
+export default function BoothForm() {
 	//폼 기본값
 	const form = useForm<z.infer<typeof formSchema>>({
 		mode: "onBlur", // 또는 "onBlur"
@@ -369,7 +360,7 @@ export default function boothForm() {
 						{/*Tab content (form)*/}
 						<FormProvider {...form}>
 							<QueryClientProvider client={queryClient}>
-								<form onSubmit={form.handleSubmit(onSubmit)}>
+								<form key={1} onSubmit={form.handleSubmit(onSubmit)}>
 									<TabsContent asChild value={TabValue.Basic}>
 										<BasicForm />
 									</TabsContent>
