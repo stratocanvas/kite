@@ -177,7 +177,13 @@ export default function ComboBox({
 							</PopoverContent>
 						</Popover>
 					) : (
-						<Drawer open={open} onOpenChange={setOpen}>
+						<Drawer
+							open={open}
+							onOpenChange={setOpen}
+							noBodyStyles
+							preventScrollRestoration={false}
+							disablePreventScroll={true}
+						>
 							<DrawerTrigger asChild>
 								<FormControl>
 									<Button
@@ -203,7 +209,7 @@ export default function ComboBox({
 
 							<DrawerContent>
 								<div className="mt-4 border-t">
-									{/*multiple &&
+									{multiple &&
 										Array.isArray(field.value) &&
 										field.value.length > 0 && (
 											<>
@@ -241,7 +247,7 @@ export default function ComboBox({
 													)}
 												</div>
 											</>
-										)*/}
+										)}
 									{renderItem(field)}
 								</div>
 								<DrawerFooter className="flex flex-row gap-2 justify-between">
