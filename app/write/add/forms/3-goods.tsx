@@ -105,7 +105,6 @@ export default function GoodsForm() {
 		...item,
 		group: "이 부스의 작가",
 	}));
-	console.log(boothArtists);
 	const pos = getValues("pos.enabled");
 	return (
 		<>

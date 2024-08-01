@@ -195,7 +195,7 @@ export default function ComboBox({
 							</DrawerTrigger>
 
 							<DrawerContent>
-								<div className="mt-4 border-t">
+								<div className="mt-4 border-t z-10">
 									{Array.isArray(field.value) && field.value.length > 0 && (
 										<>
 											<Label className="text-sm text-muted-foreground ml-3">

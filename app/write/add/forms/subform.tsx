@@ -136,7 +136,7 @@ export default function SubForm({
 						<Button variant="secondary">{label} 추가</Button>
 					</DrawerTrigger>
 					<FormProvider {...subForm}>
-						<DrawerContent>
+						<DrawerContent className="z-20">
 							<form
 								key={2}
 								onSubmit={(e) => {
