@@ -180,8 +180,8 @@ export default function ComboBox({
 						<Drawer
 							open={open}
 							onOpenChange={setOpen}
-							noBodyStyles
-							preventScrollRestoration={false}
+							//noBodyStyles
+							//preventScrollRestoration={false}
 							disablePreventScroll={true}
 						>
 							<DrawerTrigger asChild>
