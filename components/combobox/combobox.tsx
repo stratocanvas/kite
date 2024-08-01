@@ -203,7 +203,7 @@ export default function ComboBox({
 
 							<DrawerContent>
 								<div className="mt-4 border-t">
-									{multiple &&
+									{/*multiple &&
 										Array.isArray(field.value) &&
 										field.value.length > 0 && (
 											<>
@@ -241,7 +241,7 @@ export default function ComboBox({
 													)}
 												</div>
 											</>
-										)}
+										)*/}
 									{renderItem(field)}
 								</div>
 								<DrawerFooter className="flex flex-row gap-2 justify-between">
