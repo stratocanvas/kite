@@ -16,7 +16,7 @@ import {
 	CommandList,
 	CommandSeparator,
 } from "@/components/ui/command";
-import { Check, ChevronDown, Loader2, Plus, X } from "lucide-react";
+import { Check, ChevronDown, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMediaQuery } from "react-responsive";
 import { cn } from "@/lib/utils";
@@ -28,6 +28,7 @@ import { Badge } from "../ui/badge";
 import { ScrollArea } from "../ui/scroll-area";
 import { hangulIncludes, acronymizeHangul, extractHangul } from "es-hangul";
 import { useSearchQuery } from "@/app/api/write/search/search";
+import SubForm from "@/app/write/add/forms/subform";
 
 type ComboBoxItem = {
 	_id: string;
@@ -249,7 +250,9 @@ function ComboBoxContent({
 	type,
 	predefined,
 	search,
+	field,
 }: Omit<ComboBoxProps, "name" | "formValue"> & {
+	field: { name: string };
 	type?: string;
 	value: ComboBoxItem;
 	onChange: (value: ComboBoxItem) => void;
@@ -312,7 +315,6 @@ function ComboBoxContent({
 			<CommandInput
 				placeholder={`${label} 검색...`}
 				className="text-base border-t-0 border-l-0 border-r-0 rounded-none text-base"
-				autoFocus
 				onValueChange={search ? debouncedSetQuery : setInput}
 			/>
 			<CommandList>
@@ -323,7 +325,7 @@ function ComboBoxContent({
 						) : (
 							<div className="flex flex-col gap-2 items-center">
 								검색된 {label} 없음
-								<Button variant="secondary">{label} 등록</Button>
+								{search && search !== "exhibition" && <SubForm type={search} field={field} />}
 							</div>
 						)}
 					</CommandEmpty>
@@ -356,11 +358,7 @@ function ComboBoxContent({
 					{Object.entries(groupedData).map(([groupName, items]) => (
 						<CommandGroup
 							key={groupName}
-							heading={
-								groupName || (predefined && predefined.length > 0)
-									? `모든 ${label}`
-									: ""
-							}
+							heading={predefined ? `모든 ${label}` : "" || groupName}
 						>
 							{items?.map((item: ComboBoxItem) => (
 								<CommandItem

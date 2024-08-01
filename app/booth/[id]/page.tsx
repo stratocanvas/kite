@@ -11,7 +11,7 @@ import { notFound } from "next/navigation";
 import { GetBooth } from "./fetch";
 import type { Metadata, ResolvingMetadata } from "next";
 import Image from "next/image";
-
+import { ScrollArea } from "@/components/ui/scroll-area";
 type Props = {
 	params: { id: string };
 	searchParams: { [key: string]: string | string[] | undefined };
@@ -82,9 +82,9 @@ export default async function Booth({ params }: { params: { id: string } }) {
 				height={630}
 				className="hidden object-cover"
 			/>
-			<div className="container m-0 p-0 pb-[160px] mx-auto">
-				<div className="flex flex-col gap-4 justify-center relative xl:mx-36">
-					<div className="p-0 m-0 w-full mx-auto relative">
+			<div className="container m-0 p-0 pb-[160px] xl:pb-12 mx-auto">
+				<div className="flex flex-col gap-4 justify-center relative xl:flex-row">
+					<div className="xl:left-section p-0 m-0 w-full mx-auto relative rounded-lg">
 						<Suspense
 							fallback={
 								<AspectRatio ratio={3 / 4} className="bg-muted w-full">
@@ -102,11 +102,13 @@ export default async function Booth({ params }: { params: { id: string } }) {
 							/>
 						</Suspense>
 					</div>
-					<div className="p-0 m-0 w-full mx-auto flex flex-col gap-4">
-						<BoothDescription data={booth} />
-						<BoothProducts data={booth} />
-						<BoothPreorders params={params} />
-					</div>
+					<ScrollArea className="xl:right-section xl:h-[94vh] p-0 m-0 w-full mx-auto">
+						<div className="flex flex-col gap-4">
+							<BoothDescription data={booth} />
+							<BoothProducts data={booth} />
+							<BoothPreorders params={params} />
+						</div>
+					</ScrollArea>
 				</div>
 				<div>
 					<Suspense>
