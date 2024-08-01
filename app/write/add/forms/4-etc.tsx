@@ -106,7 +106,7 @@ function GenreField() {
 						<FormControl>
 							<ComboBox
 								name={field.name}
-								data={genre}
+								search="genre"
 								list={(item) => (
 									<div className="flex flex-col">
 										<p>{item.name}</p>
