@@ -182,7 +182,7 @@ export default function ComboBox({
 							onOpenChange={setOpen}
 							noBodyStyles
 							preventScrollRestoration={false}
-							disablePreventScroll={true}
+							//disablePreventScroll={true}
 						>
 							<DrawerTrigger asChild>
 								<FormControl>
