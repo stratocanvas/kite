@@ -18,7 +18,6 @@ import { create } from "zustand";
 import ComboBox from "@/components/combobox/combobox";
 import { ItemBadge } from "./3-goods";
 import { RequiredBadge } from "../components/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 interface LocationState {
 	inputValue: string;
 	setInputValue: (value: string) => void;

@@ -6,7 +6,13 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+	Drawer,
+	DrawerClose,
+	DrawerContent,
+	DrawerFooter,
+	DrawerTrigger,
+} from "@/components/ui/drawer";
 import {
 	Command,
 	CommandEmpty,
@@ -122,6 +128,7 @@ export default function ComboBox({
 		<ComboBoxContent
 			type={search}
 			value={field.value}
+			field={field.name}
 			onChange={(selectedItem) => {
 				const newValue = handleChange(formValue(selectedItem), field.value);
 				field.onChange(newValue);
@@ -170,7 +177,7 @@ export default function ComboBox({
 							</PopoverContent>
 						</Popover>
 					) : (
-						<Drawer open={open} onOpenChange={setOpen} disablePreventScroll={false}>
+						<Drawer open={open} onOpenChange={setOpen}>
 							<DrawerTrigger asChild>
 								<FormControl>
 									<Button
@@ -195,43 +202,73 @@ export default function ComboBox({
 							</DrawerTrigger>
 
 							<DrawerContent>
-								<div className="mt-4 border-t z-10">
-									{Array.isArray(field.value) && field.value.length > 0 && (
-										<>
-											<Label className="text-sm text-muted-foreground ml-3">
-												선택한 항목
-											</Label>
-											<div className="flex flex-wrap gap-1 my-1 mx-3">
-												{field.value.map(
-													(item: { _id: string; name: string }) => (
-														<Badge
-															key={item._id}
-															className="flex items-center gap-1 px-2 py-1 rounded-md"
-															variant="secondary"
-														>
-															<Button
-																className="w-4 h-4 text-muted-foreground"
-																size="icon"
-																asChild
-																variant="ghost"
-																onClick={() => {
-																	const newValue = field.value.filter(
-																		(v: { _id: string }) => v._id !== item._id,
-																	);
-																	field.onChange(newValue);
-																}}
+								<div className="mt-4 border-t">
+									{multiple &&
+										Array.isArray(field.value) &&
+										field.value.length > 0 && (
+											<>
+												<Label className="text-sm text-muted-foreground ml-3">
+													선택한 항목
+												</Label>
+												<div className="flex flex-wrap gap-1 my-1 mx-3">
+													{field.value.map(
+														(item: { _id: string; name: string }) => (
+															<Badge
+																key={item._id}
+																className="flex items-center gap-1 px-2 py-1 rounded-md"
+																variant="secondary"
+																role="status"
 															>
-																<X className="h-4 w-4 mr-1" />
-															</Button>
-															<p className="text-sm">{item.name}</p>
-														</Badge>
-													),
-												)}
-											</div>
-										</>
-									)}
+																<Button
+																	role="button"
+																	className="w-4 h-4 text-muted-foreground"
+																	size="icon"
+																	asChild
+																	variant="ghost"
+																	onClick={() => {
+																		const newValue = field.value.filter(
+																			(v: { _id: string }) =>
+																				v._id !== item._id,
+																		);
+																		field.onChange(newValue);
+																	}}
+																>
+																	<X className="h-4 w-4 mr-1" />
+																</Button>
+																<Label className="text-sm">{item.name}</Label>
+															</Badge>
+														),
+													)}
+												</div>
+											</>
+										)}
 									{renderItem(field)}
 								</div>
+								<DrawerFooter className="flex flex-row gap-2 justify-between">
+									{multiple &&
+										Array.isArray(field.value) &&
+										field.value.length > 0 && (
+											<Button
+												className="w-full"
+												role="button"
+												variant="secondary"
+												onClick={() => {
+													field.onChange([]);
+												}}
+											>
+												초기화
+											</Button>
+										)}
+									<Button
+										className="w-full"
+										role="button"
+										onClick={() => {
+											setOpen(false);
+										}}
+									>
+										확인
+									</Button>
+								</DrawerFooter>
 							</DrawerContent>
 						</Drawer>
 					)}
@@ -252,7 +289,7 @@ function ComboBoxContent({
 	search,
 	field,
 }: Omit<ComboBoxProps, "name" | "formValue"> & {
-	field: { name: string };
+	field: string;
 	type?: string;
 	value: ComboBoxItem;
 	onChange: (value: ComboBoxItem) => void;
@@ -325,7 +362,9 @@ function ComboBoxContent({
 						) : (
 							<div className="flex flex-col gap-2 items-center">
 								검색된 {label} 없음
-								{search && search !== "exhibition" && <SubForm type={search} field={field} />}
+								{search && search !== "exhibition" && (
+									<SubForm type={search} field={field} />
+								)}
 							</div>
 						)}
 					</CommandEmpty>
