@@ -170,7 +170,7 @@ export default function ComboBox({
 							</PopoverContent>
 						</Popover>
 					) : (
-						<Drawer open={open} onOpenChange={setOpen}>
+						<Drawer open={open} onOpenChange={setOpen} disablePreventScroll={false}>
 							<DrawerTrigger asChild>
 								<FormControl>
 									<Button
