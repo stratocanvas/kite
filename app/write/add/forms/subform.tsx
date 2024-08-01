@@ -131,12 +131,12 @@ export default function SubForm({
 					</FormProvider>
 				</Dialog>
 			) : (
-				<Drawer>
+				<Drawer shouldScaleBackground>
 					<DrawerTrigger>
 						<Button variant="secondary">{label} 추가</Button>
 					</DrawerTrigger>
 					<FormProvider {...subForm}>
-						<DrawerContent className="z-20">
+						<DrawerContent>
 							<form
 								key={2}
 								onSubmit={(e) => {
@@ -173,7 +173,7 @@ function FormContent({
 	//제출시 실행
 
 	return (
-		<div className="px-3 flex flex-col gap-2">
+		<div className="px-3 flex flex-col gap-2 z-20">
 			<FormField
 				control={form.control}
 				name="name"

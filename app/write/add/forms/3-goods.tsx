@@ -576,16 +576,18 @@ export const ItemBadge: React.FC<ItemProps> = ({ item, onRemove }) => (
 		key={item._id}
 		className="flex items-center gap-1 px-2 py-1 rounded-md"
 		variant="secondary"
+		role="status"
 	>
 		<Button
 			className="w-4 h-4 text-muted-foreground"
 			size="icon"
+			role="button"
 			asChild
 			variant="ghost"
 			onClick={() => onRemove(item._id)}
 		>
 			<X className="h-4 w-4 mr-1" />
 		</Button>
-		<p className="text-sm">{item.name}</p>
+		<Label className="text-sm">{item.name}</Label>
 	</Badge>
 );
