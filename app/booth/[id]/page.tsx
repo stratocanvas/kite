@@ -17,12 +17,19 @@ type Props = {
 	searchParams: { [key: string]: string | string[] | undefined };
 };
 
+export const revalidate = 86400;
 export async function generateMetadata(
 	{ params, searchParams }: Props,
 	parent: ResolvingMetadata,
 ): Promise<Metadata> {
 	// read route params
 	const id = params.id;
+	console.log(
+		"Rendering Booth page for ID:",
+		params.id,
+		"at:",
+		new Date().toISOString(),
+	);
 
 	// fetch data
 	const booth = await GetBooth(id);

@@ -1,16 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {};
-const withPWA = require("next-pwa")({
-  dest: "public",
-});
+//const withPWA = require("next-pwa")({
+//  dest: "public",
+//});
 module.exports = nextConfig;
-module.exports = withPWA(nextConfig);
+//module.exports = withPWA(nextConfig);
 
 module.exports = {
   eslint: {
     // Warning: This allows production builds to successfully complete even if
     // your project has ESLint errors.
-    ignoreDuringBuilds: true,
   },
   typescript: {
     // !! WARN !!
@@ -18,6 +17,9 @@ module.exports = {
     // your project has type errors.
     // !! WARN !!
     ignoreBuildErrors: true,
+  },
+  experimental: {
+    ppr: true,
   },
   images: {
     remotePatterns: [
