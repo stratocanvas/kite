@@ -18,9 +18,6 @@ module.exports = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
-  experimental: {
-    ppr: true,
-  },
   images: {
     remotePatterns: [
       {
