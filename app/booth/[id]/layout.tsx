@@ -1,3 +1,5 @@
+export const revalidate = 86400;
+
 export default async function Layout(props: {
     children: React.ReactNode
     AuthorAuth: React.ReactNode

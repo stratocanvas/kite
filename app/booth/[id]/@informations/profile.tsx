@@ -80,7 +80,7 @@ export default function BoothProfile({
 						ratio={3 / 4}
 						className="relative rounded-lg xl:h-[94vh]"
 					>
-						<div className="absolute inset-0 overflow-hidden">
+						<div className="absolute inset-0 overflow-hidden xl:rounded-b-lg">
 							<div
 								ref={parallaxImageRef}
 								className="absolute inset-0 rounded-lg"
@@ -145,7 +145,7 @@ export default function BoothProfile({
 									backdropFilter: "blur(12px)",
 								}}
 							/>
-							<div className="md:pb-10 absolute bottom-4 rounded-b-md w-full flex flex-col items-center md:items-start">
+							<div className="xl:pb-0 md:pb-10 absolute bottom-4 rounded-b-lg w-full flex flex-col items-center md:items-start">
 								<CardHeader className="md:pl-12 text-center md:text-left">
 									<CardDescription className="text-white text-sm md:text-md">
 										{data?.exhibition?.name}
@@ -163,7 +163,7 @@ export default function BoothProfile({
 											  })}
 									</CardDescription>
 								</CardHeader>
-								<CardFooter className="pl-12 pr-12 md:pr-4 flex flex-col items-center md:items-start gap-4 w-full md:w-96">
+								<CardFooter className="pl-12 pr-12 md:pr-4 flex flex-col items-center md:items-start gap-4 w-full md:w-96 xl:rounded-b-lg">
 									{data?.product.length > 0 && (
 										<Button
 											asChild

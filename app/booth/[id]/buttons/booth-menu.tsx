@@ -188,7 +188,7 @@ export const LikeButton = memo(({ booth }: { booth: any }) => {
         </Button>
     );
 });
-
+LikeButton.displayName = 'LikeButton';
 export function BoothMenu2({ data }: { data: any }) {
     const { authDialogOpen, setAuthDialogOpen, isOwner, wishlist, changeBookmark, contactDialogOpen, setContactDialogOpen } = useBoothMenu(
         data.booth_id,
