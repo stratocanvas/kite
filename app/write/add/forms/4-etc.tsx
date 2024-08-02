@@ -762,7 +762,7 @@ const IfThisProductComboBox: React.FC<IfThisProductComboboxProps> = ({
 					<div>
 						<ComboBox
 							name={field.name}
-							data={getValues("product")}
+							predefined={getValues("product")}
 							list={(item) => (
 								<div className="flex flex-col">
 									<p>{item.name}</p>
@@ -806,7 +806,7 @@ const ThenThatProductComboBox: React.FC<ThenThatProductComboboxProps> = ({
 					<div>
 						<ComboBox
 							name={field.name}
-							data={watch("product").flatMap(
+							predefined={watch("product").flatMap(
 								(product: {
 									option: [{ _id: string; name: string }];
 									_id: string;
