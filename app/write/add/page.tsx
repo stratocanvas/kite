@@ -246,7 +246,7 @@ export default function BoothForm() {
 		mode: "onBlur", // 또는 "onBlur"
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			exhibition: {},
+			exhibition: undefined,
 			name: "",
 			date: [], 
 			location: [],
