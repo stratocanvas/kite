@@ -83,7 +83,7 @@ const artist: Artist[] = [
 ] as const;
 export default function BasicForm() {
 	//행사가 변경되었을 때 날짜 초기화
-	const { control, watch, setValue, setError, getFieldState } =
+	const { control, watch, setValue, getValues } =
 		useFormContext();
 	const { dirtyFields } = useFormState();
 	const { inputValue, setInputValue } = useLocationStore();
@@ -200,9 +200,9 @@ export default function BasicForm() {
 								</ToggleGroup>
 							</FormControl>
 							<FormDescription>
-								{dirtyFields.exhibition
-									? "참가할 날짜를 모두 선택해 주세요"
-									: "행사를 먼저 선택해 주세요"}
+								{getValues("exhibition") === undefined
+									? "행사를 먼저 선택해 주세요"
+									: "참가할 날짜를 모두 선택해 주세요"}
 							</FormDescription>
 						</FormItem>
 					)}
@@ -220,7 +220,7 @@ export default function BasicForm() {
 									value={inputValue}
 									autoComplete="off"
 									onChange={(e) => setInputValue(e.target.value)}
-									disabled={dirtyFields.location}
+									disabled={getValues("location")?.length > 0}
 								/>
 							</FormControl>
 							<div className="flex gap-2 mt-2">
