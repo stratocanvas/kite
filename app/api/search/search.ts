@@ -1,11 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
+import { type NextRequest, NextResponse } from "next/server";
+import { connectDB } from "@/utils/mongodb/database";
 
 interface SearchResult {
 	_id: string;
 	name: string;
 	type: string;
-    genre: {name: string};
-    thumbnail: string;
+	genre: { name: string };
+	thumbnail: string;
 	// Add other fields as necessary
 }
 
