@@ -12,8 +12,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import "./protect.css";
 
-
-
 const contentSchema: z.ZodType<any> = z.lazy(() =>
 	z.object({
 		type: z.string(),
@@ -181,61 +179,60 @@ export default function BoothDescription({ data }: { data: any }) {
 				key={data?._id}
 				className="h-[100%] flex flex-col border-none shadow-none"
 			>
-				<Suspense fallback={<Skeleton />}>
-					{jsonData && jsonData !== "null" && (
-						<>
-							<CardContent className="flex-grow mt-6 xl:mt-0 flex items-center overflow-x-auto">
-								<Label className="text-xl font-bold">소개</Label>
-							</CardContent>
-							<CardContent className="flex-grow -mt-2 flex items-center overflow-hidden">
-								<div className="relative w-full h-full">
-									{renderJsonData(jsonData)}
-								</div>
-							</CardContent>
-						</>
-					)}
-				</Suspense>
-				<Suspense fallback={<Skeleton />}>
-					{data?.artist.length > 0 && (
-						<>
-							<CardContent className="flex-grow mt-6 flex items-center overflow-x-auto">
-								<Label className="text-xl font-bold">작가</Label>
-							</CardContent>
-							<CardContent className="flex-grow -mt-2 px-0 flex overflow-x-hidden">
-								<ScrollArea className="w-full whitespace-nowrap rounded-md overflow-y-hidden">
-									<div className="flex flex-row items-start justify-start space-x-4 px-6">
-										{data?.artist.map((artist: any) => (
-											<div className="flex flex-col items-center justify-center" key={artist._id}>
-												<Link href={`https://x.com/${artist?.sns_x}`}>
-													<Avatar className="h-28 w-28 relative rounded-full overflow-hidden">
-														{artist?.thumbnail && (
-															<Image
-																src={artist?.thumbnail || ""}
-																alt=""
-																fill
-																sizes="(max-width: 768px) 50vw, (max-width: 1200px) 50vw, 33vw"
-																style={{ objectFit: "cover" }}
-																className="rounded-full"
-															/>
-														)}
-														<AvatarFallback className="text-4xl text-muted-foreground">
-															{artist.name[0]}
-														</AvatarFallback>
-													</Avatar>
-												</Link>
+				{jsonData && jsonData !== "null" && (
+					<>
+						<CardContent className="flex-grow mt-6 xl:mt-0 flex items-center overflow-x-auto">
+							<Label className="text-xl font-bold">소개</Label>
+						</CardContent>
+						<CardContent className="flex-grow -mt-2 flex items-center overflow-hidden">
+							<div className="relative w-full h-full">
+								{renderJsonData(jsonData)}
+							</div>
+						</CardContent>
+					</>
+				)}
+				{data?.artist.length > 0 && (
+					<>
+						<CardContent className="flex-grow mt-6 flex items-center overflow-x-auto">
+							<Label className="text-xl font-bold">작가</Label>
+						</CardContent>
+						<CardContent className="flex-grow -mt-2 px-0 flex overflow-x-hidden">
+							<ScrollArea className="w-full whitespace-nowrap rounded-md overflow-y-hidden">
+								<div className="flex flex-row items-start justify-start space-x-4 px-6">
+									{data?.artist.map((artist: any) => (
+										<div
+											className="flex flex-col items-center justify-center"
+											key={artist._id}
+										>
+											<Link href={`https://x.com/${artist?.sns_x}`}>
+												<Avatar className="h-28 w-28 relative rounded-full overflow-hidden">
+													{artist?.thumbnail && (
+														<Image
+															src={artist?.thumbnail || ""}
+															alt=""
+															fill
+															sizes="(max-width: 768px) 50vw, (max-width: 1200px) 50vw, 33vw"
+															style={{ objectFit: "cover" }}
+															className="rounded-full"
+														/>
+													)}
+													<AvatarFallback className="text-4xl text-muted-foreground">
+														{artist.name[0]}
+													</AvatarFallback>
+												</Avatar>
+											</Link>
 
-												<Label className="mt-2 text-center w-16 break-words whitespace-normal max-h-12 overflow-y-hidden">
-													{artist.name}
-												</Label>
-											</div>
-										))}
-									</div>
-									<ScrollBar orientation="horizontal" />
-								</ScrollArea>
-							</CardContent>
-						</>
-					)}
-				</Suspense>
+											<Label className="mt-2 text-center w-16 break-words whitespace-normal max-h-12 overflow-y-hidden">
+												{artist.name}
+											</Label>
+										</div>
+									))}
+								</div>
+								<ScrollBar orientation="horizontal" />
+							</ScrollArea>
+						</CardContent>
+					</>
+				)}
 			</Card>
 		</>
 	);

@@ -1,23 +1,19 @@
-import dynamic from "next/dynamic";
 import BoothProfile from "./@informations/profile";
 import BoothDescription from "./@informations/description";
 import BoothProducts from "./@informations/products";
 import BoothPreorders from "./@informations/preorders";
 import { Suspense } from "react";
-const CartSummary = dynamic(() => import("./@informations/cart-summary"));
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Skeleton } from "@/components/ui/skeleton";
 import { notFound } from "next/navigation";
 import { GetBooth } from "./fetch";
 import type { Metadata, ResolvingMetadata } from "next";
 import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import CartSummary from "./@informations/cart-summary";
 type Props = {
 	params: { id: string };
 	searchParams: { [key: string]: string | string[] | undefined };
 };
 
-export const revalidate = 86400;
 export async function generateMetadata(
 	{ params, searchParams }: Props,
 	parent: ResolvingMetadata,
@@ -92,22 +88,14 @@ export default async function Booth({ params }: { params: { id: string } }) {
 			<div className="container m-0 p-0 pb-[160px] xl:pb-12 mx-auto">
 				<div className="flex flex-col gap-4 justify-center relative xl:flex-row">
 					<div className="xl:left-section p-0 m-0 w-full mx-auto relative rounded-lg">
-						<Suspense
-							fallback={
-								<AspectRatio ratio={3 / 4} className="bg-muted w-full">
-									<Skeleton className="h-full" />
-								</AspectRatio>
+						<BoothProfile
+							data={booth}
+							color={
+								booth.thumbnail
+									? `#${booth.thumbnail?.split("-c(")[1]?.split(")")[0]}`
+									: "#797979"
 							}
-						>
-							<BoothProfile
-								data={booth}
-								color={
-									booth.thumbnail
-										? `#${booth.thumbnail?.split("-c(")[1]?.split(")")[0]}`
-										: "#797979"
-								}
-							/>
-						</Suspense>
+						/>
 					</div>
 					<ScrollArea className="xl:right-section xl:h-[94vh] p-0 m-0 w-full mx-auto">
 						<div className="flex flex-col gap-4">
