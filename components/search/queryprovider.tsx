@@ -1,15 +1,12 @@
-// QueryProvider.tsx
-import type React from "react";
+"use client";
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState, type ReactNode } from "react";
 
-const queryClient = new QueryClient();
+export default function QueryProvider({ children }: { children: ReactNode }) {
+	const [queryClient] = useState(() => new QueryClient());
 
-const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
-
-export default QueryProvider;
+	return (
+		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+	);
+}
