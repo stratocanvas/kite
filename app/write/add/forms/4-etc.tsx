@@ -146,11 +146,13 @@ interface PromotionField {
 	_id: string;
 	type: "quantity" | "allOption" | "totalPrice";
 	// Add other properties as needed
-  }
-  
+}
+
 function PromotionField() {
 	const { control } = useFormContext<{ promotion: PromotionField[] }>();
-	const { fields, append, remove } = useFieldArray<{ promotion: PromotionField[] }>({
+	const { fields, append, remove } = useFieldArray<{
+		promotion: PromotionField[];
+	}>({
 		control,
 		name: "promotion",
 	});
@@ -711,7 +713,7 @@ interface CalendarProps {
 	field: {
 		value: Date[] | undefined[];
 		onChange: (value: Date[]) => void;
-		name: string
+		name: string;
 	};
 }
 
@@ -824,7 +826,11 @@ const ThenThatProductComboBox: React.FC<ThenThatProductComboboxProps> = ({
 							list={(option) => (
 								<div className="flex items-center gap-2">
 									<Avatar>
-										<AvatarImage src={getImageUrl(option.image)} />
+										<AvatarImage
+											src={getImageUrl(option.image)}
+											className="w-full h-full object-cover"
+										/>
+
 										<AvatarFallback>
 											<p>{option.name[0]}</p>
 										</AvatarFallback>
@@ -948,22 +954,22 @@ const CalendarBox: React.FC<CalendarProps> = ({ field }) => {
 	};
 
 	const updateField = (
-    newDate: DateRange | undefined,
-    start: string,
-    end: string,
-) => {
-    const fromDate = newDate?.from
-        ? setTimeToDate(newDate.from, start)
-        : undefined;
-    const toDate = newDate?.to 
-        ? setTimeToDate(newDate.to, end) 
-        : undefined;
-    
-    // undefined 값을 필터링하고 나머지를 Date 타입으로 단언합니다.
-    const dateArray = [fromDate, toDate].filter((date): date is Date => date !== undefined);
-    
-    field.onChange(dateArray);
-};
+		newDate: DateRange | undefined,
+		start: string,
+		end: string,
+	) => {
+		const fromDate = newDate?.from
+			? setTimeToDate(newDate.from, start)
+			: undefined;
+		const toDate = newDate?.to ? setTimeToDate(newDate.to, end) : undefined;
+
+		// undefined 값을 필터링하고 나머지를 Date 타입으로 단언합니다.
+		const dateArray = [fromDate, toDate].filter(
+			(date): date is Date => date !== undefined,
+		);
+
+		field.onChange(dateArray);
+	};
 
 	const setTimeToDate = (date: Date, timeString: string): Date => {
 		const [hours, minutes] = timeString.split(":").map(Number);

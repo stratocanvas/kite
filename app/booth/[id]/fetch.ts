@@ -1,10 +1,9 @@
+import "server-only";
 import { cache } from "react";
 import { connectDB } from "@/utils/mongodb/database";
 import { ObjectId } from "mongodb";
 
-export const revalidate = 86400;
-
-export const GetBooth = cache(async (boothId: string) => {
+export const GetBooth = async (boothId: string) => {
 	const client = await connectDB;
 	try {
 		await client.connect();
@@ -16,4 +15,4 @@ export const GetBooth = cache(async (boothId: string) => {
 	} finally {
 		await client.close();
 	}
-});
+};

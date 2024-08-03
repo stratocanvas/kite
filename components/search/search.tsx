@@ -1,290 +1,251 @@
-"use client"
+"use client";
+import { Plus, Search, User, X } from "lucide-react";
 
-import { FilterWithThumb } from "./filterwiththumb";
-import { Filter } from "./filter";
-import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { useEffect, useState, useCallback } from "react";
-import { useSearchParams, usePathname, useRouter } from 'next/navigation';
-import { FilterLight } from "./filterlight";
-import { Input } from "@/components/ui/input";
-import { debounce } from "lodash";
+import {
+	Command as CommandPrimitive,
+	CommandEmpty,
+	CommandGroup,
+	CommandItem,
+	CommandList,
+} from "@/components/ui/command";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Label } from "../ui/label";
+import { Command, CommandSeparator } from "cmdk";
+import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
+import { useSearchQuery } from "@/app/api/search/search";
+import React, { useEffect, useRef } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { debounce } from "es-toolkit";
+import { ScrollArea } from "../ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { format } from "date-fns";
 
-export function SearchBar() {
-    const [selectedCharacters, setSelectedCharacters] = useState<string[]>([]);
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-    const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-    const [selectedAuthors, setSelectedAuthors] = useState<string[]>([]);
-    const [selectedDOW, setSelectedDOW] = useState<string[]>([]);
-    const [selectedPreorder, setSelectedPreorder] = useState<string[]>([]);
-    const [boothName, setBoothName] = useState<string>("");
-    const searchParams = useSearchParams();
-    const { replace } = useRouter();
-
-    function handleSearch() {
-        const params = new URLSearchParams(searchParams);
-        if (selectedCharacters.length > 0) {
-            params.set('character', selectedCharacters.join(','));
-        }
-        if (selectedCategories.length > 0) {
-            params.set('category', selectedCategories.join(','));
-        }
-        if (selectedGenres.length > 0) {
-            params.set('genre', selectedGenres.join(','));
-        }
-        if (selectedAuthors.length > 0) {
-            params.set('author', selectedAuthors.join(','));
-        }
-        if (selectedDOW.length > 0) {
-            params.set('dow', selectedDOW.join(','));
-        }
-        /*
-        if (selectedPreorder.length > 0) {
-            params.set('preorder', selectedPreorder.join(','));
-        }
-        */
-        if (boothName.length > 0) {
-            params.set('name', boothName);
-        }
-        replace(`/booth?${params.toString()}`);
-    }
-
-    return (
-        <div className="flex flex-col gap-2 w-full md:w-auto max-w-full mx-8 justify-center">
-            <div className="flex flex-row gap-2">
-                <Input placeholder="부스 이름 검색" className="text-[16px]" id="name" onChange={(e) => setBoothName(e.target.value)} />
-                <Button type="submit" size="default" className="w-auto" onClick={handleSearch}>
-                    <Search />
-                </Button>
-            </div>
-            <ScrollArea className="whitespace-nowrap rounded-md">
-                <div className="flex flex-row gap-2">
-                    <FilterWithThumb
-                        title="캐릭터"
-                        table="character"
-                        id="character_id"
-                        sub="genre"
-                        count="p_option"
-                        subFromNested={true}
-                        onSelectedOptionsChange={setSelectedCharacters}
-                    />
-                    <Filter
-                        title="굿즈 종류"
-                        table="category"
-                        id="category_id"
-                        count="product"
-                        onSelectedOptionsChange={setSelectedCategories}
-                    />
-                    <Filter
-                        title="장르"
-                        table="genre"
-                        id="genre_id"
-                        count="booth"
-                        onSelectedOptionsChange={setSelectedGenres}
-                    />
-                    <FilterWithThumb
-                        title="작가"
-                        table="author"
-                        id="author_id"
-                        sub="sns_x"
-                        count="booth"
-                        subFromNested={false}
-                        onSelectedOptionsChange={setSelectedAuthors}
-                    />
-                    <FilterLight
-                        title="요일"
-                        table="dow"
-                        type="dow"
-                        onSelectedOptionsChange={setSelectedDOW}
-                    />
-                    {/*
-                    <FilterLight
-                        title="구입 방법"
-                        table="preorder"
-                        type="preorder"
-                        onSelectedOptionsChange={setSelectedPreorder}
-                    />
-    */}
-                </div>
-                <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-        </div>
-    )
+const typeMapping: Record<string, string> = {
+	exhibition: "행사",
+	artist: "작가",
+	character: "캐릭터",
+	category: "카테고리",
+	genre: "장르",
+};
+enum Days {
+	All = "all",
+	Saturday = "saturday",
+	Sunday = "sunday",
 }
+export default function SearchBar() {
+	const inputRef = useRef<HTMLInputElement>(null);
+	const [query, setQuery] = React.useState("");
+	const { data, isLoading } = useSearchQuery(query);
+	const queryClient = new QueryClient();
+	const [input, setInput] = React.useState("");
+	const debouncedSetQuery = React.useCallback(debounce(setQuery, 300), []);
+	const [value, setValue] = React.useState<
+		(string | { _id: string; type: string; name: string })[]
+	>([]);
+	const [date, setDate] = React.useState<Days>(Days.All);
+	const handleDateChange = () => {
+		setDate((prevDate) => {
+			switch (prevDate) {
+				case Days.All:
+					return Days.Saturday;
+				case Days.Saturday:
+					return Days.Sunday;
+				case Days.Sunday:
+					return Days.All;
+				default:
+					return Days.All;
+			}
+		});
+	};
+	useEffect(() => {
+		return () => {
+			debouncedSetQuery.cancel();
+		};
+	}, [debouncedSetQuery]);
 
-export function SearchBarSmall(params: typeof searchParams) {
-    const [selectedCharacters, setSelectedCharacters] = useState<string[]>([]);
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-    const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-    const [selectedAuthors, setSelectedAuthors] = useState<string[]>([]);
-    const [selectedDOW, setSelectedDOW] = useState<string[]>([]);
-    const [boothName, setBoothName] = useState<string>("");
-    const [searchMode, setSearchMode] = useState(false);
-    const [searchInput, setSearchInput] = useState("");
-    const [selectedPreorder, setSelectedPreorder] = useState<string[]>([]);
-
-    const parameters = params
-    const searchParams = useSearchParams();
-    const pathname = usePathname();
-    const router = useRouter();
-    function handleSearch() {
-        const params = new URLSearchParams(searchParams);
-        if (selectedCharacters.length > 0) {
-            params.set('character', selectedCharacters.join(','));
-        } else {
-            params.delete('character');
-        }
-        if (selectedCategories.length > 0) {
-            params.set('category', selectedCategories.join(','));
-        } else {
-            params.delete('category');
-        }
-        if (selectedGenres.length > 0) {
-            params.set('genre', selectedGenres.join(','));
-        } else {
-            params.delete('genre');
-        }
-        if (selectedAuthors.length > 0) {
-            params.set('author', selectedAuthors.join(','));
-        } else {
-            params.delete('author');
-        }
-        if (selectedDOW.length > 0) {
-            params.set('dow', selectedDOW.join(','));
-        } else {
-            params.delete('dow');
-        }
-        /*
-        if (selectedPreorder.length > 0) {
-            params.set('preorder', selectedPreorder.join(','));
-        } else {
-            params.delete('preorder');
-        }
-        */
-        if (boothName) {
-            params.set('name', boothName);
-        } else {
-            params.delete('name');
-        }
-        router.push(`${pathname}?${params.toString()}`, { scroll: false });
-    }
-
-    useEffect(() => {
-        const params = searchParams;
-        const characterParams = params.get('character')?.split(',') || [];
-        const categoryParams = params.get('category')?.split(',') || [];
-        const genreParams = params.get('genre')?.split(',') || [];
-        const authorParams = params.get('author')?.split(',') || [];
-        const dowParams = params.get('dow')?.split(',') || [];
-        const nameParams = params.get('name') || "";
-        const preorderParams = params.get('preorder')?.split(',') || [];
-        console.log(nameParams);
-        setSelectedCharacters(characterParams);
-        setSelectedCategories(categoryParams);
-        setSelectedGenres(genreParams);
-        setSelectedAuthors(authorParams);
-        setSelectedDOW(dowParams.map(Number));
-        setBoothName(nameParams);
-        setSearchInput(nameParams);
-        setSelectedPreorder(preorderParams);
-    }, []);
-
-    function setQuery(name: string) {
-        setBoothName(name);
-    }
-
-    const delayedSearch = useCallback(
-        debounce((q) => setQuery(q), 500),
-        []
-    )
-
-    const handleChange = (e) => {
-        delayedSearch(e.target.value);
-    }
-
-    useEffect(() => {
-        handleSearch();
-    }, [selectedCharacters, selectedCategories, selectedGenres, selectedAuthors, selectedDOW, boothName]);
-
-    return (
-        <div className="flex gap-2 w-full justify-center w-full md:w-auto mx-8">
-            <Button className={`md:hidden ${searchMode && "rounded-r-none"}`} type="submit" variant="secondary" size="sm" onClick={() => setSearchMode(!searchMode)}>
-                <Search className="w-4 h-4" />
-            </Button>
-            {searchMode &&
-                <Input
-                    placeholder="부스 이름 검색"
-                    className="text-[16px] h-full md:hidden -ml-3 rounded-l-none h-9 bg-muted"
-                    id="name"
-                    value={searchInput}
-                    autoFocus={true}
-                    onChange={(e) => { handleChange(e); setSearchInput(e.target.value) }} />
-            }
-            <div className="hidden md:flex gap-2 items-center bg-muted pl-3 rounded-md">
-                <Search className="h-4 w-4" />
-                <Input
-                    placeholder="부스 이름 검색"
-                    className="text-[16px] h-9 bg-muted"
-                    id="name"
-                    value={searchInput}
-                    onChange={(e) => { handleChange(e); setSearchInput(e.target.value) }} />
-            </div>
-            <ScrollArea className="whitespace-nowrap rounded-md">
-                <div className="flex gap-2">
-                    <FilterWithThumb
-                        params={parameters}
-                        title="캐릭터"
-                        table="character"
-                        id="character_id"
-                        sub="genre"
-                        count="p_option"
-                        subFromNested={true}
-                        onSelectedOptionsChange={setSelectedCharacters}
-                    />
-                    <Filter
-                        params={parameters}
-                        title="굿즈 종류"
-                        table="category"
-                        id="category_id"
-                        count="product"
-                        onSelectedOptionsChange={setSelectedCategories}
-                    />
-                    <Filter
-                        params={parameters}
-                        title="장르"
-                        table="genre"
-                        id="genre_id"
-                        count="booth"
-                        onSelectedOptionsChange={setSelectedGenres}
-                    />
-                    <FilterWithThumb
-                        params={parameters}
-                        title="작가"
-                        table="author"
-                        id="author_id"
-                        sub="sns_x"
-                        count="booth"
-                        subFromNested={false}
-                        onSelectedOptionsChange={setSelectedAuthors}
-                    />
-                    <FilterLight
-                        title="요일"
-                        table="dow"
-                        type="dow"
-                        onSelectedOptionsChange={setSelectedDOW}
-                    />
-                    {/*
-                    <FilterLight
-                        title="구입 방법"
-                        table="preorder"
-                        type="preorder"
-                        onSelectedOptionsChange={setSelectedPreorder}
-                    />
-        */}
-                </div>
-                <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-        </div>
-    )
+	return (
+		<QueryClientProvider client={queryClient}>
+			<CommandPrimitive
+				className="rounded-lg border shadow-md w-96 md:w-[70vw] lg:w-[50vw] xl:w-[30vw]"
+				shouldFilter={false}
+			>
+				<div className="flex flex-col w-full p-3 gap-4">
+					<div className="flex flex-wrap items-center gap-2 w-full">
+						<div className="flex flex-wrap gap-2 flex-grow">
+							{value.map((data) => (
+								<Badge
+									key={data._id}
+									role="status"
+									variant="secondary"
+									className="rounded-md"
+								>
+									<Button
+										role="button"
+										className="w-4 h-4 text-muted-foreground"
+										size="icon"
+										asChild
+										variant="ghost"
+										onClick={() =>
+											setValue(value.filter((item) => item._id !== data._id))
+										}
+									>
+										<X className="h-4 w-4 mr-1" />
+									</Button>
+									<Label className="text-sm">{data.name}</Label>
+									<Button
+										role="button"
+										className="w-4 h-4 text-muted-foreground"
+										size="icon"
+										asChild
+										variant="ghost"
+									>
+										<Plus className="h-4 w-4 ml-1" />
+									</Button>
+								</Badge>
+							))}
+							<div className="flex-grow min-w-[200px]">
+								<Command.Input
+									ref={inputRef}
+									value={input}
+									onValueChange={(value) => {
+										debouncedSetQuery(value);
+										setInput(value);
+									}}
+									placeholder={
+										value.length === 0
+											? "캐릭터, 작가, 또는 부스 이름 검색..."
+											: ""
+									}
+									onKeyDown={(e) => {
+										if (e.key === "Backspace" && input === "") {
+											setValue((prevValue) => prevValue.slice(0, -1));
+										}
+									}}
+									className="w-full focus:outline-none bg-transparent"
+								/>
+							</div>
+						</div>
+					</div>
+					<div className="justify-between flex flex-row items-end">
+						<div className="flex flex-row gap-2 items-end">
+							<Button
+								variant="secondary"
+								onClick={handleDateChange}
+								className={`text-sm h-7 w-14 px-2 ${
+									date === Days.All
+										? ""
+										: date === Days.Saturday
+										  ? "bg-blue-500 text-white hover:bg-blue-500"
+										  : "bg-red-500 text-white hover:bg-red-500"
+								}`}
+							>
+								{date === Days.All
+									? "양일"
+									: date === Days.Saturday
+									  ? "토요일"
+									  : "일요일"}
+							</Button>
+							<ToggleGroup type="multiple" variant="outline">
+								<ToggleGroupItem
+									value="preorder"
+									className="text-sm h-7 [&[data-state=on]]:data-state-on group"
+								>
+									선입금
+								</ToggleGroupItem>
+								<ToggleGroupItem
+									value="ship"
+									className="text-sm h-7 [&[data-state=on]]:data-state-on group"
+								>
+									통판
+								</ToggleGroupItem>
+							</ToggleGroup>
+						</div>
+						<div className="flex gap-1 items-center">
+							<Button className="h-7 w-7" variant="link">
+								<Search className="h-4 w-4 shrink-0" />
+							</Button>
+						</div>
+					</div>
+				</div>
+				<CommandList className="border-t">
+					<ScrollArea
+						className={
+							data && data.length > 0
+								? "flex max-h-48 flex-col overflow-y-auto"
+								: "h-0"
+						}
+					>
+						{data &&
+							Object.entries(
+								data.reduce(
+									(acc, item) => {
+										if (!acc[item.type]) acc[item.type] = [];
+										acc[item.type].push(item);
+										return acc;
+									},
+									{} as Record<string, typeof data>,
+								),
+							).map(([type, items]) => (
+								<CommandGroup key={type} heading={typeMapping[type] || type}>
+									{items.map((item) => (
+										<CommandItem
+											key={item._id}
+											value={item._id}
+											onSelect={() => {
+												setValue((previous) => [
+													...previous,
+													{ _id: item._id, type: item.type, name: item.name },
+												]);
+												setInput("");
+												if (inputRef.current) {
+													inputRef.current.focus();
+												}
+											}}
+										>
+											<div className="w-full flex flex-row gap-2 items-center">
+												{(type === "character" || type === "artist") && (
+													<Avatar className="w-6 h-6">
+														<AvatarImage
+															src={item.thumbnail}
+															className="w-full h-full object-cover"
+														/>
+														<AvatarFallback>
+															<User className="h-4 w-4 text-muted-foreground" />
+														</AvatarFallback>
+													</Avatar>
+												)}
+												<div className="py-1 w-full flex flex-row justify-between items-center">
+													<Label>{item.name}</Label>
+													<Label className="text-sm text-muted-foreground">
+														{(() => {
+															switch (type) {
+																case "character":
+																	return item.genre?.name;
+																case "artist":
+																	return item.sns?.x;
+																case "exhibition":
+																	return `${format(
+																		item.date[0],
+																		"M. d",
+																	)} - ${format(
+																		item.date[item.date.length - 1],
+																		"M. d",
+																	)}`;
+																default:
+																	return "";
+															}
+														})()}
+													</Label>
+												</div>
+											</div>
+										</CommandItem>
+									))}
+								</CommandGroup>
+							))}
+					</ScrollArea>
+				</CommandList>
+			</CommandPrimitive>
+		</QueryClientProvider>
+	);
 }
