@@ -523,7 +523,7 @@ function OptionFields({ productIndex }: { productIndex: number }) {
                 </div>
               </div>
               <div className="flex flex-wrap gap-1 my-1">
-                {getValues(
+                {watch(
                   `product[${productIndex}].option[${optionIndex}].character`
                 ).map((item: { _id: string; name: string }) => (
                   <ItemBadge
