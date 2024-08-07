@@ -6,8 +6,8 @@ export default function Home() {
 	return (
 		<QueryProvider>
 			<React.Suspense>
-				<div className="flex mx-10 justify-center items-start mt-[20vh]">
-					<SearchBar />
+				<div className="flex mx-auto justify-center items-center mt-[20vh] w-4/5 md:w-1/2 lg:w-2/5 xl:w-1/3">
+					<SearchBar minified/>
 				</div>
 			</React.Suspense>
 		</QueryProvider>
