@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  swcMinify: true,
+
+};
 //const withPWA = require("next-pwa")({
 //  dest: "public",
 //});
