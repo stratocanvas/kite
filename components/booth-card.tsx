@@ -9,19 +9,18 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 export default function BoothCard({ booth, displayEvent }: { booth: any, displayEvent: boolean }) {
     return (
-        <Link href={`/booth/${booth.booth_id}`}>
-            <Card key={booth.booth_id} className="w-full mx-auto h-full">
+        <Link href={`/booth/${booth._id}`}>
+            <Card key={booth._id} className="w-full mx-auto h-full">
                 <AspectRatio ratio={21 / 27} className="relative rounded-md" style={{ backgroundColor: booth.thumbnail ? `#${booth.thumbnail.split('-c(')[1].split(')')[0]}` : '#797979' }}>
                     {booth.thumbnail ? (
                         <Image src={booth.thumbnail} alt="Image" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" fill className="rounded-md object-cover" priority={true} />
                     ) : (
                         <div className="rounded-md bg-muted flex justify-center items-center w-full h-full">
-                            {/* You can place a placeholder image or text here */}
                             <ImageOff className="w-10 h-10 text-muted-foreground" />
                         </div>
                     )}
                     <div className='absolute left-4 top-4 flex gap-2'>
-                        {booth.preorder?.map((preorder: { date: string[], type: string }, index: number) => {
+                        {booth.buy?.map((preorder: { date: string[], type: string }, index: number) => {
                             const now = new Date();
                             const endDate = new Date(preorder.date[preorder.date.length - 1]);
                             const isEnding = (endDate.getTime() - now.getTime()) / (1000 * 60 * 60) <= 24;
@@ -55,12 +54,12 @@ export default function BoothCard({ booth, displayEvent }: { booth: any, display
                         }} />
                         <div className="absolute bottom-0 rounded-b-md w-full">
                             <CardHeader>
-                                {displayEvent && <CardDescription className="font-bold text-white text-opacity-70">{booth.event.name}</CardDescription>}
+                                {displayEvent && <CardDescription className="font-bold text-white text-opacity-70">{booth.exhibition.name}</CardDescription>}
                                 <CardTitle className="text-white">{booth.name}</CardTitle>
                                 <CardDescription className="text-white text-opacity-70">
-                                    {booth.locations?.length > 1 ?
-                                        `${booth.locations[0]}-${booth.locations[booth.locations.length - 1].match(/\d+$/)[0]}`
-                                        : booth.locations?.length === 1 ? booth.locations[0] : "위치 미정"} ·{" "}
+                                    {booth.location?.length > 1 ?
+                                        `${booth.location[0]}-${booth.location[booth.location.length - 1].match(/\d+$/)[0]}`
+                                        : booth.location?.length === 1 ? booth.location[0] : "위치 미정"} ·{" "}
                                     {Array.isArray(booth?.date) && booth?.date.length === 2
                                         ? '양일'
                                         : new Date(booth?.date).toLocaleDateString('ko-KR', {
@@ -69,24 +68,24 @@ export default function BoothCard({ booth, displayEvent }: { booth: any, display
                                         })}
                                 </CardDescription>
                                 <CardDescription className="text-white text-opacity-70">
-                                    {booth.genre.map((genre: { name: string }) => genre.name).join(" · ")}
+                                    {booth.genre?.map((genre: { name: string }) => genre?.name).join(" · ")}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="-mt-2 flex items-center justify-between h-16">
                                 <div className="flex overflow-x-auto">
-                                    {booth.author.map((author: { author_id: string, name: string, thumbnail: string }, index: number) => (
-                                        <div className={`relative z-${booth.author.length - index} ${index !== booth.author.length - 1 ? '-mr-3' : ''}`} key={author.author_id}>
+                                    {booth.artist.map((artist: { _id: string, name: string, thumbnail: string }, index: number) => (
+                                        <div className={`relative z-${booth.artist.length - index} ${index !== booth.artist.length - 1 ? '-mr-3' : ''}`} key={artist._id}>
                                             <Avatar className="border-2" style={{ borderColor: booth.thumbnail ? `#${booth.thumbnail.split('-c(')[1].split(')')[0]}` : '#797979' }}>
-                                                    {author.thumbnail && (
+                                                    {artist.thumbnail && (
                                                     <Image
-                                                        src={author?.thumbnail || ''}
+                                                        src={artist?.thumbnail || ''}
                                                         alt=''
                                                         fill
                                                         sizes="(max-width: 768px) 33vw, (max-width: 1200px) 33vw, 33vw"
                                                         style={{ objectFit: "cover" }}
                                                         className="rounded-full"
                                                     />)}
-                                                <AvatarFallback>{author.name[0]}</AvatarFallback>
+                                                <AvatarFallback>{artist.name[0]}</AvatarFallback>
                                             </Avatar>
                                         </div>
                                     ))}

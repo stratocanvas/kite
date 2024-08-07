@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 
 import { Label } from "@/components/ui/label";
-import OptionPrice from "./option-price";
+import OptionPrice from "../@informations/option-price";
 import SelectOptionsButton from "../buttons/select-options";
 import * as React from "react"
 import {
@@ -17,7 +17,7 @@ import {
     CarouselItem,
 } from "@/components/ui/carousel"
 import AddCart from "../buttons/add-cart";
-import OptionImage from "./option-image";
+import OptionImage from "../@informations/option-image";
 
 export default async function BoothProducts({ data }: { data: any }) {
     const product = data?.product
