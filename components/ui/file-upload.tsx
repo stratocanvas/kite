@@ -22,7 +22,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Dropdown } from "react-day-picker";
 interface FileUploadProps extends ControllerRenderProps {
 	maxSize?: number;
 	maxFiles?: number;
@@ -55,6 +54,8 @@ function FileUpload({
 	useEffect(() => {
 		if (value instanceof File) {
 			setPreviewUrl(URL.createObjectURL(value));
+		} else if (typeof value === "string") {
+			setPreviewUrl(value);
 		} else {
 			setPreviewUrl(null);
 		}
@@ -85,6 +86,7 @@ function FileUpload({
 		},
 		maxSize,
 		maxFiles: 1,
+		noClick: !!previewUrl,
 	});
 
 	const handleDelete = (e: { stopPropagation: () => void }) => {
@@ -115,69 +117,71 @@ function FileUpload({
 								</div>
 							)}
 							{previewUrl ? (
-								<div>
-									<DropdownMenu>
-										<DropdownMenuTrigger asChild>
-											<AspectRatio ratio={ratio}>
-												<Image
-													fill
-													src={previewUrl}
-													alt="Preview"
-													className="rounded-lg w-full h-full object-cover"
-												/>
-											</AspectRatio>
-										</DropdownMenuTrigger>
-										{width && width > 200 ? (
-											<Card
-												className="absolute bottom-5 left-1/2 transform -translate-x-1/2 mx-auto h-auto bg-white/75 dark:bg-black/75 backdrop-blur-sm max-w-[80%]"
-												onClick={(e) => e.stopPropagation()}
-											>
-												<CardContent className="pb-0 pl-2 pr-2 flex items-center h-12 max-width-[80%]">
-													<div className="flex h-5 items-center space-x-3 text-sm flex-grow">
-														<Button
-															variant="link"
-															size="sm"
-															type="button"
-															onClick={handleChange}
-														>
-															<RefreshCcw className={cn("h-4 w-4")} />
-														</Button>
-														<Button
-															className="flex-shrink-0"
-															variant="link"
-															size="sm"
-															type="button"
-															onClick={handleDelete}
-														>
-															<Trash className={cn("h-4 w-4 text-red-600")} />
-														</Button>
+								<DropdownMenu modal={false}>
+									<DropdownMenuTrigger asChild>
+										<AspectRatio ratio={ratio}>
+											<Image
+												fill
+												src={previewUrl}
+												alt="Preview"
+												className="rounded-lg w-full h-full object-cover"
+											/>
+										</AspectRatio>
+									</DropdownMenuTrigger>
+									{width && width > 200 ? (
+										<Card
+											className="absolute bottom-5 left-1/2 transform -translate-x-1/2 mx-auto h-auto bg-white/75 dark:bg-black/75 backdrop-blur-sm max-w-[80%]"
+											onClick={(e) => e.stopPropagation()}
+										>
+											<CardContent className="pb-0 pl-2 pr-2 flex items-center h-12 max-width-[80%]">
+												<div className="flex h-5 items-center space-x-3 text-sm flex-grow">
+													<Button
+														variant="link"
+														size="sm"
+														type="button"
+														onClick={handleChange}
+													>
+														<RefreshCcw className={cn("h-4 w-4")} />
+													</Button>
+													<Button
+														className="flex-shrink-0"
+														variant="link"
+														size="sm"
+														type="button"
+														onClick={handleDelete}
+													>
+														<Trash className={cn("h-4 w-4 text-red-600")} />
+													</Button>
+												</div>
+											</CardContent>
+										</Card>
+									) : (
+										<DropdownMenuContent>
+											<DropdownMenuGroup className="w-full">
+												<DropdownMenuItem onClick={handleChange}>
+													<div className="flex w-full items-center gap-1 items-center justify-between">
+														<p>변경</p>
+														<RefreshCcw className={cn("h-4 w-4")} />
 													</div>
-												</CardContent>
-											</Card>
-										) : (
-											<DropdownMenuContent>
-												<DropdownMenuGroup className="w-full">
-													<DropdownMenuItem onClick={handleChange}>
-														<div className="flex w-full items-center gap-1 items-center justify-between">
-															<p>변경</p>
-															<RefreshCcw className={cn("h-4 w-4")} />
-														</div>
-													</DropdownMenuItem>
-													<DropdownMenuItem onClick={handleDelete}>
-														<div className="flex w-full items-center gap-1 items-center justify-between">
-															<p className="text-red-600">삭제</p>
-															<Trash className={cn("h-4 w-4 text-red-600")} />
-														</div>
-													</DropdownMenuItem>
-												</DropdownMenuGroup>
-											</DropdownMenuContent>
-										)}
-									</DropdownMenu>
-								</div>
+												</DropdownMenuItem>
+												<DropdownMenuItem onClick={handleDelete}>
+													<div className="flex w-full items-center gap-1 items-center justify-between">
+														<p className="text-red-600">삭제</p>
+														<Trash className={cn("h-4 w-4 text-red-600")} />
+													</div>
+												</DropdownMenuItem>
+											</DropdownMenuGroup>
+										</DropdownMenuContent>
+									)}
+								</DropdownMenu>
 							) : isDragAccept ? (
 								<div>
 									<CardHeader className="flex items-center justify-center text-center">
-										<ImagePlus className={cn(width && width > 200 ? "h-16 w-16": "h-8 w-8")} />
+										<ImagePlus
+											className={cn(
+												width && width > 200 ? "h-16 w-16" : "h-8 w-8",
+											)}
+										/>
 										{width && width > 200 && (
 											<>
 												<CardTitle className="mt-4">
@@ -198,7 +202,11 @@ function FileUpload({
 							) : isDragReject ? (
 								<div>
 									<CardHeader className="flex items-center justify-center text-center">
-										<Frown className={cn(width && width > 200 ? "h-16 w-16": "h-8 w-8")} />
+										<Frown
+											className={cn(
+												width && width > 200 ? "h-16 w-16" : "h-8 w-8",
+											)}
+										/>
 
 										{width && width > 200 && (
 											<>
@@ -217,7 +225,11 @@ function FileUpload({
 							) : (
 								<div>
 									<CardHeader className="flex items-center justify-center text-center">
-										<ImagePlus className={cn(width && width > 200 ? "h-16 w-16": "h-8 w-8")} />
+										<ImagePlus
+											className={cn(
+												width && width > 200 ? "h-16 w-16" : "h-8 w-8",
+											)}
+										/>
 										{width && width > 200 && (
 											<>
 												<CardTitle className="mt-4">

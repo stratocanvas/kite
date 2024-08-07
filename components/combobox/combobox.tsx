@@ -7,11 +7,11 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import {
-	Drawer,
 	DrawerContent,
 	DrawerFooter,
 	DrawerTrigger,
 } from "@/components/ui/drawer";
+import { Drawer } from "vaul";
 import {
 	Command,
 	CommandEmpty,
@@ -20,7 +20,7 @@ import {
 	CommandItem,
 	CommandList,
 } from "@/components/ui/command";
-import { Check, ChevronDown, Plus, X } from "lucide-react";
+import { Check, ChevronDown, Menu, Plus, RotateCcw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMediaQuery } from "react-responsive";
 import { cn } from "@/lib/utils";
@@ -33,6 +33,16 @@ import { ScrollArea } from "../ui/scroll-area";
 import { hangulIncludes, acronymizeHangul, extractHangul } from "es-hangul";
 import { useSearchQuery } from "@/app/api/write/search/search";
 import SubForm from "@/app/write/add/forms/subform";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuItem,
+	DropdownMenuPortal,
+	DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { Separator } from "../ui/separator";
+import { set } from "date-fns";
 
 type ComboBoxItem = {
 	_id: string;
@@ -126,7 +136,7 @@ export default function ComboBox({
 		<ComboBoxContent
 			type={search}
 			value={field.value}
-			field={field.name}
+			field={field}
 			onChange={(selectedItem) => {
 				const newValue = handleChange(formValue(selectedItem), field.value);
 				field.onChange(newValue);
@@ -139,6 +149,7 @@ export default function ComboBox({
 			search={search}
 		/>
 	);
+	const [openSubform, setOpenSubform] = useState(false);
 	return (
 		<Controller
 			name={name}
@@ -172,10 +183,41 @@ export default function ComboBox({
 
 							<PopoverContent className="w-full p-0" align="start">
 								{renderItem(field)}
+								<Separator />
+								<div className="w-full p-1 flex flex-row justify-between">
+									{search && search !== "exhibition" && (
+										<Button
+											className="w-full"
+											variant="ghost"
+											onClick={() => {
+												setOpenSubform(!openSubform);
+											}}
+										>
+											<Plus className="w-4 h-4 mr-2" />
+											{label} 등록
+										</Button>
+									)}
+									<Button
+										className="w-full"
+										variant="ghost"
+										onClick={() => {
+											field.onChange([]);
+										}}
+									>
+										<RotateCcw className="w-4 h-4 mr-2" />
+										선택 초기화
+									</Button>
+								</div>
+								<SubForm
+									type={search}
+									field={field}
+									open={openSubform}
+									onOpenChange={setOpenSubform}
+								/>
 							</PopoverContent>
 						</Popover>
 					) : (
-						<Drawer
+						<Drawer.NestedRoot
 							open={open}
 							onOpenChange={setOpen}
 							//noBodyStyles
@@ -249,20 +291,43 @@ export default function ComboBox({
 									{renderItem(field)}
 								</div>
 								<DrawerFooter className="flex flex-row gap-2 justify-between">
-									{multiple &&
-										Array.isArray(field.value) &&
-										field.value.length > 0 && (
-											<Button
-												className="w-full"
-												role="button"
-												variant="secondary"
-												onClick={() => {
-													field.onChange([]);
-												}}
-											>
-												초기화
-											</Button>
-										)}
+									<div className="flex flex-row gap-2">
+										<DropdownMenu modal={false}>
+											<DropdownMenuTrigger asChild>
+												<Button
+													className="w-full"
+													role="button"
+													variant="secondary"
+												>
+													<Menu className="h-4 w-4" />
+												</Button>
+											</DropdownMenuTrigger>
+											<DropdownMenuPortal>
+												<DropdownMenuContent asChild align="start">
+													<DropdownMenuGroup>
+														<DropdownMenuItem
+															className="flex justify-between"
+															onSelect={() => {
+																field.onChange([]);
+															}}
+														>
+															<Label>선택 초기화</Label>
+															<RotateCcw className="h-4 w-4" />
+														</DropdownMenuItem>
+														{search && search !== "exhibition" && (
+															<DropdownMenuItem
+																className="flex justify-between"
+																onSelect={() => setOpenSubform(!openSubform)}
+															>
+																<Label>{label} 등록</Label>
+																<Plus className="h-4 w-4" />
+															</DropdownMenuItem>
+														)}
+													</DropdownMenuGroup>
+												</DropdownMenuContent>
+											</DropdownMenuPortal>
+										</DropdownMenu>
+									</div>
 									<Button
 										className="w-full"
 										role="button"
@@ -274,7 +339,13 @@ export default function ComboBox({
 									</Button>
 								</DrawerFooter>
 							</DrawerContent>
-						</Drawer>
+							<SubForm
+								type={search}
+								field={field}
+								open={openSubform}
+								onOpenChange={setOpenSubform}
+							/>
+						</Drawer.NestedRoot>
 					)}
 				</>
 			)}
@@ -338,6 +409,8 @@ function ComboBoxContent({
 			  )
 			: { "": predefined };
 
+	const [openSubform, setOpenSubform] = useState(false);
+
 	return (
 		<Command
 			value={input}
@@ -372,7 +445,22 @@ function ComboBoxContent({
 							<div className="flex flex-col gap-2 items-center">
 								검색된 {label} 없음
 								{search && search !== "exhibition" && (
-									<SubForm type={search} field={field} />
+									<>
+										<Button
+											variant="secondary"
+											onClick={() => {
+												setOpenSubform(!openSubform);
+											}}
+										>
+											{label} 등록
+										</Button>
+										<SubForm
+											type={search}
+											field={field}
+											open={openSubform}
+											onOpenChange={setOpenSubform}
+										/>
+									</>
 								)}
 							</div>
 						)}
