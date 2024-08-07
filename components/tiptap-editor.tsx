@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { useRef } from "react";
 import imageCompression from "browser-image-compression";
 import "./tiptap.css";
+import { ScrollArea } from "./ui/scroll-area";
 
 /*const compressImage = async (file: File): Promise<string> => {
   const options = {
@@ -61,7 +62,7 @@ const Tiptap = ({ onChange, initValue }: TiptapProps) => {
 		editorProps: {
 			attributes: {
 				class:
-					"text-muted-foreground min-h-[200px] max-h-[500px] w-full rounded-md border bg-transparent px-3 py-2 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none overflow-auto",
+					"min-h-[200px] max-h-[500px] flex flex-col overflow-auto text-muted-foreground w-full rounded-md border bg-transparent px-3 py-2 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none",
 			},
 		},
 		extensions: [
@@ -138,7 +139,6 @@ const Tiptap = ({ onChange, initValue }: TiptapProps) => {
 						if (htmlContent) {
 							// if there is htmlContent, stop manual insertion & let other extensions handle insertion via inputRule
 							// you could extract the pasted file from this url string and upload it to a server for example
-							console.log(htmlContent); // eslint-disable-line no-console
 							return false;
 						}
 

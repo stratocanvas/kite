@@ -1,4 +1,5 @@
 'use client'
+/*
 import useSWRInfinite from 'swr/infinite';
 import SearchResult from '../app/booth/fetch';
 
@@ -69,3 +70,4 @@ export default function MoreBooth({ initialBoothIds, searchParams }: { initialBo
         </>
     ) : null;
 }
+    */

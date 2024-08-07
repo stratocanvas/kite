@@ -33,6 +33,11 @@
     --ring: 240 10% 3.9%;
  
     --radius: 0.5rem;
+
+    .PopoverContent  {
+      width: var(--radix-popover-trigger-width);
+      max-height: var(--radix-popover-content-available-height);
+    }
   }
  
   .dark {
