@@ -1,32 +1,56 @@
-
-import SearchResult from "./fetch";
-import { SearchBarSmall } from "@/components/search/search"
-import MoreBooth from "../../components/load-more";
+import { GetBoothList } from "@/app/api/booth/fetch";
 import BoothCard from "@/components/booth-card";
+import SearchBar from "@/components/search/search";
 
-async function getBoothData(searchParams: { character?: string; category?: string; genre?: string; author?: string } = {}) {
-  const { booth } = await SearchResult({ searchParams });
-  return booth;
+import QueryProvider from "@/components/search/queryprovider";
+import React from "react";
+async function getBoothData(searchParams: { q?: string } = {}) {
+	const urlSearchParams = new URLSearchParams();
+
+	if (searchParams.q) {
+		try {
+			// Ensure searchParams.q is a valid JSON string
+			const parsedQ = JSON.parse(searchParams.q);
+			urlSearchParams.set("q", JSON.stringify(parsedQ));
+		} catch (error) {
+			console.error("Error parsing searchParams.q:", error);
+			// Don't set the "q" parameter if parsing fails
+		}
+	}
+
+	// Always call GetBoothList, even if there are no search parameters
+	const booths = await GetBoothList(urlSearchParams);
+	return booths || [];
 }
 
-export default async function BoothList({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
-  const booth = await getBoothData(searchParams);
-  const initialBoothIds = booth.map((booth) => booth.booth_id);
+export default async function BoothList({
+	searchParams,
+}: {
+	searchParams: { [key: string]: string | string[] | undefined };
+}) {
+	const booths = await getBoothData(searchParams);
+	const initialBoothIds = booths?.map((booth) => booth._id) || [];
 
-  return (
-    <>
-      <div className="w-full flex justify-center items-center mx-auto px-8 sticky top-0 z-10 bg-background/90 py-2 backdrop-blur-md">
-        <SearchBarSmall params={searchParams} />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 p-8 mt-4">
-        {booth?.map((booth) => (
-          <div key={booth.booth_id}>
-            <BoothCard booth={booth} displayEvent />
-          </div>
-        ))}
-        <MoreBooth initialBoothIds={initialBoothIds} searchParams={searchParams} />
-      </div>
-
-    </>
-  );
+	return (
+		<>
+			<QueryProvider>
+				<React.Suspense>
+					<div className="flex justify-center items-center z-20 fixed left-1/2 transform -translate-x-1/2 w-full">
+						<div className="w-4/5 md:w-1/2 lg:w-2/5 xl:w-1/3">
+							<SearchBar minified />
+						</div>
+					</div>
+				</React.Suspense>
+			</QueryProvider>
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 p-8 mt-4">
+				{booths && booths.length > 0 ? (
+					booths.map((booth) => (
+						<BoothCard key={booth._id} booth={booth} displayEvent />
+					))
+				) : (
+					<p>No booths found. Try adjusting your search criteria.</p>
+				)}
+			</div>
+		</>
+	);
 }
