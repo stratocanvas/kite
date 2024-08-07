@@ -67,11 +67,6 @@ const ObjectId = (): string => {
 	return timestamp + randomPart;
 };
 
-const genre: { _id: string; name: string }[] = [
-	{ _id: "bluearchive", name: "블루 아카이브" },
-	{ _id: "genshin", name: "원신" },
-	{ _id: "starrail", name: "붕괴: 스타레일" },
-];
 
 const getImageUrl = (image?: File) => {
 	if (image instanceof File) {
@@ -168,7 +163,7 @@ function PromotionField() {
 								<Plus className="mr-2 h-4 w-4" /> 추가
 							</Button>
 						</DropdownMenuTrigger>
-						<DropdownMenuContent className="w-56 mr-6 md:mr-10 lg:mr-32">
+						<DropdownMenuContent className="w-56" align="end">
 							<DropdownMenuGroup>
 								<DropdownMenuItem
 									onClick={() => {

@@ -1,6 +1,6 @@
 "use client";
 //기능
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 import { useForm, FormProvider, Form } from "react-hook-form";
@@ -48,179 +48,198 @@ const contentSchema: z.ZodType<unknown> = z.lazy(() =>
 		.optional(),
 );
 
-export const formSchema = z.object({
-	//기본 정보
-	exhibition: z.object({
-		_id: z.string(),
-		name: z.string(),
-	}),
-	name: z.string().min(1, "부스 이름을 입력해주세요"),
-	date: z.array(z.number()).min(1, "참가 날짜를 선택해주세요"),
-	location: z.array(z.string()).optional(),
-	artist: z
-		.array(
-			z.object({
-				_id: z.string(),
-				name: z.string(),
-				thumbnail: z.string().optional(),
-			}),
-		)
-		.optional(),
+export const createFormSchema = (initialData?: Partial<FormData>) =>
+	z.object({
+		//기본 정보
+		exhibition: z.object({
+			_id: z.string(),
+			name: z.string(),
+		}),
+		name: z.string().min(1, "부스 이름을 입력해주세요"),
+		date: z.array(z.date()).min(1, "참가 날짜를 선택해주세요"),
+		location: z.array(z.string()).optional(),
+		artist: z
+			.array(
+				z.object({
+					_id: z.string(),
+					name: z.string(),
+					thumbnail: z.string().optional(),
+				}),
+			)
+			.optional(),
 
-	//인포
-	thumbnail: z.instanceof(File).optional(),
-	description: z
-		.object({
-			type: z.string().optional(),
-			content: z.array(contentSchema).optional(),
-			/*
+		//인포
+		thumbnail: z
+			.union([
+				z.instanceof(File),
+				z
+					.string()
+					.url()
+					.refine((val) => (initialData ? val.length > 0 : true)),
+			])
+			.optional(),
+		description: z
+			.object({
+				type: z.string().optional(),
+				content: z.array(contentSchema).optional(),
+				/*
 			.refine((content) => content.some((item) => item?.type === "image"), {
 				message: "인포 이미지를 올려주세요",
 			}),
 			*/
-		})
-		.optional(),
-	//굿즈
-	product: z
-		.array(
+			})
+			.optional(),
+		//굿즈
+		product: z
+			.array(
+				z.object({
+					_id: z.string(),
+					name: z.string().min(1, "굿즈 이름을 입력해주세요"),
+					category: z.array(
+						z.object({
+							_id: z.string(),
+							name: z.string(),
+						}),
+					),
+					artist: z.array(
+						z.object({
+							_id: z.string(),
+							name: z.string(),
+						}),
+					),
+					option: z.array(
+						z.object({
+							_id: z.string(),
+							image: z
+								.union([
+									z.instanceof(File),
+									z
+										.string()
+										.url()
+										.refine((val) => (initialData ? val.length > 0 : true), {
+											message: "URL을 입력해주세요",
+										}),
+								])
+								.optional(),
+							name: z.string().min(1, "굿즈 이름을 입력해주세요"),
+							price: z.number().min(0, "가격을 입력해주세요"),
+							character: z
+								.array(
+									z.object({
+										_id: z.string(),
+										name: z.string(),
+									}),
+								)
+								.optional(),
+							stock: z.number().optional(),
+							type: z.enum(["new", "rerun"]).optional(),
+						}),
+					),
+				}),
+			)
+			.optional(),
+
+		//추가 정보
+		genre: z
+			.array(
+				z.object({
+					_id: z.string(),
+					name: z.string(),
+				}),
+			)
+			.optional(),
+		buy: z
+			.array(
+				z.object({
+					type: z.enum(["survey", "preorder", "ship"]),
+					name: z.string().min(1, "제목을 입력해주세요"),
+					url: z
+						.string()
+						.url({ message: "https://로 시작하는 링크를 입력해주세요" }),
+					date: z.array(z.date()).min(2).max(2),
+				}),
+			)
+			.optional(),
+		promotion: z.array(
 			z.object({
-				_id: z.string(),
-				name: z.string().min(1, "굿즈 이름을 입력해주세요"),
-				category: z.array(
-					z.object({
-						_id: z.string(),
-						name: z.string(),
-					}),
-				),
-				artist: z.array(
-					z.object({
-						_id: z.string(),
-						name: z.string(),
-					}),
-				),
-				option: z.array(
-					z.object({
-						_id: z.string(),
-						image: z.instanceof(File).optional(),
-						name: z.string().min(1, "굿즈 이름을 입력해주세요"),
-						price: z.number().min(0, "가격을 입력해주세요"),
-						character: z
-							.array(
-								z.object({
+				type: z.enum(["quantity", "allOption", "totalPrice"]),
+				ifThis: z.object({
+					item: z
+						.object({
+							_id: z.string(),
+							name: z.string(),
+						})
+						.optional(),
+					amount: z.number().optional(),
+				}),
+				thenThat: z.object({
+					type: z.enum(["discount", "giveaway"]),
+					item: z
+						.object({
+							product: z.object({
+								_id: z.string(),
+								name: z.string(),
+								option: z.object({
 									_id: z.string(),
 									name: z.string(),
 								}),
-							)
-							.optional(),
-						stock: z.number().optional(),
-						type: z.enum(["new", "rerun"]).optional(),
-					}),
-				),
+							}),
+						})
+						.optional(),
+					amount: z.number(),
+				}),
 			}),
-		)
-		.optional(),
+		),
 
-	//추가 정보
-	genre: z
-		.array(
-			z.object({
-				_id: z.string(),
-				name: z.string(),
-			}),
-		)
-		.optional(),
-	buy: z
-		.array(
-			z.object({
-				type: z.enum(["survey", "preorder", "ship"]),
-				name: z.string().min(1, "제목을 입력해주세요"),
-				url: z
-					.string()
-					.url({ message: "https://로 시작하는 링크를 입력해주세요" }),
-				date: z.array(z.date()).min(2).max(2),
-			}),
-		)
-		.optional(),
-	promotion: z.array(
-		z.object({
-			type: z.enum(["quantity", "allOption", "totalPrice"]),
-			ifThis: z.object({
-				item: z
-					.object({
-						_id: z.string(),
-						name: z.string(),
-					})
-					.optional(),
-				amount: z.number().optional(),
-			}),
-			thenThat: z.object({
-				type: z.enum(["discount", "giveaway"]),
-				item: z
-					.object({
-						product: z.object({
-							_id: z.string(),
-							name: z.string(),
-							option: z.object({
+		//운영
+		pos: z.object({
+			enabled: z.boolean(),
+			displayLevel: z.enum(["secret", "approx", "exact"]).optional(),
+		}),
+		deposit: z
+			.object({
+				enabled: z.boolean(),
+			})
+			.and(
+				z.discriminatedUnion("enabled", [
+					z.object({
+						enabled: z.literal(true),
+						account: z.object({
+							number: z.number(),
+							bank: z.object({
 								_id: z.string(),
 								name: z.string(),
 							}),
+							holder: z.string(),
 						}),
-					})
-					.optional(),
-				amount: z.number(),
-			}),
-		}),
-	),
-
-	//운영
-	pos: z.object({
-		enabled: z.boolean(),
-		displayLevel: z.enum(["secret", "approx", "exact"]).optional(),
-	}),
-	deposit: z
-		.object({
-			enabled: z.boolean(),
-		})
-		.and(
-			z.discriminatedUnion("enabled", [
-				z.object({
-					enabled: z.literal(true),
-					account: z.object({
-						number: z.number(),
-						bank: z.object({
-							_id: z.string(),
-							name: z.string(),
-						}),
-						holder: z.string(),
 					}),
-				}),
+					z.object({
+						enabled: z.literal(false),
+						account: z
+							.object({
+								number: z.number().optional(),
+								bank: z
+									.object({
+										_id: z.string().optional(),
+										name: z.string().optional(),
+									})
+									.optional(),
+								holder: z.string().optional(),
+							})
+							.optional(),
+					}),
+				]),
+			),
+		notice: z
+			.array(
 				z.object({
-					enabled: z.literal(false),
-					account: z
-						.object({
-							number: z.number().optional(),
-							bank: z
-								.object({
-									_id: z.string().optional(),
-									name: z.string().optional(),
-								})
-								.optional(),
-							holder: z.string().optional(),
-						})
-						.optional(),
+					title: z.string(),
+					description: z.string(),
+					priority: z.enum(["normal", "high", "urgent"]),
 				}),
-			]),
-		),
-	notice: z
-		.array(
-			z.object({
-				title: z.string(),
-				description: z.string(),
-				priority: z.enum(["normal", "high", "urgent"]),
-			}),
-		)
-		.optional(),
-});
+			)
+			.optional(),
+	});
 
 //탭 목록
 enum TabValue {
@@ -240,15 +259,18 @@ const tabLabels = {
 
 const queryClient = new QueryClient();
 
-export default function BoothForm() {
+export default function BoothForm({ data: initialData }: { data: FormData }) {
+	const formSchema = createFormSchema(initialData);
+	type FormData = z.infer<typeof formSchema>;
+
 	//폼 기본값
-	const form = useForm<z.infer<typeof formSchema>>({
+	const { reset, ...form } = useForm<FormData>({
 		mode: "onBlur", // 또는 "onBlur"
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			exhibition: undefined,
 			name: "",
-			date: [], 
+			date: [],
 			location: [],
 			artist: [],
 			thumbnail: undefined,
@@ -283,6 +305,11 @@ export default function BoothForm() {
 		setActiveTab(value);
 	};
 
+	useEffect(() => {
+		if (initialData) {
+			reset(initialData as unknown as FormData);
+		}
+	}, [initialData, reset]);
 	return (
 		<>
 			<Card className="sm:w-full lg:w-[800px] lg:mx-auto border-none shadow-none">
@@ -358,7 +385,7 @@ export default function BoothForm() {
 							</Accordion>
 						</div>
 						{/*Tab content (form)*/}
-						<FormProvider {...form}>
+						<FormProvider {...form} reset={reset}>
 							<QueryClientProvider client={queryClient}>
 								<form key={1} onSubmit={form.handleSubmit(onSubmit)}>
 									<TabsContent asChild value={TabValue.Basic}>
