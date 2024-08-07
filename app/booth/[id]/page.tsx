@@ -13,6 +13,7 @@ type Props = {
 	params: { id: string };
 	searchParams: { [key: string]: string | string[] | undefined };
 };
+export const dynamicParams = true;
 
 export async function generateMetadata(
 	{ params, searchParams }: Props,

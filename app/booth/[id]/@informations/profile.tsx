@@ -16,7 +16,6 @@ import { Suspense, useMemo, useRef, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { ImageOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useMediaQuery } from "react-responsive";
 
 export default function BoothProfile({
 	data,
@@ -62,8 +61,6 @@ export default function BoothProfile({
 		}
 		return sortedLocations[0];
 	}, [sortedLocations]);
-
-	const isDesktop = useMediaQuery({ query: "(min-width: 1280px)" });
 
 	return (
 		<>
