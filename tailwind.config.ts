@@ -79,6 +79,7 @@ const config = {
 				"@apply bg-blue-50 border-blue-600 text-blue-600 dark:bg-blue-950 dark:border-blue-400 dark:text-blue-400":
 					{},
 			},
+			
 		},
 	},
 	plugins: [

@@ -42,7 +42,6 @@ import {
 	DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Separator } from "../ui/separator";
-import { set } from "date-fns";
 
 type ComboBoxItem = {
 	_id: string;
@@ -340,7 +339,7 @@ export default function ComboBox({
 								</DrawerFooter>
 							</DrawerContent>
 							<SubForm
-								type={search}
+								type={search} 
 								field={field}
 								open={openSubform}
 								onOpenChange={setOpenSubform}
