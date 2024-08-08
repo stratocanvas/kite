@@ -1,11 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
-import {
-	useForm,
-	FormProvider,
-	useFormContext,
-} from "react-hook-form";
+import { useForm, FormProvider, useFormContext } from "react-hook-form";
 import {
 	DrawerClose,
 	DrawerContent,
@@ -33,12 +29,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMediaQuery } from "react-responsive";
 import { Input } from "@/components/ui/input";
 import ComboBox from "@/components/combobox/combobox";
-import { SubmitSubForm } from "@/app/api/write/submit/submit";
+import { SubmitForm } from "@/app/api/write/submit/submit";
 import FileUpload from "@/components/ui/file-upload";
 import { toast } from "sonner";
 import { GetUploadURL } from "@/app/api/write/submit/s3";
 import axios from "axios";
 import { useState } from "react";
+import { Label } from "@/components/ui/label";
 
 export const formSchema = z.object({
 	type: z.enum(["exhibition", "artist", "genre", "character", "category"]),
@@ -110,7 +107,6 @@ export default function SubForm({
 
 	async function onSubmitSubForm(data: z.infer<typeof formSchema>) {
 		let thumbnailUrl = "";
-		console.log(new Date().toLocaleTimeString(), "Starting..."); // 파일 업로드 처리
 		if (data.thumbnail) {
 			const path = `${type}`;
 			const extension = data.thumbnail.name.split(".").pop() || "webp";
@@ -118,31 +114,20 @@ export default function SubForm({
 
 			try {
 				const url = await GetUploadURL(path, filename);
-				console.log(new Date().toLocaleTimeString(), "GET Presigned URL", url); // 파일 업로드 처리
 				const response = await axios.put(url, data.thumbnail, {
 					headers: { "Content-Type": data.thumbnail.type },
 					onUploadProgress: (progressEvent) => {
 						const percentCompleted = Math.round(
 							(progressEvent.loaded * 100) / progressEvent.total,
 						);
-						console.log(
-							new Date().toLocaleTimeString(),
-							"PUT Object",
-							percentCompleted,
-						);
 					},
 				});
-				console.log("Upload complete:", response.data);
 				thumbnailUrl = `https://${process.env.NEXT_PUBLIC_S3_BUCKET}.s3.${process.env.NEXT_PUBLIC_S3_REGION}.amazonaws.com/${path}/${filename}`;
 			} catch (error) {
 				return; // 파일 업로드 실패 시 함수 종료
 			}
 		}
-		console.log(
-			new Date().toLocaleTimeString(),
-			"File Uploaded to:",
-			thumbnailUrl,
-		);
+
 		// SubmitSubForm 호출
 		try {
 			// thumbnail URL로 data 객체 업데이트
@@ -150,12 +135,10 @@ export default function SubForm({
 				...data,
 				thumbnail: thumbnailUrl || data.thumbnail, // URL이 없으면 원래 값 유지
 			};
-			console.log(new Date().toLocaleTimeString(), "Submitting...");
 
-			const result = await SubmitSubForm(updatedData, "sub");
+			const result = await SubmitForm(updatedData, "sub");
 			setValue(field.name, [...field.value, result]);
 			subForm.reset();
-			console.log(new Date().toLocaleTimeString(), "Submitted");
 			onOpenChange(false);
 		} catch (error) {
 			console.error(error);
@@ -167,6 +150,9 @@ export default function SubForm({
 				<Dialog open={open} onOpenChange={onOpenChange}>
 					<FormProvider {...subForm}>
 						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>{label} 추가</DialogTitle>
+							</DialogHeader>
 							<form
 								key={2}
 								onSubmit={(e) => {
@@ -176,12 +162,7 @@ export default function SubForm({
 									subForm.handleSubmit(onSubmitSubForm)(e);
 								}}
 							>
-								<DialogHeader>
-									<DialogTitle>{label} 추가</DialogTitle>
-								</DialogHeader>
-								<div>
-									<FormContent type={type} field={field} form={subForm} />
-								</div>
+								<FormContent type={type} field={field} form={subForm} />
 								<DialogFooter>
 									<Button
 										type="submit"
@@ -198,6 +179,9 @@ export default function SubForm({
 				<Drawer.NestedRoot open={open} onOpenChange={onOpenChange}>
 					<FormProvider {...subForm}>
 						<DrawerContent onClick={(e) => e.stopPropagation()}>
+							<DrawerHeader>
+								<DrawerTitle>{label} 추가</DrawerTitle>
+							</DrawerHeader>
 							<form
 								key={2}
 								onSubmit={(e) => {
@@ -207,12 +191,7 @@ export default function SubForm({
 									subForm.handleSubmit(onSubmitSubForm)(e);
 								}}
 							>
-								<DrawerHeader>
-									<DrawerTitle>{label} 추가</DrawerTitle>
-								</DrawerHeader>
-								<div>
-									<FormContent type={type} field={field} form={subForm} />
-								</div>
+								<FormContent type={type} field={field} form={subForm} />
 								<DrawerFooter className="flex flex-row gap-2">
 									<DrawerClose>
 										<Button type="button" variant="secondary">
@@ -246,25 +225,27 @@ function FormContent({
 
 	return (
 		<div className="flex flex-col gap-3 z-20 p-4 lg:px-0 lg:py-8">
-			<FormField
-				control={form.control}
-				name="thumbnail"
-				render={({ field }) => (
-					<FormItem onClick={(e) => e.stopPropagation()}>
-						<FormLabel>프로필 사진</FormLabel>
-						<div className="w-28 h-28">
-							<FormControl onClick={(e) => e.stopPropagation()}>
-								<FileUpload
-									{...field}
-									ratio={1}
-									maxSize={10000000}
-									maxFiles={1}
-								/>
-							</FormControl>
-						</div>
-					</FormItem>
-				)}
-			/>
+			{type !== "category" && type !== "genre" && (
+				<FormField
+					control={form.control}
+					name="thumbnail"
+					render={({ field }) => (
+						<FormItem onClick={(e) => e.stopPropagation()}>
+							<FormLabel>프로필 사진</FormLabel>
+							<div className="w-28 h-28">
+								<FormControl onClick={(e) => e.stopPropagation()}>
+									<FileUpload
+										{...field}
+										ratio={1}
+										maxSize={10000000}
+										maxFiles={1}
+									/>
+								</FormControl>
+							</div>
+						</FormItem>
+					)}
+				/>
+			)}
 			<FormField
 				control={form.control}
 				name="name"
@@ -314,7 +295,7 @@ function FormContent({
 										search="genre"
 										list={(item) => (
 											<div className="flex flex-col">
-												<p>{item.name}</p>
+												<Label>{item.name}</Label>
 											</div>
 										)}
 										label="장르 또는 태그"

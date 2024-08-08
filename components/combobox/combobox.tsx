@@ -9,6 +9,7 @@ import {
 import {
 	DrawerContent,
 	DrawerFooter,
+	DrawerTitle,
 	DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Drawer } from "vaul";
@@ -247,6 +248,9 @@ export default function ComboBox({
 							</DrawerTrigger>
 
 							<DrawerContent>
+								<DrawerTitle className="hidden">
+									{label} {multiple ? "추가" : "선택"}
+								</DrawerTitle>
 								<div className="mt-4 border-t">
 									{multiple &&
 										Array.isArray(field.value) &&
