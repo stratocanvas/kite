@@ -38,18 +38,16 @@ export const GetBoothList = cache(
 				database.collection("booth");
 			const queryInput = searchParams.get("q");
 
-			if (!queryInput) {
-				return await collection.find().limit(10).toArray();
-			}
 
-			const parsedInput = parseQueryInput(queryInput);
+
+			const parsedInput = parseQueryInput(queryInput || "");
 			const searchQuery = generateAtlasSearchQuery(parsedInput);
 			const result = await collection
 				.aggregate<BoothDocument>(searchQuery)
-				.limit(10)
 				.toArray();
 			const end = Date.now();
 			console.log("Search took", end - start, "ms");
+			console.log("Search results:", result);
 			return result;
 		} catch (error) {
 			console.error("Error in GetBoothList:", error);

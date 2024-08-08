@@ -24,7 +24,7 @@ interface DeleteButtonProps {
  * @param {Array} props.fields - The fields array.
  * @returns {React.ReactElement} The rendered EditButton component.
  */
-const EditButton: React.FC<EditButtonProps> = ({ fields }) => {
+const EditButton = ({ fields }: EditButtonProps) => {
 	const { editMode, setEditMode } = useEditModeStore();
 
 	return (
@@ -64,10 +64,10 @@ const EditButton: React.FC<EditButtonProps> = ({ fields }) => {
  * @param {string} props.label - The label of the button.
  * @returns {JSX.Element} The rendered DeleteButton component.
  */
-const DeleteButton: React.FC<DeleteButtonProps> = ({
+const DeleteButton = ({
 	formProps: { fields, remove, index },
 	label,
-}) => {
+}: DeleteButtonProps) => {
 	const { editMode, setEditMode } = useEditModeStore();
 
 	return (

@@ -2,12 +2,10 @@ import { Badge } from "@/components/ui/badge";
 import { useFormContext } from "react-hook-form";
 
 interface ItemBadgeProps {
-	field: {
-		name: string;
-	};
+	name: string;
 }
 
-const RequiredBadge: React.FC<ItemBadgeProps> = ({ field }) => {
+const RequiredBadge = ({ field }: {field: ItemBadgeProps}) => {
 	const { getFieldState } = useFormContext();
 	const invalid = getFieldState(field.name).invalid;
 	const empty = !getFieldState(field.name).isDirty || !getFieldState(field.name).isTouched;

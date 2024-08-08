@@ -1,4 +1,4 @@
-import { da } from "date-fns/locale";
+import { da, th } from "date-fns/locale";
 import { ObjectId } from "mongodb";
 
 interface BaseInfo {
@@ -19,9 +19,8 @@ interface InputItem {
 }
 
 function generateAtlasSearchQuery(input: InputItem[]): object[] {
-	console.log(input);
 	const should: object[] = [];
-    const filters: object[] = [];
+	const filters: object[] = [];
 
 	let dateFilter: number | undefined;
 	let buyFilter: { [key: number]: string } | undefined;
@@ -162,6 +161,26 @@ function generateAtlasSearchQuery(input: InputItem[]): object[] {
 			},
 		});
 	}
+
+	result.push(
+		{
+			$limit: 2,
+		},
+		{
+			$project: {
+				_id: 1,
+				name: 1,
+				location: 1,
+				artist: 1,
+				exhibition: 1,
+				date: 1,
+				buy: 1,
+				genre: 1,
+				thumbnail: 1,
+				paginationToken: { $meta: "searchSequenceToken" },
+			},
+		},
+	);
 
 	console.log(JSON.stringify(result, null, 2));
 	return result;
