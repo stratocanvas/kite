@@ -7,7 +7,7 @@ import { useForm, FormProvider, Form } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
+import { nanoid } from "nanoid";
 //UI 컴포넌트
 import {
 	Card,
@@ -34,6 +34,9 @@ import GoodsForm from "./forms/3-goods";
 import EtcForm from "./forms/4-etc";
 import ManagementForm from "./forms/5-management";
 import { useActiveTabStore } from "@/store/addform";
+import { GetUploadURL } from "@/app/api/write/submit/s3";
+import { SubmitForm } from "@/app/api/write/submit/submit";
+import axios from "axios";
 
 //폼 스키마
 const contentSchema: z.ZodType<unknown> = z.lazy(() =>
@@ -56,7 +59,10 @@ export const createFormSchema = (initialData?: Partial<FormData>) =>
 			name: z.string(),
 		}),
 		name: z.string().min(1, "부스 이름을 입력해주세요"),
-		date: z.array(z.date()).min(1, "참가 날짜를 선택해주세요"),
+		date: z.object({
+			day: z.array(z.string()).min(1),
+			dow: z.array(z.number()).min(1),
+		}),
 		location: z.array(z.string()).optional(),
 		artist: z
 			.array(
@@ -270,7 +276,7 @@ export default function BoothForm({ data: initialData }: { data: FormData }) {
 		defaultValues: {
 			exhibition: undefined,
 			name: "",
-			date: [],
+			date: { day: [], dow: [] },
 			location: [],
 			artist: [],
 			thumbnail: undefined,
@@ -290,8 +296,130 @@ export default function BoothForm({ data: initialData }: { data: FormData }) {
 	});
 
 	//제출시 실행
-	function onSubmit(data: z.infer<typeof formSchema>) {
-		console.log(data);
+	// Types
+	type File = globalThis.File;
+
+	// Environment variables
+	const S3_BUCKET = process.env.NEXT_PUBLIC_S3_BUCKET;
+	const S3_REGION = process.env.NEXT_PUBLIC_S3_REGION;
+
+	// Utility functions
+	const generateS3Url = (path: string, filename: string) =>
+		`https://${S3_BUCKET}.s3.${S3_REGION}.amazonaws.com/${path}/${filename}`;
+
+	const getFileExtension = (filename: string) =>
+		filename.split(".").pop() || "";
+
+	// Image upload function
+	async function uploadImage(file: File, path: string): Promise<string> {
+		const extension = getFileExtension(file.name);
+		const filename = `${nanoid()}.${extension}`;
+
+		try {
+			const url = await GetUploadURL(path, filename);
+			await axios.put(url, file, {
+				headers: { "Content-Type": file.type },
+				onUploadProgress: (progressEvent) => {
+					const percentCompleted = Math.round(
+						(progressEvent.loaded * 100) / (progressEvent.total ?? 1),
+					);
+					console.log(`Upload progress: ${percentCompleted}%`);
+				},
+			});
+			return generateS3Url(path, filename);
+		} catch (error) {
+			console.error("Error uploading image:", error);
+			throw error;
+		}
+	}
+
+	type ImageField = string | File | null | undefined;
+	type TipTapItem = { type: string; attrs?: { src?: ImageField } };
+	type Product = { option?: Array<{ image?: ImageField }> };
+
+	async function processImageField(field: ImageField): Promise<string | null> {
+		if (!field) return null;
+		if (typeof field === "string") return field.trim() || null;
+		return uploadImage(field, "booth");
+	}
+
+	async function processBlobImage(src: string): Promise<string> {
+		const blob = await fetch(src).then((res) => res.blob());
+		const file = new File([blob], "image.jpg", { type: blob.type });
+		return uploadImage(file, "booth");
+	}
+
+	async function processTipTapContent(
+		content: TipTapItem[],
+	): Promise<TipTapItem[]> {
+		return Promise.all(
+			content.map(async (item) => {
+				if (item.type !== "image" || !item.attrs?.src) return item;
+
+				try {
+					const src = item.attrs.src;
+					if (src instanceof File) {
+						item.attrs.src = await uploadImage(src, "booth");
+					} else if (typeof src === "string" && src.trim()) {
+						item.attrs.src = src.startsWith("blob:")
+							? await processBlobImage(src)
+							: src;
+					} else {
+						item.attrs.src = null;
+					}
+				} catch (error) {
+					console.error("Error processing image:", error);
+					item.attrs.src = null;
+				}
+
+				return item;
+			}),
+		);
+	}
+
+	async function processProductOptions(
+		products: Product[],
+	): Promise<Product[]> {
+		return Promise.all(
+			products.map(async (product) => {
+				if (!product.option) return product;
+
+				const processedOptions = await Promise.all(
+					product.option.map(async (opt) => ({
+						...opt,
+						image: await processImageField(opt.image),
+					})),
+				);
+
+				return { ...product, option: processedOptions };
+			}),
+		);
+	}
+
+	// Main submit function
+	async function onSubmit(data: z.infer<typeof formSchema>) {
+		console.log("Original data:", data);
+
+		try {
+			const processedData = {
+				...data,
+				thumbnail: await processImageField(data.thumbnail),
+				description: data.description && {
+					...data.description,
+					content: await processTipTapContent(data.description.content || []),
+				},
+				product: data.product && (await processProductOptions(data.product)),
+			};
+
+			console.log("Processed data:", processedData);
+
+			const result = await SubmitForm(processedData, "main");
+			console.log("Form submission result:", result);
+			return result;
+		} catch (error) {
+			console.error("Error processing and submitting form:", error);
+			throw error;
+		}
 	}
 
 	//활성화된 탭 상태

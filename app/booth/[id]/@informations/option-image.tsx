@@ -12,12 +12,12 @@ export default function OptionImage({ productId, options }: { productId: string,
     return (
         <Watermark text={'Sample'} lineHeight="3rem" opacity={0.2} textSize={24} textColor="#fff">
             <AspectRatio className="rounded-t-md" ratio={1 / 1}
-                style={{ backgroundColor: selectedOption?.thumbnail ? `#${selectedOption.thumbnail.split('-c(')[1].split(')')[0]}` : 'transparent' }}
+                style={{ backgroundColor: selectedOption?.image ? `#${selectedOption.image?.split('-c(')[1]?.split(')')[0]}` : 'transparent' }}
                 onContextMenu={(e: MouseEvent<HTMLImageElement>) => {
                     e.preventDefault();
                 }}>
                 {selectedOption ? (
-                    selectedOption.thumbnail ? (
+                    selectedOption.image ? (
                             <Image
                                 style={{
                                     userSelect: 'none',
@@ -29,7 +29,7 @@ export default function OptionImage({ productId, options }: { productId: string,
                                     OUserSelect: 'none',
                                     userDrag: 'none'
                                 }}
-                                src={selectedOption.thumbnail}
+                                src={selectedOption.image}
                                 alt="Image"
                                 fill
                                 className="rounded-t-md object-cover no-right-click"
@@ -41,10 +41,10 @@ export default function OptionImage({ productId, options }: { productId: string,
                             <ImageOff className="text-muted-foreground" />
                         </div>
                     )
-                ) : options[0]?.thumbnail ? (
+                ) : options[0]?.image ? (
                     <>
                             <Image
-                                src={options[0].thumbnail}
+                                src={options[0].image}
                                 alt="Image"
                                 fill
                                 style={{
