@@ -545,10 +545,7 @@ function ContentProtectionField() {
 	);
 }
 
-interface HelpTooltipProps {
-	content: string;
-}
-const HelpTooltip: React.FC<HelpTooltipProps> = ({ content }) => {
+const HelpTooltip = ({ content }: { content: string }) => {
 	const isDesktop = useMediaQuery({ query: "(min-width: 768px)" });
 	return isDesktop ? (
 		<TooltipProvider>

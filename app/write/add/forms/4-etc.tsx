@@ -67,7 +67,6 @@ const ObjectId = (): string => {
 	return timestamp + randomPart;
 };
 
-
 const getImageUrl = (image?: File) => {
 	if (image instanceof File) {
 		return URL.createObjectURL(image);
@@ -672,11 +671,9 @@ function TotalPricePromotion({ index }: { index: number }) {
 
 //BOXES
 interface PromotionTypeToggleGroupProps {
-	field: {
-		name: string;
-		value: undefined;
-		onChange: (value: string) => void;
-	};
+	name: string;
+	value: undefined;
+	onChange: (value: string) => void;
 }
 
 interface IfThisProductComboboxProps {
@@ -712,9 +709,9 @@ interface CalendarProps {
 	};
 }
 
-const PromotionTypeToggleGroup: React.FC<PromotionTypeToggleGroupProps> = ({
+const PromotionTypeToggleGroup = ({
 	field,
-}) => {
+}: { field: PromotionTypeToggleGroupProps }) => {
 	return (
 		<FormItem>
 			<FormControl>
@@ -746,10 +743,7 @@ const PromotionTypeToggleGroup: React.FC<PromotionTypeToggleGroupProps> = ({
 	);
 };
 
-const IfThisProductComboBox: React.FC<IfThisProductComboboxProps> = ({
-	field,
-	type,
-}) => {
+const IfThisProductComboBox = ({ field, type }: IfThisProductComboboxProps) => {
 	const { getValues } = useFormContext();
 
 	return (
@@ -791,9 +785,7 @@ const IfThisProductComboBox: React.FC<IfThisProductComboboxProps> = ({
 	);
 };
 
-const ThenThatProductComboBox: React.FC<ThenThatProductComboboxProps> = ({
-	field,
-}) => {
+const ThenThatProductComboBox = ({ field }: ThenThatProductComboboxProps) => {
 	const { watch } = useFormContext();
 
 	return (
@@ -865,7 +857,7 @@ const ThenThatProductComboBox: React.FC<ThenThatProductComboboxProps> = ({
 	);
 };
 
-const AmountField: React.FC<AmountFieldProps> = ({ field, level, type }) => {
+const AmountField = ({ field, level, type }: AmountFieldProps) => {
 	const width = type === "price" ? "w-24" : "w-16";
 	const placeholder = type === "price" ? "금액" : "수량";
 	const suffixPre = type === "price" ? "원" : "개";
@@ -903,7 +895,7 @@ const AmountField: React.FC<AmountFieldProps> = ({ field, level, type }) => {
 	);
 };
 
-const CalendarBox: React.FC<CalendarProps> = ({ field }) => {
+const CalendarBox = ({ field }: CalendarProps) => {
 	const [date, setDate] = useState<DateRange | undefined>(() => {
 		if (Array.isArray(field.value) && field.value.length === 2) {
 			const [start, end] = field.value;
