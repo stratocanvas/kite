@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import * as React from "react";
-import { format } from "date-fns";
+import { format, getDay, parseISO } from "date-fns";
 import { fi, ko } from "date-fns/locale";
 import { create } from "zustand";
 import ComboBox from "@/components/combobox/combobox";
@@ -20,6 +20,7 @@ import { ItemBadge } from "./3-goods";
 import { RequiredBadge } from "../components/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TriangleAlert } from "lucide-react";
+import { Label } from "@/components/ui/label";
 interface LocationState {
 	inputValue: string;
 	setInputValue: (value: string) => void;
@@ -62,7 +63,7 @@ export default function BasicForm() {
 												<p>{item.name}</p>
 												<p className="text-sm text-muted-foreground">
 													{item.date.length > 0 && (
-														<div>
+														<Label>
 															{`${format(
 																item.date[0],
 																"yyyy년 M월 d일",
@@ -70,7 +71,7 @@ export default function BasicForm() {
 																item.date[item.date.length - 1],
 																"yyyy년 M월 d일",
 															)}`}
-														</div>
+														</Label>
 													)}
 												</p>
 											</div>
@@ -84,7 +85,7 @@ export default function BasicForm() {
 										})}
 										multiple={false}
 										onChange={() => {
-											setValue("date", []);
+											setValue("date", { day: [], dow: [] });
 										}}
 									/>
 								</FormControl>
@@ -116,7 +117,7 @@ export default function BasicForm() {
 
 				<FormField
 					control={control}
-					name="date"
+					name="date.day"
 					render={({ field }) => (
 						<FormItem className="flex flex-col">
 							<div className="flex justify-between items-center">
@@ -131,31 +132,31 @@ export default function BasicForm() {
 									value={field.value}
 									onValueChange={(values) => {
 										field.onChange(values);
+										const dowValues = values.map(
+											(date) => new Date(date).getDay() + 1,
+										);
+
+										setValue("date.dow", dowValues);
 									}}
 								>
-									{(watch("exhibition")?.date || field.value)?.map(
-										(date: string) => (
-											<ToggleGroupItem
-												key={date}
-												value={date}
-												className="[&[data-state=on]]:data-state-on group"
-											>
-												<div className="flex flex-col items-center">
-													<div>
-														{format(new Date(date), "EEEE", { locale: ko })}
-													</div>
-													<div className="text-xs text-muted-foreground group-data-[state=on]:text-blue-600 group-data-[state=on]:dark:text-blue-400">
-														{format(new Date(date), "yyyy. M. d", {
-															locale: ko,
-														})}
-													</div>
+									{(watch("exhibition")?.date || field.value).map((date: string) => (
+										<ToggleGroupItem
+											key={date}
+											value={date}
+											className="[&[data-state=on]]:data-state-on group"
+										>
+											<div className="flex flex-col items-center">
+												<div>
+													{format(new Date(date), "EEEE", { locale: ko })}
 												</div>
-											</ToggleGroupItem>
-										),
-									)}
+												<div className="text-xs text-muted-foreground group-data-[state=on]:text-blue-600 group-data-[state=on]:dark:text-blue-400">
+													{format(new Date(date), "yyyy. M. d", { locale: ko })}
+												</div>
+											</div>
+										</ToggleGroupItem>
+									))}
 								</ToggleGroup>
 							</FormControl>
-							<FormMessage />
 							<FormDescription>
 								{getValues("exhibition") === undefined
 									? "행사를 먼저 선택해 주세요"

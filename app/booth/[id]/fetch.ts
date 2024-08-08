@@ -1,4 +1,4 @@
-import { connectDB } from "@/utils/mongodb/database";
+import clientPromise from "@/utils/mongodb/database";
 import { ObjectId } from "mongodb";
 import { cache } from "react";
 
@@ -31,10 +31,9 @@ const convertIdToString = (item: any): any => {
 };
 
 export const GetBooth = cache(async (boothId: string) => {
-	const client = await connectDB;
+	const client = await clientPromise;
 
 	try {
-		await client.connect();
 		const db = client.db("kiteapp");
 		const data = await db
 			.collection("booth")
@@ -46,6 +45,5 @@ export const GetBooth = cache(async (boothId: string) => {
 		}
 		return null;
 	} finally {
-		await client.close();
 	}
 });

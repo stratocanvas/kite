@@ -1,5 +1,5 @@
 "use server";
-import { connectDB } from "@/utils/mongodb/database";
+import clientPromise from "@/utils/mongodb/database";
 import { ObjectId } from "mongodb";
 import { z } from "zod";
 import DOMPurify from "dompurify";
@@ -9,7 +9,7 @@ import { JSDOM } from "jsdom";
 const subFormSchema = z.object({
 	name: z.string().min(1),
 	alias: z.array(z.string()).optional(),
-	sns: z.object({ x: z.string().optional(), }).optional(),
+	sns: z.object({ x: z.string().optional() }).optional(),
 	genre: z.object({ _id: z.string(), name: z.string() }).optional(),
 	type: z.enum(["exhibition", "artist", "genre", "character", "category"]),
 	thumbnail: z.string().url().optional(),
@@ -34,7 +34,10 @@ const mainFormSchema = z.object({
 		name: z.string(),
 	}),
 	name: z.string().min(1, "부스 이름을 입력해주세요"),
-	date: z.array(z.number()).min(1, "참가 날짜를 선택해주세요"),
+	date: z.object({
+		day: z.array(z.string()).min(1),
+		dow: z.array(z.number()).min(1),
+	}),
 	location: z.array(z.string()).optional(),
 	artist: z
 		.array(
@@ -47,16 +50,16 @@ const mainFormSchema = z.object({
 		.optional(),
 
 	//인포
-	thumbnail: z.instanceof(File).optional(),
+	thumbnail: z.string().url().optional().nullable(),
 	description: z
 		.object({
 			type: z.string().optional(),
 			content: z.array(contentSchema).optional(),
 			/*
-			.refine((content) => content.some((item) => item?.type === "image"), {
-				message: "인포 이미지를 올려주세요",
-			}),
-			*/
+		.refine((content) => content.some((item) => item?.type === "image"), {
+			message: "인포 이미지를 올려주세요",
+		}),
+		*/
 		})
 		.optional(),
 	//굿즈
@@ -80,7 +83,7 @@ const mainFormSchema = z.object({
 				option: z.array(
 					z.object({
 						_id: z.string(),
-						image: z.instanceof(File).optional(),
+						image: z.string().url().optional().nullable(),
 						name: z.string().min(1, "굿즈 이름을 입력해주세요"),
 						price: z.number().min(0, "가격을 입력해주세요"),
 						character: z
@@ -213,70 +216,81 @@ async function ValidateForm(
 	data: FormData,
 	type: keyof typeof schemaMap,
 ): Promise<boolean> {
+	console.log("ValidateForm called with type:", type);
+	console.log("FormData received:", data);
+
 	const schema = schemaMap[type];
 	if (!schema) {
+		console.error(`Invalid form type: ${type}`);
 		throw new Error(`Invalid form type: ${type}`);
 	}
-	const result = schema.safeParse(data);
-	console.log(result.success);
+	console.log("Schema found:", schema);
 
+	const result = schema.safeParse(data);
+	console.log("Validation result:", result);
+	console.log("Validation errors:", result.error);
 	return result.success;
 }
 
-function convertIdsToObjectId(obj: any): any {
+function convertDataForMongoDB(obj: any): any {
 	if (typeof obj !== "object" || obj === null) {
 		return obj;
 	}
 
 	if (Array.isArray(obj)) {
-		return obj.map(convertIdsToObjectId);
+		return obj.map(convertDataForMongoDB);
 	}
 
 	const result: any = {};
 	for (const [key, value] of Object.entries(obj)) {
 		if (key === "_id" && typeof value === "string") {
 			result[key] = new ObjectId(value);
+		} else if (key === "date" && typeof value === "object" && value !== null) {
+			result[key] = {
+				...value,
+				day: value.day.map((dateString: string) => new Date(dateString)),
+			};
 		} else {
-			result[key] = convertIdsToObjectId(value);
+			result[key] = convertDataForMongoDB(value);
 		}
 	}
 
 	return result;
 }
 
-export async function SubmitSubForm(data: FormData, type: string) {
+export async function SubmitForm(data: FormData, type: string) {
 	// Validate data and type
 	const isValid = await ValidateForm(data, type as keyof typeof schemaMap);
 	if (!isValid) {
 		throw new Error("입력한 내용을 확인해주세요");
 	}
+	const collection = type === "main" ? "booth" : "tag";
 
-	const client = await connectDB;
+	const client = await clientPromise;
 	try {
-		await client.connect();
 		const db = client.db("kiteapp");
 
-		// Convert genre._id to ObjectId
-		const convertedData = convertIdsToObjectId(data);
+		// Convert IDs to ObjectId and dates to Date objects
+		const convertedData = convertDataForMongoDB(data);
 
-		const submit = await db.collection("tag").insertOne(convertedData);
-		const insertedData = await db
-			.collection("tag")
-			.findOne({ _id: submit.insertedId });
+		const submit = await db.collection(collection).insertOne(convertedData);
+		if (type === "sub") {
+			const insertedData = await db
+				.collection(collection)
+				.findOne({ _id: submit.insertedId });
 
-		// Convert _id to string
-		if (insertedData?._id) {
-			insertedData._id = insertedData._id.toString();
+			// Convert _id to string
+			if (insertedData?._id) {
+				insertedData._id = insertedData._id.toString();
+			}
+
+			// Convert genre._id to string
+			if (insertedData?.genre?._id) {
+				insertedData.genre._id = insertedData.genre._id.toString();
+			}
+			console.log(insertedData);
+			return insertedData;
 		}
-
-		// Convert genre._id to string
-		if (insertedData?.genre?._id) {
-			insertedData.genre._id = insertedData.genre._id.toString();
-		}
-
-		console.log(insertedData);
-		return insertedData;
 	} finally {
-		await client.close();
 	}
 }

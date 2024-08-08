@@ -204,7 +204,7 @@ export default function SearchBar({ minified }: { minified?: boolean }) {
 						</div>
 					</div>
 				</div>
-				<SearchFilters />
+				<SearchFilters setOpen={setOpen} />
 			</div>
 			<CommandList className="border-t">
 				<ScrollArea
@@ -255,12 +255,12 @@ export default function SearchBar({ minified }: { minified?: boolean }) {
 	);
 }
 
-const SearchValues: React.FC<SearchValuesProps> = ({
+const SearchValues = ({
 	value,
 	setValue,
 	inputRef,
 	minified,
-}) => {
+}: SearchValuesProps) => {
 	// 주어진 id를 가진 항목을 value 배열에서 제거합니다.
 	const handleRemove = (id: string) => {
 		setValue(value.filter((item) => item.id !== id));
@@ -368,10 +368,10 @@ const SearchValues: React.FC<SearchValuesProps> = ({
 };
 
 interface SearchFiltersProps {
-	setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+	setOpen?: (open: boolean) => void;
 }
 
-const SearchFilters: React.FC<SearchFiltersProps> = ({ setOpen }) => {
+const SearchFilters = ({ setOpen }: SearchFiltersProps) => {
 	const router = useRouter();
 	const { queryInput, setQueryInput } = useQueryStore();
 
@@ -513,7 +513,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ setOpen }) => {
 					</ToggleGroup>
 				</div>
 				<div className="flex gap-1 items-center">
-					<Button type="submit" className="h-7 w-7" variant="link">
+					<Button type="submit" className="h-7 w-7" variant="ghost">
 						<Search className="h-4 w-4 shrink-0" />
 					</Button>
 				</div>
@@ -528,11 +528,11 @@ interface AutoCompleteResultsProps {
 	setInput: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const AutoCompleteResults: React.FC<AutoCompleteResultsProps> = ({
+const AutoCompleteResults = ({
 	data,
 	setValue,
 	setInput,
-}) => {
+}: AutoCompleteResultsProps) => {
 	if (!data || data.length === 0) return null;
 
 	// data 배열을 type값을 기준으로 그룹화합니다.
@@ -588,10 +588,10 @@ const AutoCompleteResults: React.FC<AutoCompleteResultsProps> = ({
 	);
 };
 
-const AutoCompleteResultItem: React.FC<{
-	item: AutoCompleteResult;
-	type: string;
-}> = ({ item, type }) => {
+const AutoCompleteResultItem = ({
+	item,
+	type,
+}: { item: AutoCompleteResult; type: string }) => {
 	return (
 		<div className="w-full flex flex-row gap-2 items-center">
 			{(type === "character" || type === "artist") && (

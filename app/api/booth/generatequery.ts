@@ -1,4 +1,3 @@
-import { da } from "date-fns/locale";
 import { ObjectId } from "mongodb";
 
 interface BaseInfo {
@@ -19,9 +18,8 @@ interface InputItem {
 }
 
 function generateAtlasSearchQuery(input: InputItem[]): object[] {
-	console.log(input);
 	const should: object[] = [];
-    const filters: object[] = [];
+	const filters: object[] = [];
 
 	let dateFilter: number | undefined;
 	let buyFilter: { [key: number]: string } | undefined;
@@ -32,6 +30,26 @@ function generateAtlasSearchQuery(input: InputItem[]): object[] {
 
 		const hasCategory = "category" in item && item.category;
 		const hasCharacter = "character" in item && item.character;
+		const hasBuy = item.buy && Object.keys(item.buy).length > 0;
+		const hasDate = item.date && item.date !== 0;
+
+		if (hasBuy) {
+			const buyValues = item.buy ? Object.values(item.buy) : [];
+			filters.push({
+				in: {
+					path: "buy.type",
+					value: buyValues,
+				},
+			});
+		}
+		if (hasDate) {
+			filters.push({
+				in: {
+					path: "date.dow",
+					value: item.date,
+				},
+			});
+		}
 
 		if (hasCategory && hasCharacter) {
 			must.push({
@@ -115,53 +133,52 @@ function generateAtlasSearchQuery(input: InputItem[]): object[] {
 			should.push({ compound: { must } });
 		}
 
-		// Update date and buy filters
 		if (item.date !== undefined) {
 			dateFilter = item.date;
-		}
-		if (item.buy !== undefined) {
-			buyFilter = item.buy;
 		}
 	});
 
 	const result: object[] = [];
 
-	// Only add $search stage if there are any search conditions
-	if (should.length > 0) {
-		result.push({
+	// 쿼리가 있는 경우에만 $search 스테이지를 추가
+	if (should.length > 0 || filters.length > 0) {
+		const searchStage: any = {
 			$search: {
 				index: "booth",
-				compound: {
-					should,
-					minimumShouldMatch: 1,
-				},
+				compound: {},
 			},
-		});
+		};
+
+		if (should.length > 0) {
+			searchStage.$search.compound.should = should;
+			searchStage.$search.compound.minimumShouldMatch = 1;
+		}
+		if (filters.length > 0) {
+			searchStage.$search.compound.filter = filters;
+		}
+
+		result.push(searchStage);
 	}
 
-	if (dateFilter !== undefined && dateFilter !== 0) {
-		result.push({
-			$match: {
-				$expr: {
-					$anyElementTrue: {
-						$map: {
-							input: "$date",
-							as: "date",
-							in: { $eq: [{ $dayOfWeek: "$$date" }, dateFilter] },
-						},
-					},
-				},
+	result.push(
+		{
+			$limit: 10,
+		},
+		{
+			$project: {
+				_id: 1,
+				name: 1,
+				location: 1,
+				artist: 1,
+				exhibition: 1,
+				date: 1,
+				buy: 1,
+				genre: 1,
+				thumbnail: 1,
+				paginationToken: { $meta: "searchSequenceToken" },
 			},
-		});
-	}
-	if (buyFilter && Object.keys(buyFilter).length > 0) {
-		const buyValues = Object.values(buyFilter);
-		result.push({
-			$match: {
-				"buy.type": { $in: buyValues },
-			},
-		});
-	}
+		},
+	);
 
 	console.log(JSON.stringify(result, null, 2));
 	return result;
