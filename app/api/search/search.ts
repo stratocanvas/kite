@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { type NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/utils/mongodb/database";
+import clientPromise from "@/utils/mongodb/database";
 
 export interface AutoCompleteResult {
 	_id: string;
