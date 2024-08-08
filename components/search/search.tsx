@@ -513,7 +513,7 @@ const SearchFilters = ({ setOpen }: SearchFiltersProps) => {
 					</ToggleGroup>
 				</div>
 				<div className="flex gap-1 items-center">
-					<Button type="submit" className="h-7 w-7" variant="link">
+					<Button type="submit" className="h-7 w-7" variant="ghost">
 						<Search className="h-4 w-4 shrink-0" />
 					</Button>
 				</div>

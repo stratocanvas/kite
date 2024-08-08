@@ -1,4 +1,3 @@
-import { da, th } from "date-fns/locale";
 import { ObjectId } from "mongodb";
 
 interface BaseInfo {
@@ -31,6 +30,26 @@ function generateAtlasSearchQuery(input: InputItem[]): object[] {
 
 		const hasCategory = "category" in item && item.category;
 		const hasCharacter = "character" in item && item.character;
+		const hasBuy = item.buy && Object.keys(item.buy).length > 0;
+		const hasDate = item.date && item.date !== 0;
+
+		if (hasBuy) {
+			const buyValues = item.buy ? Object.values(item.buy) : [];
+			filters.push({
+				in: {
+					path: "buy.type",
+					value: buyValues,
+				},
+			});
+		}
+		if (hasDate) {
+			filters.push({
+				in: {
+					path: "date.dow",
+					value: item.date,
+				},
+			});
+		}
 
 		if (hasCategory && hasCharacter) {
 			must.push({
@@ -114,57 +133,36 @@ function generateAtlasSearchQuery(input: InputItem[]): object[] {
 			should.push({ compound: { must } });
 		}
 
-		// Update date and buy filters
 		if (item.date !== undefined) {
 			dateFilter = item.date;
-		}
-		if (item.buy !== undefined) {
-			buyFilter = item.buy;
 		}
 	});
 
 	const result: object[] = [];
 
-	// Only add $search stage if there are any search conditions
-	if (should.length > 0) {
-		result.push({
+	// 쿼리가 있는 경우에만 $search 스테이지를 추가
+	if (should.length > 0 || filters.length > 0) {
+		const searchStage: any = {
 			$search: {
 				index: "booth",
-				compound: {
-					should,
-					minimumShouldMatch: 1,
-				},
+				compound: {},
 			},
-		});
-	}
+		};
 
-	if (dateFilter !== undefined && dateFilter !== 0) {
-		result.push({
-			$match: {
-				$expr: {
-					$anyElementTrue: {
-						$map: {
-							input: "$date",
-							as: "date",
-							in: { $eq: [{ $dayOfWeek: "$$date" }, dateFilter] },
-						},
-					},
-				},
-			},
-		});
-	}
-	if (buyFilter && Object.keys(buyFilter).length > 0) {
-		const buyValues = Object.values(buyFilter);
-		result.push({
-			$match: {
-				"buy.type": { $in: buyValues },
-			},
-		});
+		if (should.length > 0) {
+			searchStage.$search.compound.should = should;
+			searchStage.$search.compound.minimumShouldMatch = 1;
+		}
+		if (filters.length > 0) {
+			searchStage.$search.compound.filter = filters;
+		}
+
+		result.push(searchStage);
 	}
 
 	result.push(
 		{
-			$limit: 2,
+			$limit: 10,
 		},
 		{
 			$project: {
