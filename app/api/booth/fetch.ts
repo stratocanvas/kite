@@ -1,7 +1,7 @@
-import clientPromise from "@/utils/mongodb/database";
+import clientPromise from "@/lib/database";
 import { cache } from "react";
 import type { Collection, MongoClient } from "mongodb";
-
+import { ObjectId } from "mongodb";
 import generateAtlasSearchQuery from "./generatequery";
 
 interface BaseInfo {
@@ -108,3 +108,50 @@ function isEmptyOrSpecificCase(input: InputItem[]): boolean {
 	}
 	return false;
 }
+
+
+const convertIdToString = (item: any): any => {
+	if (item instanceof ObjectId) {
+		return item.toString();
+	}
+	if (Array.isArray(item)) {
+		return item.map(convertIdToString);
+	}
+	if (typeof item === "object" && item !== null) {
+		if (item instanceof Date) {
+			return item;
+		}
+		return Object.fromEntries(
+			Object.entries(item).map(([key, value]) => {
+				if (
+					key === "date" &&
+					Array.isArray(value) &&
+					value.length === 2 &&
+					value.every((v) => v instanceof Date)
+				) {
+					return [key, value];
+				}
+				return [key, convertIdToString(value)];
+			}),
+		);
+	}
+	return item;
+};
+
+export const GetBooth = cache(async (boothId: string) => {
+	const client = await clientPromise;
+
+	try {
+		const db = client.db("kiteapp");
+		const data = await db
+			.collection("booth")
+			.findOne({ _id: new ObjectId(boothId) });
+
+		if (data) {
+			const convertedData = convertIdToString(data);
+			return convertedData;
+		}
+		return null;
+	} finally {
+	}
+});

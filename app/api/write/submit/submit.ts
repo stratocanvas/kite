@@ -1,5 +1,5 @@
 "use server";
-import clientPromise from "@/utils/mongodb/database";
+import clientPromise from "@/lib/database";
 import { ObjectId } from "mongodb";
 import { z } from "zod";
 import DOMPurify from "dompurify";

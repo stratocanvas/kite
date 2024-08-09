@@ -6,7 +6,7 @@ interface SearchResult {
 	// Add other fields as necessary
 }
 
-export const useSearchQuery = (collection: string, query: string) => {
+export const useAutoComplete = (collection: string, query: string) => {
 	return useQuery<SearchResult[]>({
 		queryKey: ["search", collection, query],
 		queryFn: async () => {
