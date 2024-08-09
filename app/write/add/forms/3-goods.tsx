@@ -543,10 +543,10 @@ function OptionFields({ productIndex }: { productIndex: number }) {
 
 interface ItemProps {
 	item: { _id: string; name: string };
-	onRemove: (_id: string) => void;
+	onRemove: (id: string) => void;
 }
 
-export const ItemBadge: React.FC<ItemProps> = ({ item, onRemove }) => (
+export const ItemBadge = ({ item, onRemove }: ItemProps) => (
 	<Badge
 		key={item._id}
 		className="flex items-center gap-1 px-2 py-1 rounded-md"

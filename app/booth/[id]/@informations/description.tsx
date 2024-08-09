@@ -31,138 +31,133 @@ type BlockProps = {
 	marks?: { type: string }[];
 };
 
-const Block: React.FC<BlockProps> = React.memo(
-	({ type, attrs, content, marks }) => {
-		const renderChildren = useMemo(
-			() => (childContent: Content[]) => {
-				return childContent.map((child) => {
-					const { type, attrs, content, text, marks } = child;
-					const src = attrs?.src || "";
-					const parsedWidth =
-						Number(src.split("-w(")[1]?.split(")")[0]) || 1200;
-					const parsedHeight =
-						Number(src.split("-h(")[1]?.split(")")[0]) || 1200;
-					const aspectRatio = parsedWidth / parsedHeight;
+const Block = React.memo(({ type, attrs, content, marks }: BlockProps) => {
+	const renderChildren = useMemo(
+		() => (childContent: Content[]) => {
+			return childContent.map((child) => {
+				const { type, attrs, content, text, marks } = child;
+				const src = attrs?.src || "";
+				const parsedWidth = Number(src.split("-w(")[1]?.split(")")[0]) || 1200;
+				const parsedHeight = Number(src.split("-h(")[1]?.split(")")[0]) || 1200;
+				const aspectRatio = parsedWidth / parsedHeight;
 
-					const width = 1200;
-					const height = width / aspectRatio;
-					switch (type) {
-						case "text":
-							return (
-								<span
-									key={nanoid()}
-									className={
-										marks?.some((mark) => mark.type === "bold")
-											? "font-bold text-foreground"
-											: ""
-									}
-								>
-									{text}
-								</span>
-							);
-						case "horizontalRule":
-							return <Separator key={nanoid()} className="my-2" />;
-						case "image":
-							return (
-								<div
-									key={nanoid()}
-									className="no-right-click relative rounded-md flex gap-2 w-full h-auto my-2 lg:my-4 overflow-hidden"
+				const width = 1200;
+				const height = width / aspectRatio;
+				switch (type) {
+					case "text":
+						return (
+							<span
+								key={nanoid()}
+								className={
+									marks?.some((mark) => mark.type === "bold")
+										? "font-bold text-foreground"
+										: ""
+								}
+							>
+								{text}
+							</span>
+						);
+					case "horizontalRule":
+						return <Separator key={nanoid()} className="my-2" />;
+					case "image":
+						return (
+							<div
+								key={nanoid()}
+								className="no-right-click relative rounded-md flex gap-2 w-full h-auto my-2 lg:my-4 overflow-hidden"
+								style={{
+									backgroundColor: `#${
+										attrs?.src.split("-c(")[1]?.split(")")[0] || ""
+									}`,
+								}}
+							>
+								<Image
+									className="rounded-md"
+									loading="lazy"
+									src={attrs?.src || ""}
+									alt="info-image"
+									width={width}
+									height={height}
+									sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
 									style={{
-										backgroundColor: `#${
-											attrs?.src.split("-c(")[1]?.split(")")[0] || ""
-										}`,
+										userSelect: "none",
+										WebkitUserSelect: "none",
+										WebkitTouchCallout: "none",
+										WebkitUserDrag: "none",
+										KhtmlUserSelect: "none",
+										MozUserSelect: "none",
+										OUserSelect: "none",
+										userDrag: "none",
 									}}
-								>
-									<Image
-										className="rounded-md"
-										loading="lazy"
-										src={attrs?.src || ""}
-										alt="info-image"
-										width={width}
-										height={height}
-										sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-										style={{
-											userSelect: "none",
-											WebkitUserSelect: "none",
-											WebkitTouchCallout: "none",
-											WebkitUserDrag: "none",
-											KhtmlUserSelect: "none",
-											MozUserSelect: "none",
-											OUserSelect: "none",
-											userDrag: "none",
-										}}
-									/>
-								</div>
-							);
-						default:
-							return content ? (
-								<Block
-									key={nanoid()}
-									type={type}
-									attrs={attrs}
-									content={content}
-									marks={marks}
 								/>
-							) : (
-								<>
-									<br />
-								</>
-							);
-					}
-				});
-			},
-			[],
-		);
+							</div>
+						);
+					default:
+						return content ? (
+							<Block
+								key={nanoid()}
+								type={type}
+								attrs={attrs}
+								content={content}
+								marks={marks}
+							/>
+						) : (
+							<>
+								<br />
+							</>
+						);
+				}
+			});
+		},
+		[],
+	);
 
-		switch (type) {
-			case "doc":
-				return <div>{renderChildren(content || [])}</div>;
-			case "heading":
-				return (
-					<h3 className="font-bold text-xl">{renderChildren(content || [])}</h3>
-				);
-			case "paragraph":
-				return (
-					<p className="text-base text-muted-foreground">
+	switch (type) {
+		case "doc":
+			return <div>{renderChildren(content || [])}</div>;
+		case "heading":
+			return (
+				<h3 className="font-bold text-xl">{renderChildren(content || [])}</h3>
+			);
+		case "paragraph":
+			return (
+				<p className="text-base text-muted-foreground">
+					{renderChildren(content || [])}
+				</p>
+			);
+		case "bulletList":
+			return (
+				<ul className="list-disc pl-6 text-muted-foreground">
+					{content?.map((item) => (
+						<Block key={nanoid()} {...item} />
+					))}
+				</ul>
+			);
+		case "orderedList":
+			return (
+				<ol
+					start={attrs?.start}
+					className="list-decimal pl-6 text-muted-foreground"
+				>
+					{content?.map((item) => (
+						<Block key={nanoid()} {...item} />
+					))}
+				</ol>
+			);
+		case "listItem":
+			return <li>{renderChildren(content || [])}</li>;
+		case "blockquote":
+			return (
+				<Alert className="bg-muted my-2 text-foreground">
+					<AlertTitle className="text-foreground">
 						{renderChildren(content || [])}
-					</p>
-				);
-			case "bulletList":
-				return (
-					<ul className="list-disc pl-6 text-muted-foreground">
-						{content?.map((item) => (
-							<Block key={nanoid()} {...item} />
-						))}
-					</ul>
-				);
-			case "orderedList":
-				return (
-					<ol
-						start={attrs?.start}
-						className="list-decimal pl-6 text-muted-foreground"
-					>
-						{content?.map((item) => (
-							<Block key={nanoid()} {...item} />
-						))}
-					</ol>
-				);
-			case "listItem":
-				return <li>{renderChildren(content || [])}</li>;
-			case "blockquote":
-				return (
-					<Alert className="bg-muted my-2 text-foreground">
-						<AlertTitle className="text-foreground">
-							{renderChildren(content || [])}
-						</AlertTitle>
-					</Alert>
-				);
-			default:
-				return null;
-		}
-	},
-);
+					</AlertTitle>
+				</Alert>
+			);
+		default:
+			return null;
+	}
+});
 Block.displayName = "Block";
-
 
 type Artist = {
 	_id: string;
@@ -172,15 +167,13 @@ type Artist = {
 };
 
 type BoothDescriptionProps = {
-	data: {
-		_id: string;
-		description: string;
-		artist: Artist[];
-	};
+	_id: string;
+	description: string | Content;
+	artist: Artist[];
 };
 
-const BoothDescription: React.FC<BoothDescriptionProps> = React.memo(
-	({ data }) => {
+const BoothDescription = React.memo(
+	({ data }: { data: BoothDescriptionProps }) => {
 		const jsonData = useMemo(() => {
 			try {
 				return typeof data.description === "string"

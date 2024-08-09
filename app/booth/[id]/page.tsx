@@ -4,7 +4,7 @@ import BoothProducts from "./@informations/products";
 import BoothPreorders from "./@informations/preorders";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { GetBooth } from "./fetch";
+import { GetBooth } from "@/app/api/booth/fetch";
 import type { Metadata, ResolvingMetadata } from "next";
 import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
