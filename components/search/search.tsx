@@ -99,7 +99,7 @@ export default function SearchBar({ minified }: { minified?: boolean }) {
 	const TriggerButton = (
 		<Button
 			variant="outline"
-			className="w-full rounded-lg border shadow-md items-center justify-start"
+			className="w-full rounded-lg border shadow-lg items-center justify-start"
 		>
 			<Search className="text-muted-foreground h-4 w-4 mr-2 shrink-0" />
 			<div
@@ -246,7 +246,7 @@ export default function SearchBar({ minified }: { minified?: boolean }) {
 				)
 			) : (
 				<>
-					<div className="rounded-lg border shadow-md w-full">
+					<div className="rounded-lg border shadow-md md:shadow-xl w-full">
 						{CommandContent}
 					</div>
 				</>
