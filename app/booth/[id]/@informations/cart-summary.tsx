@@ -12,12 +12,6 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Plus, Minus, X, Trash } from "lucide-react";
 import useSWR, { mutate } from "swr";
-import {
-	AddCart,
-	DeleteCart,
-	GetCart,
-	AddOrUpdateCart,
-} from "../../../api/auth/booth/buttons/actions";
 import CountUp from "react-countup";
 import { AnimatedCounter } from "react-animated-counter";
 import FlipNumbers from "react-flip-numbers";
@@ -47,11 +41,13 @@ interface GroupedItems {
 
 export default function CartSummary({ boothId }: CartSummaryProps) {
 	const { data: items, mutate } = useSWR<Item[]>(
+		/*
 		boothId ? ["getCart", boothId] : null,
-		() => GetCart(boothId),
+		() => GetCart(boothId),*/
 	);
 
 	const handleQuantityChange = async (item: Item, isIncrease: boolean) => {
+		/*
 		const newQuantity = isIncrease ? item.quantity + 1 : item.quantity - 1;
 		const updatedItem = { ...item, quantity: newQuantity };
 
@@ -89,7 +85,7 @@ export default function CartSummary({ boothId }: CartSummaryProps) {
 				revalidate: false,
 			},
 		);
-	};
+	*/};
 
 	const groupedItems = useMemo<GroupedItems>(
 		() =>

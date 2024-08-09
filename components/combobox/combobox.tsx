@@ -32,7 +32,7 @@ import { Label } from "../ui/label";
 import { Badge } from "../ui/badge";
 import { ScrollArea } from "../ui/scroll-area";
 import { hangulIncludes, acronymizeHangul, extractHangul } from "es-hangul";
-import { useSearchQuery } from "@/app/api/write/search/search";
+import { useAutoComplete } from "@/app/api/write/search/search";
 import SubForm from "@/app/write/add/forms/subform";
 import {
 	DropdownMenu,
@@ -384,7 +384,7 @@ function ComboBoxContent({
 		};
 	}, [debouncedSetQuery]);
 
-	const { data, isLoading } = useSearchQuery(type || "", query);
+	const { data, isLoading } = useAutoComplete(type || "", query, true);
 
 	const groupedData =
 		data && group

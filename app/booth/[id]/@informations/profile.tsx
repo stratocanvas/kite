@@ -11,7 +11,6 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { BoothMenu, BoothMenu2 } from "../buttons/booth-menu";
 import { Suspense, useMemo, useRef, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { ImageOff } from "lucide-react";
@@ -205,7 +204,6 @@ export default function BoothProfile({
 						</div>
 					</div>
 					<div className="flex items-center">
-						<BoothMenu2 data={data} />
 					</div>
 				</div>
 			</div>

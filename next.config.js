@@ -21,6 +21,7 @@ module.exports = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  trailingSlash: false,
   images: {
     remotePatterns: [
       {
