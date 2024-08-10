@@ -16,7 +16,7 @@ export default function Footer() {
 
                         </CardTitle>
                         <CardDescription className="flex gap-4 items-center">
-                            <Link href="/privacypolicy.md">개인정보처리방침</Link>
+                            <Link href="/privacypolicy">개인정보처리방침</Link>
                             <Link href="mailto:admin@kitebooth.com"><Mail /></Link>
                             <Link href="https://twitter.com/kitebooth"><Twitter /></Link>
                         </CardDescription>
