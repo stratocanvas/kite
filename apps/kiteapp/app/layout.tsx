@@ -9,6 +9,7 @@ import Footer from "@/app/footer";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { GoogleTagManager } from "@next/third-parties/google";
 import Link from "next/link";
+import ConsoleWarning from "@/components/consoleWarning";
 
 const Pretendard = localFont({
 	src: "./fonts/PretendardVariable.woff2",
@@ -93,7 +94,7 @@ export default function RootLayout({
 						<UserStateProvider>
 							<TopMenuDesktop />
 							<main className="flex flex-col min-h-screen">{children}</main>
-
+							<ConsoleWarning />
 							<Toaster />
 							<footer className="footer">
 								<Footer />
