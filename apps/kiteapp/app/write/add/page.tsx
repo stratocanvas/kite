@@ -448,7 +448,7 @@ export default function BoothForm({ data: initialData }: { data: FormData }) {
 							<Save className="mr-2 h-4 w-4" /> 임시 저장
 						</Button>
 						<Button type="button" size="sm">
-							<Check className="mr-2 h-4 w-4" /> 등록
+							<Check className="mr-2 h-4 w-4" /> 제출
 						</Button>
 					</div>
 				</CardHeader>

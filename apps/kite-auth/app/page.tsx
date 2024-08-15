@@ -2,15 +2,14 @@ import Image from "next/image";
 import {
 	Card,
 	CardTitle,
-	CardContent,
-	CardFooter,
 	CardHeader,
 	CardDescription,
+	CardContent,
+	CardFooter,
 } from "@/components/ui/card";
-import Link from "next/link";
 import KiteLogo from "@/public/kite.svg";
-import SignInPage, { GoogleSignIn, TwitterSignIn } from "@/components/sign-in";
-import UserInfo from "@/components/userinfo";
+import { SignIn } from "@/components/signin";
+import Link from "next/link";
 export default async function Home() {
 	return (
 		<>
@@ -28,7 +27,25 @@ export default async function Home() {
 					</div>
 					<CardDescription>회원가입도 여기서 할 수 있어요. </CardDescription>
 				</CardHeader>
-				<SignInPage />
+				<CardContent className="flex flex-row gap-2">
+					<div className="w-full">
+						<SignIn provider="google" />
+					</div>
+					<div className="w-full">
+						<SignIn provider="twitter" />
+					</div>
+				</CardContent>
+				<CardFooter className="flex flex-col gap-2">
+					<CardDescription className="text-start">
+						계속하면{" "}
+						<Link
+							href={`https://${process.env.NEXT_PUBLIC_BASE_URL}/privacypolicy`}
+						>
+							<span className="underline">개인정보 처리방침</span>
+						</Link>
+						에 동의하는 것으로 간주됩니다.
+					</CardDescription>
+				</CardFooter>
 			</Card>
 		</>
 	);
