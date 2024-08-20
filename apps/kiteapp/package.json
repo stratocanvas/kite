@@ -14,6 +14,7 @@
 		"@auth/mongodb-adapter": "^3.4.2",
 		"@aws-sdk/client-lambda": "^3.624.0",
 		"@aws-sdk/client-s3": "^3.627.0",
+		"@aws-sdk/client-sqs": "^3.632.0",
 		"@aws-sdk/s3-presigned-post": "^3.627.0",
 		"@aws-sdk/s3-request-presigner": "^3.627.0",
 		"@hirohe/react-watermark": "^0.5.0",
@@ -45,6 +46,7 @@
 		"@radix-ui/react-toolbar": "^1.1.0",
 		"@radix-ui/react-tooltip": "^1.1.2",
 		"@radix-ui/themes": "^2.0.3",
+		"@repo/ui": "workspace:*",
 		"@supabase/auth-helpers-nextjs": "^0.9.0",
 		"@supabase/auth-ui-react": "^0.4.7",
 		"@supabase/auth-ui-shared": "^0.1.8",
@@ -66,12 +68,6 @@
 		"@tiptap/starter-kit": "^2.5.9",
 		"@types/gtag.js": "^0.0.19",
 		"@types/topojson-client": "^3.1.4",
-		"@udecode/cn": "^31.0.0",
-		"@udecode/plate-combobox": "^31.0.0",
-		"@udecode/plate-common": "^31.3.2",
-		"@udecode/plate-floating": "^31.0.0",
-		"@udecode/plate-normalizers": "^31.0.0",
-		"@udecode/plate-resizable": "^31.0.0",
 		"@vercel/analytics": "^1.3.1",
 		"@vercel/og": "^0.6.2",
 		"@vercel/speed-insights": "^1.0.12",
@@ -136,9 +132,7 @@
 		"validator": "^13.12.0",
 		"vaul": "^0.9.1",
 		"zod": "^3.23.8",
-		"zustand": "^4.5.4",
-    "@repo/ui": "workspace:*"
-
+		"zustand": "^4.5.4"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.6.1",
@@ -162,7 +156,6 @@
 		"postcss": "^8.4.41",
 		"prisma": "^5.18.0",
 		"tailwindcss": "^3.4.9",
-		"turbo": "^2.0.12",
 		"typescript": "^5.5.4",
 		"use-resize-observer": "^9.1.0"
 	}
