@@ -37,6 +37,7 @@ import { useActiveTabStore } from "@/store/addform";
 import { GetUploadURL } from "@/app/api/write/submit/s3";
 import { SubmitForm } from "@/app/api/write/submit/submit";
 import axios from "axios";
+import { sendMessageToSQS } from "@/app/api/write/submit/sqs";
 
 //폼 스키마
 const contentSchema: z.ZodType<unknown> = z.lazy(() =>
@@ -411,10 +412,9 @@ export default function BoothForm({ data: initialData }: { data: FormData }) {
 				product: data.product && (await processProductOptions(data.product)),
 			};
 
-			console.log("Processed data:", processedData);
 
 			const result = await SubmitForm(processedData, "main");
-			console.log("Form submission result:", result);
+
 			return result;
 		} catch (error) {
 			console.error("Error processing and submitting form:", error);

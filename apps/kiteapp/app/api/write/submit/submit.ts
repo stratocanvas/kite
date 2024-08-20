@@ -2,9 +2,6 @@
 import clientPromise from "@/lib/database";
 import { ObjectId } from "mongodb";
 import { z } from "zod";
-import DOMPurify from "dompurify";
-import type { Node } from "@tiptap/core";
-import { JSDOM } from "jsdom";
 
 const subFormSchema = z.object({
 	name: z.string().min(1),
@@ -216,19 +213,12 @@ async function ValidateForm(
 	data: FormData,
 	type: keyof typeof schemaMap,
 ): Promise<boolean> {
-	console.log("ValidateForm called with type:", type);
-	console.log("FormData received:", data);
-
 	const schema = schemaMap[type];
 	if (!schema) {
 		console.error(`Invalid form type: ${type}`);
 		throw new Error(`Invalid form type: ${type}`);
 	}
-	console.log("Schema found:", schema);
-
 	const result = schema.safeParse(data);
-	console.log("Validation result:", result);
-	console.log("Validation errors:", result.error);
 	return result.success;
 }
 
@@ -288,7 +278,6 @@ export async function SubmitForm(data: FormData, type: string) {
 			if (insertedData?.genre?._id) {
 				insertedData.genre._id = insertedData.genre._id.toString();
 			}
-			console.log(insertedData);
 			return insertedData;
 		}
 	} finally {

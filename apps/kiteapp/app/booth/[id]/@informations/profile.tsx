@@ -15,6 +15,9 @@ import { Suspense, useMemo, useRef, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { ImageOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useScrollToSection } from "@/components/smooth-scroll";
+import { motion } from "framer-motion";
+import AnimatedButton from "@/components/animated-button";
 
 export default function BoothProfile({
 	data,
@@ -61,6 +64,13 @@ export default function BoothProfile({
 		return sortedLocations[0];
 	}, [sortedLocations]);
 
+	const scrollToElement = useScrollToSection();
+
+	const handleButtonClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+		e.preventDefault();
+		scrollToElement("goods");
+	};
+
 	return (
 		<>
 			<Card
@@ -69,9 +79,7 @@ export default function BoothProfile({
 				ref={buttonRef}
 			>
 				<div className="relative">
-					<Suspense>
-						{/*<BoothMenu data={data} />*/}
-					</Suspense>
+					<Suspense>{/*<BoothMenu data={data} />*/}</Suspense>
 					<AspectRatio
 						ratio={3 / 4}
 						className="relative rounded-lg xl:h-[94vh]"
@@ -139,6 +147,7 @@ export default function BoothProfile({
 									background: `linear-gradient(to top, ${color} 15%, transparent)`,
 									mask: "linear-gradient(to top, white, white, transparent)",
 									backdropFilter: "blur(12px)",
+									WebkitBackdropFilter: "blur(12px)",
 								}}
 							/>
 							<div className="xl:pb-0 md:pb-10 absolute bottom-4 rounded-b-lg w-full flex flex-col items-center md:items-start">
@@ -161,16 +170,15 @@ export default function BoothProfile({
 								</CardHeader>
 								<CardFooter className="pl-12 pr-12 md:pr-4 flex flex-col items-center md:items-start gap-4 w-full md:w-96 xl:rounded-b-lg">
 									{data?.product.length > 0 && (
-										<Button
+										<AnimatedButton
 											asChild
-											type="button"
 											size="lg"
 											className="text-base w-full bg-white hover:bg-gray-100 text-black font-bold"
 										>
-											<Link href={`/booth/${data?._id}#goods`}>
+											<Link href="#goods" onClick={handleButtonClick}>
 												굿즈 둘러보기
 											</Link>
-										</Button>
+										</AnimatedButton>
 									)}
 									<CardDescription className="text-white text-sm md:text-md md:text-left">
 										{data.genre
@@ -203,8 +211,7 @@ export default function BoothProfile({
 								  })}
 						</div>
 					</div>
-					<div className="flex items-center">
-					</div>
+					<div className="flex items-center" />
 				</div>
 			</div>
 		</>
