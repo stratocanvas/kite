@@ -29,16 +29,17 @@ interface BoothDocument {
 
 function parseQueryInput(queryInput: string): InputItem[] {
 	try {
-		const decodedBase64 = Buffer.from(queryInput, "base64").toString("utf-8");
+		// Base64 디코딩
+		const decodedBase64 = atob(queryInput);
 
 		// URL 디코딩
 		const decodedInput = decodeURIComponent(decodedBase64);
 
 		// JSON 파싱
 		const parsed = JSON.parse(decodedInput);
+
 		return Array.isArray(parsed) ? parsed : [parsed];
 	} catch (error) {
-		console.error("Error parsing query input:", error);
 		return [];
 	}
 }
@@ -98,7 +99,7 @@ export const GetBoothList = cache(
 
 			if (isEmptyOrSpecificCase(parsedInput)) {
 				result = await collection
-					.find({})
+					.find({ status: "open" })
 					.project({
 						_id: 1,
 						name: 1,

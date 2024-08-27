@@ -50,6 +50,13 @@ function generateAtlasSearchQuery(input: InputItem[]): object[] {
 				},
 			});
 		}
+//TODO: Atlas Search 인덱스에 status 추가
+		filters.push({
+			text: {
+				path: "status",
+				query: "open",
+			},
+		});
 
 		if (hasCategory && hasCharacter) {
 			must.push({
