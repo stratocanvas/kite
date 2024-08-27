@@ -59,38 +59,47 @@ const Block = React.memo(({ type, attrs, content, marks }: BlockProps) => {
 						);
 					case "horizontalRule":
 						return <Separator key={nanoid()} className="my-2" />;
-					case "image":
+					case "image": {
+						const divisionMatch = src.match(/-d\((\d+)-(\d+)\)/);
+						const totalDivisions = divisionMatch
+							? Number.parseInt(divisionMatch[2])
+							: 1;
+						const imageHeight = totalDivisions > 1 ? 8192 : parsedHeight;
+						const images = [];
+
+						for (let i = 1; i <= totalDivisions; i++) {
+							const dividedSrc = src.replace(
+								/-d\(\d+-\d+\)/,
+								`-d(${i}-${totalDivisions})`,
+							);
+							const isFirst = i === 1;
+							const isLast = i === totalDivisions;
+							images.push(
+								<Image
+									key={nanoid()}
+									className={`
+										${isFirst ? "rounded-t-md" : ""}
+										${isLast ? "rounded-b-md" : ""}
+									`.trim()}
+									loading="lazy"
+									src={dividedSrc}
+									alt={`info-image-part-${i}`}
+									width={parsedWidth}
+									height={imageHeight}
+									sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+								/>,
+							);
+						}
+
 						return (
 							<div
 								key={nanoid()}
-								className="no-right-click relative rounded-md flex gap-2 w-full h-auto my-2 lg:my-4 overflow-hidden"
-								style={{
-									backgroundColor: `#${
-										attrs?.src.split("-c(")[1]?.split(")")[0] || ""
-									}`,
-								}}
+								className="relative rounded-md flex flex-col gap-0 w-full h-auto my-2 lg:my-4 overflow-hidden dark:bg-zinc-900 bg-zinc-100"
 							>
-								<Image
-									className="rounded-md"
-									loading="lazy"
-									src={attrs?.src || ""}
-									alt="info-image"
-									width={width}
-									height={height}
-									sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-									style={{
-										userSelect: "none",
-										WebkitUserSelect: "none",
-										WebkitTouchCallout: "none",
-										WebkitUserDrag: "none",
-										KhtmlUserSelect: "none",
-										MozUserSelect: "none",
-										OUserSelect: "none",
-										userDrag: "none",
-									}}
-								/>
+								{images}
 							</div>
 						);
+					}
 					default:
 						return content ? (
 							<Block
