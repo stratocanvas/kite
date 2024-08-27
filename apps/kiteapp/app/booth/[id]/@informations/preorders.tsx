@@ -15,7 +15,6 @@ import {
 	CarouselNext,
 	CarouselPrevious,
 } from "@/components/ui/carousel";
-import { createClient } from "@/utils/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
