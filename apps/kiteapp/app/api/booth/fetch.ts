@@ -3,6 +3,7 @@ import { cache } from "react";
 import type { Collection, MongoClient } from "mongodb";
 import { ObjectId } from "mongodb";
 import generateAtlasSearchQuery from "./generatequery";
+import { Buffer } from "node:buffer";
 
 interface BaseInfo {
 	_id: string;
@@ -26,11 +27,14 @@ interface BoothDocument {
 	// Add other fields as needed
 }
 
-
-
 function parseQueryInput(queryInput: string): InputItem[] {
 	try {
-		const decodedInput = decodeURIComponent(queryInput);
+		const decodedBase64 = Buffer.from(queryInput, "base64").toString("utf-8");
+
+		// URL 디코딩
+		const decodedInput = decodeURIComponent(decodedBase64);
+
+		// JSON 파싱
 		const parsed = JSON.parse(decodedInput);
 		return Array.isArray(parsed) ? parsed : [parsed];
 	} catch (error) {
@@ -80,14 +84,14 @@ const convertIdToString = (item: any): any => {
 };
 
 export const GetBoothList = cache(
-	async (searchParams: URLSearchParams): Promise<BoothDocument[] | null> => {
+	async (query: string): Promise<BoothDocument[] | null> => {
 		let client: MongoClient | null = null;
 		try {
 			client = await clientPromise;
 			const database = client.db("kiteapp");
 			const collection: Collection<BoothDocument> =
 				database.collection("booth");
-			const queryInput = searchParams.get("q");
+			const queryInput = query;
 			const parsedInput = parseQueryInput(queryInput || "");
 
 			let result: BoothDocument[];

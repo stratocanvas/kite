@@ -5,21 +5,8 @@ import SearchBar from "@/components/search/search";
 import QueryProvider from "@/components/search/queryprovider";
 import React from "react";
 async function getBoothData(searchParams: { q?: string } = {}) {
-	const urlSearchParams = new URLSearchParams();
-
-	if (searchParams.q) {
-		try {
-			// Ensure searchParams.q is a valid JSON string
-			const parsedQ = JSON.parse(searchParams.q);
-			urlSearchParams.set("q", JSON.stringify(parsedQ));
-		} catch (error) {
-			console.error("Error parsing searchParams.q:", error);
-			// Don't set the "q" parameter if parsing fails
-		}
-	}
-
 	// Always call GetBoothList, even if there are no search parameters
-	const booths = await GetBoothList(urlSearchParams);
+	const booths = await GetBoothList(searchParams.q);
 	return booths || [];
 }
 

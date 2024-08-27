@@ -69,8 +69,8 @@ interface SearchValuesProps {
 }
 
 /**
- * 
- * @param minified: 미니 모드 사용여부. 미니 모드에서는 검색창을 눌러야 각종 옵션이 표시됨. 
+ *
+ * @param minified: 미니 모드 사용여부. 미니 모드에서는 검색창을 눌러야 각종 옵션이 표시됨.
  * @returns base64 검색 쿼리를 SearchParams로 전달
  */
 export default function SearchBar({ minified }: { minified?: boolean }) {
@@ -273,8 +273,8 @@ export default function SearchBar({ minified }: { minified?: boolean }) {
  * @param value 사용자의 검색어
  * @param setValue 사용자의 검색어 저장
  * @param inputRef 검색창 포커스를 위한 ref
- * @param minified 미니 모드 사용여부 
- * @returns 
+ * @param minified 미니 모드 사용여부
+ * @returns
  */
 const SearchValues = ({
 	value,
@@ -282,19 +282,18 @@ const SearchValues = ({
 	inputRef,
 	minified,
 }: SearchValuesProps) => {
-
 	/**
 	 *  주어진 id를 가진 항목을 value 배열에서 제거합니다.
-	 * */ 
+	 * */
 	const handleRemove = (id: string) => {
 		setValue(value.filter((item) => item.id !== id));
 	};
 
 	/**
-	 * chainMode: 한 검색 태그 블록 내 여러 검색어를 지정하여 AND 조건 검색을 가능하게 합니다. 
+	 * chainMode: 한 검색 태그 블록 내 여러 검색어를 지정하여 AND 조건 검색을 가능하게 합니다.
 	 * 주어진 id를 가진 항목의 chainMode 값을 토글하고, 다른 항목들의 chainMode 값을 false로 설정합니다.
-	 * @param 검색어의 id. 검색 태그 블록마다 고유의 무작위 id를 갖습니다. 
-	 */ 
+	 * @param 검색어의 id. 검색 태그 블록마다 고유의 무작위 id를 갖습니다.
+	 */
 	const handleChainMode = (id: string) => {
 		// setValue 함수를 사용하여 상태를 업데이트합니다.
 		setValue((prevValue) =>
@@ -316,7 +315,7 @@ const SearchValues = ({
 	};
 
 	/**
-	 * 한 검색 태그 블록 내 검색어 수를 반환합니다. 
+	 * 한 검색 태그 블록 내 검색어 수를 반환합니다.
 	 * @param item 검색창 항목
 	 * @returns 검색어 수
 	 */
@@ -406,7 +405,7 @@ interface SearchFiltersProps {
 /**
  * 요일, 구매 옵션 조건을 처리하고 실제 검색을 수행합니다.
  * @param setOpen 검색 수행시 검색창을 닫기 위한 부분입니다.
- * @returns 
+ * @returns
  */
 const SearchFilters = ({ setOpen }: SearchFiltersProps) => {
 	const router = useRouter();
@@ -476,8 +475,8 @@ const SearchFilters = ({ setOpen }: SearchFiltersProps) => {
 	const handleSearch = useCallback(() => {
 		/**
 		 * 검색어 항목을 제거합니다.
-		 * @param obj 
-		 * @returns 
+		 * @param obj
+		 * @returns
 		 */
 		const removeFields = (obj: Record<string, any>) => {
 			const newObj = { ...obj };
@@ -506,10 +505,13 @@ const SearchFilters = ({ setOpen }: SearchFiltersProps) => {
 			(Array.isArray(queryInput) ? queryInput.length > 0 : true)
 		) {
 			const transformedQueryInput = transformQueryInput(queryInput);
-			const queryString = encodeURIComponent(
-				JSON.stringify(transformedQueryInput),
-			);
-			router.push(`/booth?q=${queryString}`);
+			const jsonString = JSON.stringify(transformedQueryInput);
+			const base64String = btoa(
+				encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, (match, p1) =>
+				  String.fromCharCode(Number.parseInt(p1, 16))
+				)
+			  );
+			router.push(`/booth?q=${base64String}`);
 		} else {
 			router.push("/booth");
 		}
@@ -585,7 +587,7 @@ interface AutoCompleteResultsProps {
 
 /**
  * 검색어 자동완성 결과입니다.
- * @param data 사용자의 입력값에 따른 자동완성 결과 원본입니다. 
+ * @param data 사용자의 입력값에 따른 자동완성 결과 원본입니다.
  * @param setValue 사용자가 최종적으로 검색할 항목
  * @param setInput 사용자의 입력값
  * @returns 자동완성 항목들
@@ -613,7 +615,7 @@ const AutoCompleteResults = ({
 	 * 자동완성 목록 내 항목을 선택했을때 호출되는 함수입니다.
 	 * chainMode가 켜진 경우 해당 태그 블록 내에, 그렇지 않은 경우 새로운 태그 블록을 추가합니다.
 	 * 또한, chainMode가 켜진 경우 한 태그 블록 내에 동일한 type이 이미 존재하는 경우 새로운 항목으로 대체합니다.
-	 * @param type 검색어 종류. 
+	 * @param type 검색어 종류.
 	 * @param item 검색어 항목. 태그 블록에 실제로 표시되는 내용입니다.
 	 */
 	const handleSelect = (type: string, item: AutoCompleteResult) => {
@@ -659,7 +661,7 @@ const AutoCompleteResults = ({
 /**
  * 검색어 자동완성 결과 내 항목입니다.
  * @param item 검색어 항목. 검색결과 항목에 실제로 표시되는 내용입니다.
- * @param type 검색어 종류. 검색어 종류에 따라 레이아웃이 결정됩니다. 
+ * @param type 검색어 종류. 검색어 종류에 따라 레이아웃이 결정됩니다.
  * @returns 자동완성 결과 개별 항목
  */
 const AutoCompleteResultItem = ({
