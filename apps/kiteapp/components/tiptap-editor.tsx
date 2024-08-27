@@ -9,6 +9,7 @@ import {
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
+        
 import {
 	Bold,
 	List,
@@ -24,34 +25,7 @@ import { Separator } from "@/components/ui/separator";
 import FileHandler from "@tiptap-pro/extension-file-handler";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
-import imageCompression from "browser-image-compression";
 import "./tiptap.css";
-import { ScrollArea } from "./ui/scroll-area";
-
-/*const compressImage = async (file: File): Promise<string> => {
-  const options = {
-    maxSizeMB: 1,
-    useWebWorker: true,
-    fileType: 'image/webp',
-  };
-
-  try {
-    const compressedFile = await imageCompression(file, options);
-    const reader = new FileReader();
-    reader.readAsDataURL(compressedFile);
-
-    console.log("compressed");
-    return new Promise((resolve) => {
-      reader.onload = () => {
-        resolve(reader.result as string);
-      };
-    });
-  } catch (error) {
-    console.error('Error compressing image:', error);
-    return '';
-  }
-};
-*/
 
 interface TiptapProps {
 	onChange?: (jsonData: any) => void;
@@ -68,7 +42,7 @@ const Tiptap = ({ onChange, initValue }: TiptapProps) => {
 		extensions: [
 			Placeholder.configure({
 				// Use a placeholder:
-				placeholder: '인포 이미지를 올려주세요.',
+				placeholder: "인포 이미지를 올려주세요.",
 				emptyEditorClass: "is-editor-empty",
 			}),
 			StarterKit.configure({
