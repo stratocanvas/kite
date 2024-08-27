@@ -26,49 +26,7 @@ interface BoothDocument {
 	// Add other fields as needed
 }
 
-export const GetBoothList = cache(
-	async (searchParams: URLSearchParams): Promise<BoothDocument[] | null> => {
-		let client: MongoClient | null = null;
-		try {
-			client = await clientPromise;
-			const database = client.db("kiteapp");
-			const collection: Collection<BoothDocument> =
-				database.collection("booth");
-			const queryInput = searchParams.get("q");
-			const parsedInput = parseQueryInput(queryInput || "");
 
-			let result: BoothDocument[];
-
-			if (isEmptyOrSpecificCase(parsedInput)) {
-				result = await collection
-					.find({})
-					.project({
-						_id: 1,
-						name: 1,
-						location: 1,
-						artist: 1,
-						exhibition: 1,
-						date: 1,
-						buy: 1,
-						genre: 1,
-						thumbnail: 1,
-					})
-					.limit(10)
-					.toArray();
-			} else {
-				const searchQuery = generateAtlasSearchQuery(parsedInput);
-				result = await collection
-					.aggregate<BoothDocument>(searchQuery)
-					.toArray();
-			}
-
-			return result;
-		} catch (error) {
-			console.error("Error in GetBoothList:", error);
-			return null;
-		}
-	},
-);
 
 function parseQueryInput(queryInput: string): InputItem[] {
 	try {
@@ -120,6 +78,51 @@ const convertIdToString = (item: any): any => {
 	}
 	return item;
 };
+
+export const GetBoothList = cache(
+	async (searchParams: URLSearchParams): Promise<BoothDocument[] | null> => {
+		let client: MongoClient | null = null;
+		try {
+			client = await clientPromise;
+			const database = client.db("kiteapp");
+			const collection: Collection<BoothDocument> =
+				database.collection("booth");
+			const queryInput = searchParams.get("q");
+			const parsedInput = parseQueryInput(queryInput || "");
+
+			let result: BoothDocument[];
+
+			if (isEmptyOrSpecificCase(parsedInput)) {
+				result = await collection
+					.find({})
+					.project({
+						_id: 1,
+						name: 1,
+						location: 1,
+						artist: 1,
+						exhibition: 1,
+						date: 1,
+						buy: 1,
+						genre: 1,
+						thumbnail: 1,
+					})
+					.limit(10)
+					.toArray();
+			} else {
+				const searchQuery = generateAtlasSearchQuery(parsedInput);
+				result = await collection
+					.aggregate<BoothDocument>(searchQuery)
+					.toArray();
+			}
+
+			const convertedData = convertIdToString(result);
+			return convertedData;
+		} catch (error) {
+			console.error("Error in GetBoothList:", error);
+			return null;
+		}
+	},
+);
 
 export const GetBooth = cache(async (boothId: string) => {
 	const client = await clientPromise;
