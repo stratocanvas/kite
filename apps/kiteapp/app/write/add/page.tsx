@@ -76,15 +76,7 @@ export const createFormSchema = (initialData?: Partial<FormData>) =>
 			.optional(),
 
 		//인포
-		thumbnail: z
-			.union([
-				z.instanceof(File),
-				z
-					.string()
-					.url()
-					.refine((val) => (initialData ? val.length > 0 : true)),
-			])
-			.optional(),
+		thumbnail: z.union([z.instanceof(File), z.string().url()]).optional(),
 		description: z
 			.object({
 				type: z.string().optional(),
@@ -117,17 +109,7 @@ export const createFormSchema = (initialData?: Partial<FormData>) =>
 					option: z.array(
 						z.object({
 							_id: z.string(),
-							image: z
-								.union([
-									z.instanceof(File),
-									z
-										.string()
-										.url()
-										.refine((val) => (initialData ? val.length > 0 : true), {
-											message: "URL을 입력해주세요",
-										}),
-								])
-								.optional(),
+							image: z.union([z.instanceof(File), z.string().url()]).optional(),
 							name: z.string().min(1, "굿즈 이름을 입력해주세요"),
 							price: z.number().min(0, "가격을 입력해주세요"),
 							character: z
@@ -312,13 +294,25 @@ export default function BoothForm({ data: initialData }: { data: FormData }) {
 		filename.split(".").pop() || "";
 
 	// Image upload function
-	async function uploadImage(file: File, path: string): Promise<string> {
+	function generateFileInfo(
+		file: File,
+		path: string,
+	): { filename: string; url: string } {
 		const extension = getFileExtension(file.name);
 		const filename = `${nanoid()}.${extension}`;
+		const url = generateS3Url(path, filename);
+		return { filename, url };
+	}
 
+	// Image upload function
+	async function uploadImage(
+		file: File,
+		path: string,
+		filename: string,
+	): Promise<void> {
 		try {
-			const url = await GetUploadURL(path, filename);
-			await axios.put(url, file, {
+			const uploadUrl = await GetUploadURL(path, filename);
+			await axios.put(uploadUrl, file, {
 				headers: { "Content-Type": file.type },
 				onUploadProgress: (progressEvent) => {
 					const percentCompleted = Math.round(
@@ -327,7 +321,6 @@ export default function BoothForm({ data: initialData }: { data: FormData }) {
 					console.log(`Upload progress: ${percentCompleted}%`);
 				},
 			});
-			return generateS3Url(path, filename);
 		} catch (error) {
 			console.error("Error uploading image:", error);
 			throw error;
@@ -338,63 +331,95 @@ export default function BoothForm({ data: initialData }: { data: FormData }) {
 	type TipTapItem = { type: string; attrs?: { src?: ImageField } };
 	type Product = { option?: Array<{ image?: ImageField }> };
 
-	async function processImageField(field: ImageField): Promise<string | null> {
-		if (!field) return null;
-		if (typeof field === "string") return field.trim() || null;
-		return uploadImage(field, "booth");
+	async function processImageField(
+		field: ImageField,
+		path: string,
+	): Promise<[string | null, (() => Promise<void>) | null]> {
+		if (!field) return [null, null];
+		if (typeof field === "string") return [field.trim() || null, null];
+		const { filename, url } = generateFileInfo(field, path);
+		return [url, () => uploadImage(field, path, filename)];
 	}
 
-	async function processBlobImage(src: string): Promise<string> {
+	async function processBlobImage(
+		src: string,
+		path: string,
+	): Promise<[string, () => Promise<void>]> {
 		const blob = await fetch(src).then((res) => res.blob());
 		const file = new File([blob], "image.jpg", { type: blob.type });
-		return uploadImage(file, "booth");
+		const { filename, url } = generateFileInfo(file, path);
+		return [url, () => uploadImage(file, path, filename)];
 	}
 
 	async function processTipTapContent(
 		content: TipTapItem[],
-	): Promise<TipTapItem[]> {
-		return Promise.all(
+	): Promise<[TipTapItem[], (() => Promise<void>)[]]> {
+		const uploadTasks: (() => Promise<void>)[] = [];
+		const processedContent = await Promise.all(
 			content.map(async (item) => {
-				if (item.type !== "image" || !item.attrs?.src) return item;
+				if (item.type !== "image" || !item.attrs?.src)
+					return [item, null] as const;
 
 				try {
 					const src = item.attrs.src;
+					let newSrc: string | null = null;
+					let uploadTask: (() => Promise<void>) | null = null;
+
 					if (src instanceof File) {
-						item.attrs.src = await uploadImage(src, "booth");
+						[newSrc, uploadTask] = await processImageField(src, "booth/queue");
 					} else if (typeof src === "string" && src.trim()) {
-						item.attrs.src = src.startsWith("blob:")
-							? await processBlobImage(src)
-							: src;
-					} else {
-						item.attrs.src = null;
+						if (src.startsWith("blob:")) {
+							[newSrc, uploadTask] = await processBlobImage(src, "booth/queue");
+						} else {
+							newSrc = src;
+						}
 					}
+
+					if (uploadTask) uploadTasks.push(uploadTask);
+					return [
+						{ ...item, attrs: { ...item.attrs, src: newSrc } },
+						uploadTask,
+					] as const;
 				} catch (error) {
 					console.error("Error processing image:", error);
-					item.attrs.src = null;
+					return [
+						{ ...item, attrs: { ...item.attrs, src: null } },
+						null,
+					] as const;
 				}
-
-				return item;
 			}),
 		);
+
+		return [
+			processedContent.map(([item]) => item),
+			uploadTasks.filter((task): task is () => Promise<void> => task !== null),
+		];
 	}
 
 	async function processProductOptions(
 		products: Product[],
-	): Promise<Product[]> {
-		return Promise.all(
+	): Promise<[Product[], (() => Promise<void>)[]]> {
+		const uploadTasks: (() => Promise<void>)[] = [];
+		const processedProducts = await Promise.all(
 			products.map(async (product) => {
-				if (!product.option) return product;
+				if (!product.option) return [product, []] as const;
 
 				const processedOptions = await Promise.all(
-					product.option.map(async (opt) => ({
-						...opt,
-						image: await processImageField(opt.image),
-					})),
+					product.option.map(async (opt) => {
+						const [image, uploadTask] = await processImageField(
+							opt.image,
+							"booth/queue",
+						);
+						if (uploadTask) uploadTasks.push(uploadTask);
+						return { ...opt, image };
+					}),
 				);
 
-				return { ...product, option: processedOptions };
+				return [{ ...product, option: processedOptions }, uploadTasks] as const;
 			}),
 		);
+
+		return [processedProducts.map(([product]) => product), uploadTasks.flat()];
 	}
 
 	// Main submit function
@@ -402,18 +427,49 @@ export default function BoothForm({ data: initialData }: { data: FormData }) {
 		console.log("Original data:", data);
 
 		try {
+			// 1. Convert files to URLs
+			const [thumbnailUrl, thumbnailUploadTask] = await processImageField(
+				data.thumbnail,
+				"booth/queue",
+			);
+			const [processedContent, contentUploadTasks] = data.description?.content
+				? await processTipTapContent(data.description.content)
+				: [[], []];
+			const [processedProducts, productUploadTasks] = data.product
+				? await processProductOptions(data.product)
+				: [[], []];
+
+			// Prepare processed data for submission
 			const processedData = {
 				...data,
-				thumbnail: await processImageField(data.thumbnail),
+				thumbnail: thumbnailUrl,
 				description: data.description && {
 					...data.description,
-					content: await processTipTapContent(data.description.content || []),
+					content: processedContent,
 				},
-				product: data.product && (await processProductOptions(data.product)),
+				product: processedProducts,
 			};
+			console.log(
+				"Size of processedData:",
+				JSON.stringify(processedData).length,
+				"bytes",
+			);
 
-
+			// 2. Submit form with converted URLs
 			const result = await SubmitForm(processedData, "main");
+
+			// 3. Upload images to S3 after form submission
+			const uploadTasks = [
+				...(thumbnailUploadTask ? [thumbnailUploadTask] : []),
+				...contentUploadTasks,
+				...productUploadTasks,
+			];
+
+			await Promise.all(uploadTasks.map((task) => task()));
+
+			// 4. Send message to SQS after image upload
+			console.log(result);
+			await sendMessageToSQS(JSON.stringify(result));
 
 			return result;
 		} catch (error) {
