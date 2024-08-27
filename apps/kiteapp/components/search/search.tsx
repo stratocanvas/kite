@@ -482,7 +482,7 @@ const SearchFilters = ({ setOpen }: SearchFiltersProps) => {
 		const removeFields = (obj: Record<string, any>) => {
 			const newObj = { ...obj };
 			for (const key in newObj) {
-				if (key === "name" || key === "chainMode") {
+				if (key === "chainMode") {
 					delete newObj[key];
 				} else if (typeof newObj[key] === "object" && newObj[key] !== null) {
 					newObj[key] = removeFields(newObj[key]);
