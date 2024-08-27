@@ -37,11 +37,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
 import { AutoComplete, type AutoCompleteResult } from "@/app/api/search/search";
 import useQueryStore, { type InputItem } from "@/store/searchquery";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { useMediaQuery } from "react-responsive";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
+
 const typeMapping: Record<string, string> = {
 	exhibition: "행사",
 	artist: "작가",
@@ -68,6 +68,11 @@ interface SearchValuesProps {
 	minified?: boolean;
 }
 
+/**
+ * 
+ * @param minified: 미니 모드 사용여부. 미니 모드에서는 검색창을 눌러야 각종 옵션이 표시됨. 
+ * @returns base64 검색 쿼리를 SearchParams로 전달
+ */
 export default function SearchBar({ minified }: { minified?: boolean }) {
 	//자동완성에 사용되는 쿼리입니다. 서버로 전송되는 내용입니다.
 	const [search, setSearch] = React.useState("");
@@ -85,6 +90,7 @@ export default function SearchBar({ minified }: { minified?: boolean }) {
 	const { data } = AutoComplete(search);
 
 	const [open, setOpen] = React.useState(false);
+
 	//input에 debounce를 적용하여 search로 전달합니다.
 	const debouncedSetSearch = React.useCallback(debounce(setSearch, 300), []);
 
@@ -96,6 +102,10 @@ export default function SearchBar({ minified }: { minified?: boolean }) {
 	}, [debouncedSetSearch]);
 
 	const isDesktop = useMediaQuery({ query: "(min-width: 768px)" });
+
+	/**
+	 * 부스 페이지에서 검색창을 여는 버튼
+	 */
 	const TriggerButton = (
 		<Button
 			variant="outline"
@@ -118,8 +128,8 @@ export default function SearchBar({ minified }: { minified?: boolean }) {
 									variant="secondary"
 									className={`rounded-md ${
 										item.date === 1
-											? "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-500 hover:bg-red-100 hover:dark:bg-red-900"
-											: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-500 hover:bg-blue-100 hover:dark:bg-blue-900"
+											? "bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-500 hover:bg-red-100 hover:dark:bg-red-900"
+											: "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-500 hover:bg-blue-100 hover:dark:bg-blue-900"
 									}`}
 								>
 									<Label className="text-sm flex items-center">
@@ -149,6 +159,9 @@ export default function SearchBar({ minified }: { minified?: boolean }) {
 		</Button>
 	);
 
+	/**
+	 * 부스 페이지 검색창에 표시될 내용
+	 */
 	const CommandContent = (
 		<CommandPrimitive shouldFilter={false}>
 			<div className="flex flex-col w-full p-3 gap-4">
@@ -255,18 +268,33 @@ export default function SearchBar({ minified }: { minified?: boolean }) {
 	);
 }
 
+/**
+ * 사용자가 검색할 값을 미리보기로 표시합니다.
+ * @param value 사용자의 검색어
+ * @param setValue 사용자의 검색어 저장
+ * @param inputRef 검색창 포커스를 위한 ref
+ * @param minified 미니 모드 사용여부 
+ * @returns 
+ */
 const SearchValues = ({
 	value,
 	setValue,
 	inputRef,
 	minified,
 }: SearchValuesProps) => {
-	// 주어진 id를 가진 항목을 value 배열에서 제거합니다.
+
+	/**
+	 *  주어진 id를 가진 항목을 value 배열에서 제거합니다.
+	 * */ 
 	const handleRemove = (id: string) => {
 		setValue(value.filter((item) => item.id !== id));
 	};
 
-	// 주어진 id를 가진 항목의 chainMode 값을 토글하고, 다른 항목들의 chainMode 값을 false로 설정합니다.
+	/**
+	 * chainMode: 한 검색 태그 블록 내 여러 검색어를 지정하여 AND 조건 검색을 가능하게 합니다. 
+	 * 주어진 id를 가진 항목의 chainMode 값을 토글하고, 다른 항목들의 chainMode 값을 false로 설정합니다.
+	 * @param 검색어의 id. 검색 태그 블록마다 고유의 무작위 id를 갖습니다. 
+	 */ 
 	const handleChainMode = (id: string) => {
 		// setValue 함수를 사용하여 상태를 업데이트합니다.
 		setValue((prevValue) =>
@@ -287,7 +315,11 @@ const SearchValues = ({
 		}
 	};
 
-	// 주어진 항목에서 id와 chainMode를 제외한 속성의 개수를 반환합니다.
+	/**
+	 * 한 검색 태그 블록 내 검색어 수를 반환합니다. 
+	 * @param item 검색창 항목
+	 * @returns 검색어 수
+	 */
 	const getItemCount = (item: SearchValueItem) => {
 		return Object.keys(item).filter(
 			(key) => key !== "id" && key !== "chainMode",
@@ -371,6 +403,11 @@ interface SearchFiltersProps {
 	setOpen?: (open: boolean) => void;
 }
 
+/**
+ * 요일, 구매 옵션 조건을 처리하고 실제 검색을 수행합니다.
+ * @param setOpen 검색 수행시 검색창을 닫기 위한 부분입니다.
+ * @returns 
+ */
 const SearchFilters = ({ setOpen }: SearchFiltersProps) => {
 	const router = useRouter();
 	const { queryInput, setQueryInput } = useQueryStore();
@@ -410,7 +447,9 @@ const SearchFilters = ({ setOpen }: SearchFiltersProps) => {
 		},
 		[setQueryInput],
 	);
-
+	/**
+	 * 요일 조건을 처리합니다.
+	 */
 	const handleDateChange = useCallback(() => {
 		const newDate =
 			date === Days.All
@@ -421,6 +460,9 @@ const SearchFilters = ({ setOpen }: SearchFiltersProps) => {
 		updateQueryInput(newDate, buy);
 	}, [date, buy, updateQueryInput]);
 
+	/**
+	 * 구매 옵션 조건을 처리합니다.
+	 */
 	const handleBuyOptionsChange = useCallback(
 		(value: string[]) => {
 			updateQueryInput(date, value);
@@ -428,7 +470,15 @@ const SearchFilters = ({ setOpen }: SearchFiltersProps) => {
 		[date, updateQueryInput],
 	);
 
+	/**
+	 * 검색을 수행합니다.
+	 */
 	const handleSearch = useCallback(() => {
+		/**
+		 * 검색어 항목을 제거합니다.
+		 * @param obj 
+		 * @returns 
+		 */
 		const removeFields = (obj: Record<string, any>) => {
 			const newObj = { ...obj };
 			for (const key in newObj) {
@@ -441,6 +491,11 @@ const SearchFilters = ({ setOpen }: SearchFiltersProps) => {
 			return newObj;
 		};
 
+		/**
+		 * 사용자의 검색 쿼리를 searchParams로 변환하여 실제 검색이 이루어지게 합니다.
+		 * @param 검색어
+		 * @returns searchParams
+		 */
 		const transformQueryInput = (input: InputItem | InputItem[]) => {
 			const inputArray = Array.isArray(input) ? input : [input];
 			return inputArray.map((item) => removeFields(item));
@@ -482,8 +537,8 @@ const SearchFilters = ({ setOpen }: SearchFiltersProps) => {
 							date === Days.All
 								? "text-muted-foreground"
 								: date === Days.Saturday
-								  ? "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-500 hover:bg-blue-50 hover:dark:bg-blue-950"
-								  : "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-500 hover:bg-red-50 hover:dark:bg-red-950"
+								  ? "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-500 hover:bg-blue-100 hover:dark:bg-blue-900"
+								  : "bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-500 hover:bg-red-100 hover:dark:bg-red-900"
 						}`}
 					>
 						{date === Days.All
@@ -528,6 +583,13 @@ interface AutoCompleteResultsProps {
 	setInput: React.Dispatch<React.SetStateAction<string>>;
 }
 
+/**
+ * 검색어 자동완성 결과입니다.
+ * @param data 사용자의 입력값에 따른 자동완성 결과 원본입니다. 
+ * @param setValue 사용자가 최종적으로 검색할 항목
+ * @param setInput 사용자의 입력값
+ * @returns 자동완성 항목들
+ */
 const AutoCompleteResults = ({
 	data,
 	setValue,
@@ -547,7 +609,13 @@ const AutoCompleteResults = ({
 		{} as Record<string, AutoCompleteResult[]>,
 	);
 
-	// 항목을 선택했을 때 호출되는 함수입니다.
+	/**
+	 * 자동완성 목록 내 항목을 선택했을때 호출되는 함수입니다.
+	 * chainMode가 켜진 경우 해당 태그 블록 내에, 그렇지 않은 경우 새로운 태그 블록을 추가합니다.
+	 * 또한, chainMode가 켜진 경우 한 태그 블록 내에 동일한 type이 이미 존재하는 경우 새로운 항목으로 대체합니다.
+	 * @param type 검색어 종류. 
+	 * @param item 검색어 항목. 태그 블록에 실제로 표시되는 내용입니다.
+	 */
 	const handleSelect = (type: string, item: AutoCompleteResult) => {
 		setValue((previous) => {
 			const chainModeItem = previous.find((prevItem) => prevItem.chainMode);
@@ -588,6 +656,12 @@ const AutoCompleteResults = ({
 	);
 };
 
+/**
+ * 검색어 자동완성 결과 내 항목입니다.
+ * @param item 검색어 항목. 검색결과 항목에 실제로 표시되는 내용입니다.
+ * @param type 검색어 종류. 검색어 종류에 따라 레이아웃이 결정됩니다. 
+ * @returns 자동완성 결과 개별 항목
+ */
 const AutoCompleteResultItem = ({
 	item,
 	type,
