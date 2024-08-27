@@ -10,6 +10,8 @@ export default {
 			authorization: {
 				params: {
 					scope: "openid profile",
+					access_type: "offline",
+					prompt: "consent",
 				},
 			},
 		}),
@@ -23,26 +25,30 @@ export default {
 	],
 	cookies: {
 		sessionToken: {
-			name: `${isProduction ? "__Secure-" : ""}next-auth.session-token`,
+			name: `${isProduction ? "__Secure-" : ""}authjs.session-token`,
 			options: {
 				httpOnly: true,
 				sameSite: "lax",
 				path: "/",
 				secure: isProduction,
-				domain: isProduction ? `.${process.env.NEXT_PUBLIC_BASE_URL}` : "localhost",
+				domain: isProduction
+					? `.${process.env.NEXT_PUBLIC_BASE_URL}`
+					: "localhost",
 			},
 		},
 		callbackUrl: {
-			name: `${isProduction ? "__Secure-" : ""}next-auth.callback-url`,
+			name: `${isProduction ? "__Secure-" : ""}authjs.callback-url`,
 			options: {
 				sameSite: "lax",
 				path: "/",
 				secure: isProduction,
-				domain: isProduction ? `.${process.env.NEXT_PUBLIC_BASE_URL}` : "localhost",
+				domain: isProduction
+					? `.${process.env.NEXT_PUBLIC_BASE_URL}`
+					: "localhost",
 			},
 		},
 		csrfToken: {
-			name: "__Host-next-auth.csrf-token",
+			name: "__Host-authjs.csrf-token",
 			options: {
 				httpOnly: true,
 				sameSite: "lax",
