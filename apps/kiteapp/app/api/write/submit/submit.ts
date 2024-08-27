@@ -280,6 +280,22 @@ export async function SubmitForm(data: FormData, type: string) {
 			}
 			return insertedData;
 		}
-	} finally {
+		const thumbnailUrl = convertedData.thumbnail;
+		const descriptionImages = convertedData.description.content
+			.filter((item) => item.type === "image")
+			.map((item) => item.attrs.src);
+		const productImages = convertedData.product.flatMap((product) =>
+			product.option.map((option) => option.image),
+		);
+		return {
+			_id: convertedData._id,
+			images: {
+				thumbnail: thumbnailUrl,
+				description: descriptionImages,
+				product: productImages,
+			},
+		};
+	} catch {
+		throw new Error();
 	}
 }
