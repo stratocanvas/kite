@@ -160,9 +160,10 @@ export default function BoothProfile({
 									</CardTitle>
 									<CardDescription className="text-white text-sm md:text-md">
 										{locationDisplay} ·{" "}
-										{Array.isArray(data?.date) && data?.date.length === 2
+										{Array.isArray(data?.date.day) &&
+										data?.date.day.length === 2
 											? "양일"
-											: new Date(data?.date).toLocaleDateString("ko-KR", {
+											: new Date(data?.date.day).toLocaleDateString("ko-KR", {
 													weekday: "long",
 													timeZone: "Asia/Seoul",
 											  })}
@@ -203,9 +204,9 @@ export default function BoothProfile({
 						<div className="font-bold">{data.name}</div>
 						<div className="text-sm text-muted-foreground">
 							{locationDisplay} ·{" "}
-							{Array.isArray(data?.date) && data?.date.length === 2
+							{Array.isArray(data?.date.day) && data?.date.day.length === 2
 								? "양일"
-								: new Date(data?.date).toLocaleDateString("ko-KR", {
+								: new Date(data?.date.day).toLocaleDateString("ko-KR", {
 										weekday: "long",
 										timeZone: "Asia/Seoul",
 								  })}
