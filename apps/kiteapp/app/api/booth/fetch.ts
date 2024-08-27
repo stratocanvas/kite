@@ -30,9 +30,7 @@ export const GetBoothList = cache(
 	async (searchParams: URLSearchParams): Promise<BoothDocument[] | null> => {
 		let client: MongoClient | null = null;
 		try {
-			const connectStart = Date.now();
 			client = await clientPromise;
-			const connectEnd = Date.now();
 			const database = client.db("kiteapp");
 			const collection: Collection<BoothDocument> =
 				database.collection("booth");
@@ -42,7 +40,6 @@ export const GetBoothList = cache(
 			let result: BoothDocument[];
 
 			if (isEmptyOrSpecificCase(parsedInput)) {
-				const emptyStart = Date.now();
 				result = await collection
 					.find({})
 					.project({
@@ -58,25 +55,12 @@ export const GetBoothList = cache(
 					})
 					.limit(10)
 					.toArray();
-				const emptyEnd = Date.now();
-				console.log("Empty query time:", emptyEnd - emptyStart);
 			} else {
-				const generateQueryStart = Date.now();
 				const searchQuery = generateAtlasSearchQuery(parsedInput);
-				const generateQueryEnd = Date.now();
-				const queryStart = Date.now();
 				result = await collection
 					.aggregate<BoothDocument>(searchQuery)
 					.toArray();
-				const queryEnd = Date.now();
-				console.log(
-					"Generate query time:",
-					generateQueryEnd - generateQueryStart,
-				);
-				console.log("Query time:", queryEnd - queryStart);
 			}
-
-			console.log("Connect time:", connectEnd - connectStart);
 
 			return result;
 		} catch (error) {
@@ -108,7 +92,6 @@ function isEmptyOrSpecificCase(input: InputItem[]): boolean {
 	}
 	return false;
 }
-
 
 const convertIdToString = (item: any): any => {
 	if (item instanceof ObjectId) {
