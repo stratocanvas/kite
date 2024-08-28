@@ -1,4 +1,4 @@
-import { MongoClient, type MongoClientOptions } from "mongodb";
+import { MongoClient } from "mongodb";
 
 const uri: string = process.env.MONGODB_URI || "";
 
