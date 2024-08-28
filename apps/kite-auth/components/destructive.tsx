@@ -34,18 +34,29 @@ import { Input } from "./ui/input";
 import { LogOut, UserRoundX } from "lucide-react";
 import { toast } from "sonner";
 
-export function Unlink({ id, provider }: { id: string; provider: string }) {
+export function Unlink({
+	id,
+	provider,
+	providerId,
+}: { id: string; provider: string; providerId: string }) {
 	const router = useRouter();
-	const { update } = useSession();
 	const unlink = async () => {
-		const res = await unlinkProfile(id, provider);
+		const res = await unlinkProfile(id, provider, providerId);
 		if (res) {
-			await update({ user: { [provider]: null } });
 			router.refresh();
 		}
 	};
 	return (
-		<Button variant="secondary" onClick={unlink}>
+		<Button
+			variant="secondary"
+			onClick={() => {
+				toast.promise(unlink(), {
+					loading: "연결 해제중...",
+					success: "연결 해제됨",
+					error: "연결 해제 실패",
+				});
+			}}
+		>
 			해제
 		</Button>
 	);
@@ -60,8 +71,8 @@ export function DeleteAccount({ id }: { id: string }) {
 	const goodbye = () => {
 		return new Promise<void>((resolve, reject) => {
 			deleteAccount(id)
-				.then((res) => {
-					if (res) {
+				.then((success) => {
+					if (success) {
 						handleSignOut().then(resolve).catch(reject);
 					} else {
 						reject(new Error("Failed to delete account"));
