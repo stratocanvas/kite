@@ -12,8 +12,7 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "./ui/accordion";
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "./ui/drawer";
-import { Button } from "./ui/button";
+import { getUserData } from "@/lib/auth/fetch";
 
 export default async function Profile() {
 	const session = await auth();
@@ -22,6 +21,7 @@ export default async function Profile() {
 
 	return (
 		<div className="flex flex-col gap-4">
+			<pre>{JSON.stringify(session, null, 2)}</pre>
 			<Card>
 				<CardHeader>
 					<CardTitle className="text-lg">연결된 계정</CardTitle>
@@ -47,6 +47,7 @@ export default async function Profile() {
 const ConnectedAccounts = async ({ provider }: { provider: string }) => {
 	const session = await auth();
 	if (!session?.user) return null;
+	const data = await getUserData(session.user.id);
 	const size = provider === "google" ? 24 : 20;
 	return (
 		<div className="flex justify-between items-center w-full">
@@ -58,16 +59,14 @@ const ConnectedAccounts = async ({ provider }: { provider: string }) => {
 					width={size}
 					height={size}
 				/>
-				<Label
-					className={session.user[provider] ? "" : "text-muted-foreground"}
-				>
-					{session.user[provider] ? session.user[provider] : "연결 안 됨"}
+				<Label className={data?.[provider] ? "" : "text-muted-foreground"}>
+					{data?.[provider] ? data?.[provider].name : "연결 안 됨"}
 				</Label>
 			</div>
-			{session.user.google && session.user.twitter && (
-				<Unlink id={session.user.id} provider={provider} />
+			{data?.google && data?.twitter && (
+				<Unlink id={session.user.id} provider={provider} providerId={data?.[provider].id} />
 			)}
-			{!session.user[provider] && <Link provider={provider} />}
+			{!data?.[provider] && <Link provider={provider} />}
 		</div>
 	);
 };
