@@ -10,27 +10,20 @@ import {
 import {
 	motion,
 	AnimatePresence,
-	useAnimationControls,
-	useDragControls,
 } from "framer-motion";
-
 import { Label } from "@/components/ui/label";
 import * as React from "react";
-import { forwardRef } from "react";
 import {
 	Carousel,
 	CarouselContent,
 	CarouselItem,
 } from "@/components/ui/carousel";
 import OptionImage from "./option-image";
-import { Button } from "@/components/ui/button";
 import {
 	List,
 	Minus,
 	Plus,
 	ShoppingBag,
-	Sparkle,
-	Sparkles,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -156,36 +149,49 @@ const ProductItem = ({ product }: { product: Product }) => {
 	);
 };
 
+/**
+ * 굿즈의 신상품/복각 여부를 표시합니다.
+ * @param data: 굿즈 정보
+ * @returns
+ */
 const NewRerunBadge = ({ data }: { data: Option | Option[] }) => {
-	const isProduct = Array.isArray(data);
+	const options = Array.isArray(data) ? data : [data];
+	const types = options.map((opt) => opt.type);
 
-	const hasNewOption = isProduct
-		? data.some((opt) => opt.type === "new")
-		: data.type === "new";
+	const renderBadge = (type: string, label: string, color: string) =>
+		types.includes(type) && (
+			<Badge
+				key={type}
+				className={`text-white bg-${color}-500 hover:bg-${color}-500/90 mr-1`}
+			>
+				{label}
+			</Badge>
+		);
 
-	const hasRerunOption = isProduct
-		? data.some((opt) => opt.type === "rerun")
-		: data.type === "rerun";
+	const renderText = (type: string, label: string, color: string) =>
+		types.includes(type) && (
+			<span
+				key={type}
+				className={`text-${color}-600 dark:text-${color}-400 mr-1`}
+			>
+				{label}
+			</span>
+		);
 
-	const body = (
-		<>
-			{hasNewOption && (
-				<Badge className="text-white bg-blue-500 hover:bg-blue-500/90 mr-1">
-					신간
-				</Badge>
-			)}
-			{hasRerunOption && (
-				<Badge className="text-white bg-orange-500 hover:bg-orange-500/90 mr-1">
-					복각
-				</Badge>
-			)}
-		</>
-	);
+	const badges = [
+		renderBadge("new", "신간", "blue"),
+		renderBadge("rerun", "복각", "orange"),
+	];
 
-	return isProduct ? (
-		<div className="flex items-center">{body}</div>
+	const texts = [
+		renderText("new", "신간", "blue"),
+		renderText("rerun", "복각", "orange"),
+	];
+
+	return Array.isArray(data) ? (
+		<div className="flex items-center">{badges}</div>
 	) : (
-		<span>{body}</span>
+		<span>{texts}</span>
 	);
 };
 
@@ -211,11 +217,11 @@ const ProductSummary = ({ data }: { data: Product }) => {
 					<CardTitle className="break-words overflow-hidden text-ellipsis">
 						{data.name}
 					</CardTitle>
-					<Label>
+					<p>
 						{data.option.length > 1
 							? `${data.option.length}개 옵션`
 							: `${data.option[0].price?.toLocaleString()}원`}
-					</Label>
+					</p>
 				</CardHeader>
 			</motion.div>
 		</>
@@ -305,16 +311,15 @@ const OptionContent = ({
 									</Avatar>
 									<div className="flex flex-col text-start py-1 flex-grow min-w-0">
 										<div className="text-sm font-medium break-all whitespace-normal overflow-wrap-anywhere">
-											<NewRerunBadge data={item} />
 											{item.name}
 										</div>
-										<p className="text-sm text-muted-foreground">
+										<div className="text-sm text-muted-foreground flex flex-row gap-1">
 											{item.price
 												? `${item.price.toLocaleString()}원`
 												: "가격 미정"}
-										</p>
+											<NewRerunBadge data={item} />
+										</div>
 									</div>
-
 									<QuantityControl
 										itemId={item._id}
 										quantity={quantities[item._id]}
