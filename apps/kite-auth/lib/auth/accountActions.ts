@@ -47,7 +47,13 @@ export const initializeUser = async (id: string) => {
 
 	try {
 		const command = new UpdateCommand(params);
-		return await docClient.send(command);
+		await docClient.send(command);
+
+		// 사용자 초기화 후 메시지 암호화 및 전송
+		const encryptedMessage = await encryptMessage(id, "create");
+		await sendSQSMessage(encryptedMessage);
+		console.log(encryptedMessage);
+		return { success: true, message: "User initialized and message sent" };
 	} catch (error) {
 		console.error("Error initializing user in DynamoDB:", error);
 		throw error;
@@ -292,12 +298,14 @@ export const deleteAccount = async (id: string): Promise<boolean> => {
 		};
 
 		await docClient.send(new BatchWriteCommand(batchWriteParams));
+		const encryptedMessage = await encryptMessage(id, "delete");
+		await sendSQSMessage(encryptedMessage);
+		console.log(encryptedMessage);
 		return true;
 	} catch (error) {
 		return false;
 	}
 };
-
 
 export async function handleSignIn(provider: string): Promise<void> {
 	return new Promise((resolve, reject) => {
