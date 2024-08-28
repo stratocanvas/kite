@@ -10,10 +10,18 @@ import {
 	TransactWriteCommand,
 	UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
+import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 
 const docClient = DynamoDBDocumentClient.from(client);
-import { revalidatePath } from "next/cache";
+const sqsClient = new SQSClient({
+	region: "ap-northeast-2", // 예: "us-west-2"
+	credentials: {
+		accessKeyId: process.env.AWS_ACCESS_KEY || "",
+		secretAccessKey: process.env.AWS_ACCESS_KEY_SECRET || "",
+	},
+});
 
+import { revalidatePath } from "next/cache";
 /**
  * 사용자의 계정을 초기화합니다.
  * @param id - 사용자 UID
@@ -92,6 +100,22 @@ const encryptMessage = async (
 		encryptedData: uint8ArrayToBase64(new Uint8Array(encryptedData)),
 	});
 };
+
+const sendSQSMessage = async (messageBody: string) => {
+	const command = new SendMessageCommand({
+		QueueUrl: process.env.SQS_QUEUE_URL,
+		MessageBody: messageBody,
+	});
+
+	try {
+		await sqsClient.send(command);
+		console.log("Message sent successfully");
+	} catch (error) {
+		console.error("Error sending message to SQS:", error);
+		throw error;
+	}
+};
+
 /**
  * OAuth 연결을 해제합니다.
  *
