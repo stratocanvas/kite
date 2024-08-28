@@ -1,8 +1,6 @@
-import authConfig from "@/lib/auth/auth.config";
-import NextAuth from "next-auth";
+import { auth } from "@/lib/auth/auth";
 import { NextResponse } from "next/server";
 
-const { auth } = NextAuth(authConfig);
 export default auth((req) => {
 	if (!req.auth && req.nextUrl.pathname === "/dashboard") {
 		return Response.redirect(new URL("/", req.nextUrl.origin));
@@ -22,7 +20,9 @@ export default auth((req) => {
 			// URL 유효성 검증
 			try {
 				const url = new URL(decodedNext);
-				if (url.hostname.endsWith(process.env.NEXT_PUBLIC_BASE_URL||'localhost')) {
+				if (
+					url.hostname.endsWith(process.env.NEXT_PUBLIC_BASE_URL || "localhost")
+				) {
 					return NextResponse.redirect(new URL(decodedNext, req.url));
 				}
 			} catch (error) {
