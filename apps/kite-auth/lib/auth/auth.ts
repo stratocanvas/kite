@@ -64,35 +64,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 			},
 		},
 	},
+
 	events: {
 		async createUser({ user }) {
 			await initializeUser(user.id as string);
 		},
 	},
 	callbacks: {
-		async jwt({ token, user, trigger, session, profile, account }) {
+		async jwt({ token, user, profile, account }) {
 			if (user && profile && account) {
 				await linkProfile(user.id, account.provider, profile);
-				const data = await findUser(user.id as string);
-				token.role = data?.role;
-				token.google = data?.google?.name;
-				token.twitter = data?.twitter?.name;
-			}
-			if (trigger === "update" && session) {
-				const data = await findUser(token.sub as string);
-				token.role = data?.role;
-				token.google = data?.google?.name;
-				token.twitter = data?.twitter?.name;
 			}
 			return token;
-		},
-
-		async session({ session, token }) {
-			session.user.id = token.sub;
-			session.user.role = token.role;
-			session.user.google = token.google;
-			session.user.twitter = token.twitter;
-			return session;
 		},
 	},
 });
