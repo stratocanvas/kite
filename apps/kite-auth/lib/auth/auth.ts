@@ -1,5 +1,5 @@
 import NextAuth from "next-auth";
-import { findUser, initializeUser, linkProfile } from "./account";
+import { initializeUser, linkProfile } from "./account";
 
 import { DynamoDBAdapter } from "@auth/dynamodb-adapter";
 import Twitter from "next-auth/providers/twitter";
@@ -76,6 +76,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 				await linkProfile(user.id, account.provider, profile);
 			}
 			return token;
+		},
+		async session({ session, token }) {
+			session.user.id = token.sub;
+			session.user.name=undefined
+			session.user.image=undefined
+			return session;
 		},
 	},
 });
