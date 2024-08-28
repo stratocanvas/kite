@@ -46,6 +46,52 @@ export const initializeUser = async (id: string) => {
 	}
 };
 
+const encryptMessage = async (
+	userId: string,
+	action: "create" | "delete",
+): Promise<string> => {
+	const payload = JSON.stringify({ userId, action });
+	const encodedPayload = new TextEncoder().encode(payload);
+
+	const hexToUint8Array = (hexString: string): Uint8Array => {
+		const matches = hexString.match(/.{1,2}/g);
+		if (matches === null) {
+			throw new Error("Invalid hexadecimal string");
+		}
+		return new Uint8Array(matches.map((byte) => Number.parseInt(byte, 16)));
+	};
+
+	const uint8ArrayToBase64 = (array: Uint8Array): string => {
+		return btoa(String.fromCharCode.apply(null, Array.from(array)));
+	};
+
+	// 암호화 키를 Uint8Array로 변환
+	const keyData = hexToUint8Array(process.env.ENCRYPTION_KEY || "");
+
+	// 암호화 키 생성
+	const key = await crypto.subtle.importKey(
+		"raw",
+		keyData,
+		{ name: "AES-GCM" },
+		false,
+		["encrypt"],
+	);
+
+	// IV 생성
+	const iv = crypto.getRandomValues(new Uint8Array(12));
+
+	// 암호화
+	const encryptedData = await crypto.subtle.encrypt(
+		{ name: "AES-GCM", iv: iv },
+		key,
+		encodedPayload,
+	);
+
+	return JSON.stringify({
+		iv: uint8ArrayToBase64(iv),
+		encryptedData: uint8ArrayToBase64(new Uint8Array(encryptedData)),
+	});
+};
 /**
  * OAuth 연결을 해제합니다.
  *
