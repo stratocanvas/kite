@@ -1,41 +1,49 @@
 "use server";
-import client from "@/lib/db";
-import { ObjectId } from "mongodb";
 import { signIn, signOut } from "./auth";
+import client from "@/lib/db";
+import {
+	BatchWriteCommand,
+	type BatchWriteCommandInput,
+	DynamoDBDocumentClient,
+	QueryCommand,
+	type QueryCommandInput,
+	TransactWriteCommand,
+	UpdateCommand,
+} from "@aws-sdk/lib-dynamodb";
 
-const db = client.db("auth");
-const accounts = db.collection("accounts");
-const users = db.collection("users");
+const docClient = DynamoDBDocumentClient.from(client);
+import { revalidatePath } from "next/cache";
 
 /**
  * 사용자의 계정을 초기화합니다.
  * @param id - 사용자 UID
  * @returns 로그인용 계정 정보
  */
-export const initializeUser = async (id: string) => {
-	return users.updateOne(
-		{
-			_id: new ObjectId(id),
-		},
-		{
-			$set: {
-				role: "user",
-				createdAt: new Date(),
-			},
-		},
-		{
-			upsert: true,
-		},
-	);
-};
 
-/**
- * 사용자의 프로필을 가져옵니다.
- * @param id - 사용자의 UID
- * @returns 사용자의 프로필
- */
-export const findUser = async (id: string) => {
-	return users.findOne({ _id: new ObjectId(id) });
+export const initializeUser = async (id: string) => {
+	const params = {
+		TableName: "next-auth",
+		Key: {
+			pk: `USER#${id}`,
+			sk: `USER#${id}`,
+		},
+		UpdateExpression: "SET #role = :role, createdAt = :createdAt",
+		ExpressionAttributeNames: {
+			"#role": "role",
+		},
+		ExpressionAttributeValues: {
+			":role": "user",
+			":createdAt": new Date().toISOString(),
+		},
+	};
+
+	try {
+		const command = new UpdateCommand(params);
+		return await docClient.send(command);
+	} catch (error) {
+		console.error("Error initializing user in DynamoDB:", error);
+		throw error;
+	}
 };
 
 /**
@@ -43,34 +51,48 @@ export const findUser = async (id: string) => {
  *
  * @param id - 사용자의 UID
  * @param provider - 해제할 OAuth 제공자
+ * @param providerId - 해제할 OAuth 제공자의 id
  */
 export const unlinkProfile = async (
 	id: string,
 	provider: string,
+	providerId: string,
 ): Promise<boolean> => {
-	try {
-		const userResult = await users.updateOne(
-			{ _id: new ObjectId(id) },
-			{
-				$unset: {
-					[provider]: "",
+	const transactItems = [
+		{
+			Update: {
+				TableName: "next-auth",
+				Key: {
+					pk: `USER#${id}`,
+					sk: `USER#${id}`,
+				},
+				UpdateExpression: "REMOVE #provider",
+				ExpressionAttributeNames: {
+					"#provider": provider,
 				},
 			},
-		);
+		},
+		{
+			Delete: {
+				TableName: "next-auth",
+				Key: {
+					pk: `USER#${id}`,
+					sk: `ACCOUNT#${provider}#${providerId}`,
+				},
+			},
+		},
+	];
 
-		const accountResult = await accounts.deleteOne({
-			userId: new ObjectId(id),
-			provider,
-		});
+	const transactParams = {
+		TransactItems: transactItems,
+	};
 
-		// Check if both operations were acknowledged and at least one document was modified/deleted
-		if (userResult.modifiedCount > 0 && accountResult.deletedCount > 0) {
-			return true;
-		}
-		return false;
+	try {
+		await docClient.send(new TransactWriteCommand(transactParams));
+		revalidatePath("/dashboard");
+		return true;
 	} catch (error) {
-		// Handle any errors that occurred during the operations
-		console.error(error);
+		console.error("Error unlinking profile in DynamoDB:", error);
 		return false;
 	}
 };
@@ -87,31 +109,28 @@ export const linkProfile = async (
 	provider: string | null,
 	profile: GoogleProfile | TwitterProfile | null,
 ) => {
-	if (!provider || !profile) return;
+	if (!id || !provider || !profile) return;
+
 	const updateData = (() => {
 		switch (provider) {
 			case "google":
 				if ("sub" in profile) {
 					return {
-						google: {
-							id: profile.sub,
-							name: profile.name,
-							picture: profile.picture,
-							addedAt: new Date(),
-						},
+						id: profile.sub,
+						name: profile.name,
+						picture: profile.picture,
+						addedAt: new Date().toISOString(),
 					};
 				}
 				break;
 			case "twitter":
 				if ("data" in profile) {
 					return {
-						twitter: {
-							id: profile.data.id,
-							name: profile.data.name,
-							username: profile.data.username,
-							picture: profile.data.profile_image_url,
-							addedAt: new Date(),
-						},
+						id: profile.data.id,
+						name: profile.data.name,
+						username: profile.data.username,
+						picture: profile.data.profile_image_url,
+						addedAt: new Date().toISOString(),
 					};
 				}
 				break;
@@ -120,11 +139,27 @@ export const linkProfile = async (
 	})();
 
 	if (updateData) {
-		await users.updateOne(
-			{ _id: new ObjectId(id) },
-			{ $set: updateData },
-			{ upsert: true },
-		);
+		const params = {
+			TableName: "next-auth", // DynamoDB 테이블 이름
+			Key: {
+				pk: `USER#${id}`,
+				sk: `USER#${id}`,
+			},
+			UpdateExpression: "SET #provider = :profile",
+			ExpressionAttributeNames: {
+				"#provider": provider,
+			},
+			ExpressionAttributeValues: {
+				":profile": updateData,
+			},
+		};
+
+		try {
+			await docClient.send(new UpdateCommand(params));
+		} catch (error) {
+			console.error("Error updating DynamoDB:", error);
+			throw error;
+		}
 	}
 };
 
@@ -149,25 +184,50 @@ interface TwitterProfile {
  * @param id - 사용자 UID
  * @returns 삭제 성공 여부
  */
+
 export const deleteAccount = async (id: string): Promise<boolean> => {
+	const tableName = "next-auth";
+	const pk = `USER#${id}`;
+
 	try {
-		const userResult = await users.deleteOne({ _id: new ObjectId(id) });
+		// 1. Query items with the same partition key
+		const queryParams: QueryCommandInput = {
+			TableName: tableName,
+			KeyConditionExpression: "pk = :pkValue",
+			ExpressionAttributeValues: {
+				":pkValue": pk,
+			},
+		};
 
-		const accountResult = await accounts.deleteMany({
-			userId: new ObjectId(id),
-		});
+		const { Items } = await docClient.send(new QueryCommand(queryParams));
 
-		// Check if both operations were acknowledged and at least one document was modified/deleted
-		if (userResult.deletedCount >= 0 && accountResult.deletedCount >= 0) {
-			return true;
+		if (!Items || Items.length === 0) {
+			console.error(`No items found for account ${id}. This is unexpected.`);
+			return false;
 		}
-		return false;
+
+		const deleteRequests = Items.map((item) => ({
+			DeleteRequest: {
+				Key: {
+					pk: item.pk,
+					sk: item.sk,
+				},
+			},
+		}));
+
+		const batchWriteParams: BatchWriteCommandInput = {
+			RequestItems: {
+				[tableName]: deleteRequests,
+			},
+		};
+
+		await docClient.send(new BatchWriteCommand(batchWriteParams));
+		return true;
 	} catch (error) {
-		// Handle any errors that occurred during the operations
-		console.error(error);
 		return false;
 	}
 };
+
 
 export async function handleSignIn(provider: string): Promise<void> {
 	return new Promise((resolve, reject) => {
