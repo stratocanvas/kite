@@ -1,5 +1,5 @@
 import NextAuth from "next-auth";
-import { initializeUser, linkProfile } from "./account";
+import { initializeUser, linkProfile } from "./accountActions";
 
 import { DynamoDBAdapter } from "@auth/dynamodb-adapter";
 import Twitter from "next-auth/providers/twitter";

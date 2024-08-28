@@ -3,7 +3,7 @@ import {
 	deleteAccount,
 	handleSignOut,
 	unlinkProfile,
-} from "@/lib/auth/account";
+} from "@/lib/auth/accountActions";
 import { useSession } from "next-auth/react";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
