@@ -134,6 +134,7 @@ export function DeleteAccount({ id }: { id: string }) {
 				});
 			}}
 			disabled={input !== challenge}
+			className="w-full"
 		>
 			회원 탈퇴
 		</Button>
@@ -156,8 +157,8 @@ export function DeleteAccount({ id }: { id: string }) {
 						취소
 					</AlertDialogCancel>
 					<AlertDialogAction
-						asChild
-						className="bg-destructive text-white hover:bg-destructive/90"
+						disabled={input !== challenge}
+						className="bg-transparent hover:bg-transparent px-0"
 					>
 						{confirmButton}
 					</AlertDialogAction>
