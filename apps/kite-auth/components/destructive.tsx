@@ -70,10 +70,11 @@ export function DeleteAccount({ id }: { id: string }) {
 	});
 	const router = useRouter();
 	const goodbye = async () => {
-		const res = await deleteAccount(id);
-		if (res) {
-			router.refresh();
+		const success = await deleteAccount(id);
+		if (!success) {
+			throw new Error();
 		}
+		router.refresh();
 	};
 
 	const openButton = (
