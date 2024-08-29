@@ -92,15 +92,33 @@ export function DeleteAccount({ id }: { id: string }) {
 		</>
 	);
 
+	const highlightText = (input: string, challenge: string) => {
+		return challenge.split("").map((char, index) => {
+			let colorClass = "currentColor";
+			if (index < input.length) {
+				colorClass = input[index] === char ? "text-cyan-500" : "text-red-500";
+			}
+			return (
+				// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+				<span key={index} className={colorClass}>
+					{char}
+				</span>
+			);
+		});
+	};
+
 	const confirmation = (
 		<>
 			<p className="mb-1 md:-mb-2">
-				계속하려면 <span className="font-bold">회원 탈퇴</span>를 입력하세요.
+				계속하려면{" "}
+				<span className="font-bold">{highlightText(input, challenge)}</span> 를
+				입력하세요.
 			</p>
 			<Input
 				className="text-[16px]"
 				onChange={(e) => setInput(e.target.value)}
 				placeholder="회원 탈퇴"
+				value={input}
 			/>
 		</>
 	);
