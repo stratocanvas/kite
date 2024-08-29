@@ -1,8 +1,5 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+export { auth as middleware } from "@/lib/auth/auth"
 
-export default async function middleware(req: NextRequest) {
-}
 export const config = {
 	matcher: [
 		/*
