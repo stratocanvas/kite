@@ -1,8 +1,13 @@
 import NextAuth from "next-auth";
-import authConfig from "./auth.config";
+
+import { DynamoDBAdapter } from "@auth/dynamodb-adapter";
+import Twitter from "next-auth/providers/twitter";
+import Google from "next-auth/providers/google";
+import client from "../dynamodb";
+
+const isProduction = process.env.NODE_ENV === "production";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-	session: { strategy: "jwt" },
 	trustHost: true,
 	adapter: DynamoDBAdapter(client),
 	providers: [
@@ -58,10 +63,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 		},
 	},
 	callbacks: {
-		async session({ session, token }) {
-			session.user.id = token.sub as string;
-			session.user.email = undefined;
-
+		async session({ session }) {
 			return session;
 		},
 	},

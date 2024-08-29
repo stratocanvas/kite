@@ -11,7 +11,6 @@ const isProduction = process.env.NODE_ENV === "production";
 export const { handlers, signIn, signOut, auth } = NextAuth({
 	trustHost: true,
 	adapter: DynamoDBAdapter(client),
-	session: { strategy: "jwt" },
 	providers: [
 		Google({
 			authorization: {
@@ -69,19 +68,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 		async createUser({ user }) {
 			await initializeUser(user.id as string);
 		},
-	},
-	callbacks: {
-		async jwt({ token, user, profile, account }) {
+		async signIn({ user, profile, account }) {
 			if (user && profile && account) {
 				await linkProfile(user.id, account.provider, profile);
 			}
-			return token;
-		},
-		async session({ session, token }) {
-			session.user.id = token.sub;
-			session.user.name=undefined
-			session.user.image=undefined
-			return session;
 		},
 	},
 });
