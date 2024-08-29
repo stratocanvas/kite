@@ -68,18 +68,12 @@ export function DeleteAccount({ id }: { id: string }) {
 	const isDesktop: boolean = useMediaQuery({
 		query: "(min-width:768px)",
 	});
-	const goodbye = () => {
-		return new Promise<void>((resolve, reject) => {
-			deleteAccount(id)
-				.then((success) => {
-					if (success) {
-						handleSignOut().then(resolve).catch(reject);
-					} else {
-						reject(new Error("Failed to delete account"));
-					}
-				})
-				.catch(reject);
-		});
+	const router = useRouter();
+	const goodbye = async () => {
+		const res = await deleteAccount(id);
+		if (res) {
+			router.refresh();
+		}
 	};
 
 	const openButton = (
