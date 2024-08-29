@@ -316,3 +316,36 @@ export async function handleSignOut(): Promise<void> {
 		signOut({ redirectTo: "/" }).then(resolve).catch(reject);
 	});
 }
+
+export const editProfile = async (
+	id: string,
+	name: string,
+): Promise<boolean> => {
+	const sanitizedName = name
+		.replace(/<[^>]*>?/gm, "")
+		.trim()
+		.slice(0, 50);
+
+	const params = {
+		TableName: "next-auth", // DynamoDB 테이블 이름
+		Key: {
+			pk: `USER#${id}`,
+			sk: `USER#${id}`,
+		},
+		UpdateExpression: "SET #name = :name",
+		ExpressionAttributeNames: {
+			"#name": "name",
+		},
+		ExpressionAttributeValues: {
+			":name": sanitizedName,
+		},
+	};
+
+	try {
+		await docClient.send(new UpdateCommand(params));
+		return true;
+	} catch (error) {
+		console.error("Error updating DynamoDB:", error);
+		throw error;
+	}
+};
