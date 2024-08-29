@@ -129,9 +129,15 @@ importers:
 
   apps/kiteapp:
     dependencies:
+      '@auth/dynamodb-adapter':
+        specifier: ^2.4.2
+        version: 2.4.2(@aws-sdk/client-dynamodb@3.637.0)(@aws-sdk/lib-dynamodb@3.637.0(@aws-sdk/client-dynamodb@3.637.0))
       '@auth/mongodb-adapter':
         specifier: ^3.4.2
         version: 3.4.2(mongodb@6.8.0(socks@2.7.1))
+      '@aws-sdk/client-dynamodb':
+        specifier: ^3.637.0
+        version: 3.637.0
       '@aws-sdk/client-lambda':
         specifier: ^3.637.0
         version: 3.637.0
@@ -141,6 +147,9 @@ importers:
       '@aws-sdk/client-sqs':
         specifier: ^3.637.0
         version: 3.637.0
+      '@aws-sdk/lib-dynamodb':
+        specifier: ^3.637.0
+        version: 3.637.0(@aws-sdk/client-dynamodb@3.637.0)
       '@aws-sdk/s3-presigned-post':
         specifier: ^3.637.0
         version: 3.637.0
