@@ -3,8 +3,8 @@ import {
 	deleteAccount,
 	handleSignOut,
 	unlinkProfile,
+	editProfile,
 } from "@/lib/auth/accountActions";
-import { useSession } from "next-auth/react";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { useMediaQuery } from "react-responsive";
@@ -29,10 +29,18 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "./ui/alert-dialog";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "./ui/dialog";
 import React from "react";
 import { Input } from "./ui/input";
 import { LogOut, UserRoundX } from "lucide-react";
 import { toast } from "sonner";
+import { Label } from "./ui/label";
 
 export function Unlink({
 	id,
@@ -215,5 +223,72 @@ export function SignOut() {
 			<LogOut className="h-4 w-4 mr-2" />
 			로그아웃
 		</Button>
+	);
+}
+
+export function EditProfile({ id }: { id: string }) {
+	const router = useRouter();
+	const [name, setName] = React.useState("");
+	const [open, setOpen] = React.useState(false);
+	const isDesktop = useMediaQuery({ query: "(min-width:768px)" });
+
+	const edit = async () => {
+		const success = await editProfile(id, name);
+		if (!success) {
+			throw new Error();
+		}
+		router.refresh();
+	};
+
+	const formContent = (
+		<form
+			className="flex flex-col gap-4"
+			action={() => {
+				toast.promise(edit(), {
+					loading: "변경중...",
+					success: "변경 완료",
+					error: "변경 실패",
+				});
+				setOpen(false);
+				setName("");
+			}}
+		>
+			<div className="flex flex-col gap-2">
+				<Label htmlFor="username">닉네임</Label>
+				<Input
+					id="username"
+					className="text-[16px]"
+					onChange={(e) => setName(e.target.value)}
+					value={name}
+				/>
+			</div>
+			<Button type="submit">변경</Button>
+		</form>
+	);
+
+	return isDesktop ? (
+		<Dialog open={open} onOpenChange={setOpen}>
+			<DialogTrigger asChild>
+				<Button variant="secondary">변경</Button>
+			</DialogTrigger>
+			<DialogContent className="sm:max-w-[425px]">
+				<DialogHeader>
+					<DialogTitle>프로필 변경</DialogTitle>
+				</DialogHeader>
+				{formContent}
+			</DialogContent>
+		</Dialog>
+	) : (
+		<Drawer open={open} onOpenChange={setOpen}>
+			<DrawerTrigger asChild>
+				<Button variant="secondary">변경</Button>
+			</DrawerTrigger>
+			<DrawerContent>
+				<DrawerHeader className="text-left">
+					<DrawerTitle>프로필 변경</DrawerTitle>
+				</DrawerHeader>
+				<div className="px-4 mb-4">{formContent}</div>
+			</DrawerContent>
+		</Drawer>
 	);
 }

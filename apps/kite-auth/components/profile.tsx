@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth/auth";
-import { DeleteAccount, Unlink, SignOut } from "./destructive";
+import { DeleteAccount, Unlink, SignOut, EditProfile } from "./buttons";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import GoogleLogo from "@/public/google.svg";
 import XLogo from "@/public/x.svg";
@@ -29,6 +29,7 @@ export default async function Profile() {
 					</Avatar>
 					<p>{session.user.name}</p>
 				</div>
+				<EditProfile id={session.user.id} />
 			</div>
 			<Card>
 				<CardHeader>
