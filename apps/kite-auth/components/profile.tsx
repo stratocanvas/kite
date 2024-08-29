@@ -12,6 +12,7 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "./ui/accordion";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 export default async function Profile() {
 	const session = await auth();
@@ -20,7 +21,15 @@ export default async function Profile() {
 
 	return (
 		<div className="flex flex-col gap-4">
-			<pre>{JSON.stringify(session, null, 2)}</pre>
+			<div className="flex justify-between">
+				<div className="flex flex-row gap-4 items-center">
+					<Avatar>
+						<AvatarImage src={session.user.image} />
+						<AvatarFallback>{session.user.name[0]}</AvatarFallback>
+					</Avatar>
+					<p>{session.user.name}</p>
+				</div>
+			</div>
 			<Card>
 				<CardHeader>
 					<CardTitle className="text-lg">연결된 계정</CardTitle>
