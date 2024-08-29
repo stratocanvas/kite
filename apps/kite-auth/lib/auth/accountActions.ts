@@ -21,7 +21,6 @@ const sqsClient = new SQSClient({
 	},
 });
 
-import { revalidatePath } from "next/cache";
 /**
  * 사용자의 계정을 초기화합니다.
  * @param id - 사용자 UID
@@ -165,7 +164,6 @@ export const unlinkProfile = async (
 
 	try {
 		await docClient.send(new TransactWriteCommand(transactParams));
-		revalidatePath("/dashboard");
 		return true;
 	} catch (error) {
 		console.error("Error unlinking profile in DynamoDB:", error);
