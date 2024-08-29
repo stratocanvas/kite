@@ -12,7 +12,6 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "./ui/accordion";
-import { getUserData } from "@/lib/auth/fetch";
 
 export default async function Profile() {
 	const session = await auth();
@@ -47,7 +46,6 @@ export default async function Profile() {
 const ConnectedAccounts = async ({ provider }: { provider: string }) => {
 	const session = await auth();
 	if (!session?.user) return null;
-	const data = await getUserData(session.user.id);
 	const size = provider === "google" ? 24 : 20;
 	return (
 		<div className="flex justify-between items-center w-full">
@@ -59,14 +57,22 @@ const ConnectedAccounts = async ({ provider }: { provider: string }) => {
 					width={size}
 					height={size}
 				/>
-				<Label className={data?.[provider] ? "" : "text-muted-foreground"}>
-					{data?.[provider] ? data?.[provider].name : "연결 안 됨"}
+				<Label
+					className={session.user?.[provider] ? "" : "text-muted-foreground"}
+				>
+					{session.user?.[provider]
+						? session.user?.[provider].name
+						: "연결 안 됨"}
 				</Label>
 			</div>
-			{data?.google && data?.twitter && (
-				<Unlink id={session.user.id} provider={provider} providerId={data?.[provider].id} />
+			{session.user?.google && session.user?.twitter && (
+				<Unlink
+					id={session.user.id}
+					provider={provider}
+					providerId={session.user?.[provider].id}
+				/>
 			)}
-			{!data?.[provider] && <Link provider={provider} />}
+			{!session.user?.[provider] && <Link provider={provider} />}
 		</div>
 	);
 };
