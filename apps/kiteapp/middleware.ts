@@ -27,6 +27,11 @@ export default auth((req) => {
 });
 export const config = {
 	matcher: [
+		"/",
+		"/write/add",
+		"/dashboard",
+		"/api/cart",
+		"/api/bookmark",
 		/*
 		 * Match all request paths except for the ones starting with:
 		 * - _next/static (static files)
