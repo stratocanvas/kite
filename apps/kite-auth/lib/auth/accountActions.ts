@@ -318,34 +318,38 @@ export async function handleSignOut(): Promise<void> {
 }
 
 export const editProfile = async (
-	id: string,
-	name: string,
+    id: string,
+    name: string,
 ): Promise<boolean> => {
-	const sanitizedName = name
-		.replace(/<[^>]*>?/gm, "")
-		.trim()
-		.slice(0, 50);
+    const sanitizedName = name
+        .trim()
+        .slice(0, 50)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 
-	const params = {
-		TableName: "next-auth", // DynamoDB 테이블 이름
-		Key: {
-			pk: `USER#${id}`,
-			sk: `USER#${id}`,
-		},
-		UpdateExpression: "SET #name = :name",
-		ExpressionAttributeNames: {
-			"#name": "name",
-		},
-		ExpressionAttributeValues: {
-			":name": sanitizedName,
-		},
-	};
+    const params = {
+        TableName: "next-auth", // DynamoDB 테이블 이름
+        Key: {
+            pk: `USER#${id}`,
+            sk: `USER#${id}`,
+        },
+        UpdateExpression: "SET #name = :name",
+        ExpressionAttributeNames: {
+            "#name": "name",
+        },
+        ExpressionAttributeValues: {
+            ":name": sanitizedName,
+        },
+    };
 
-	try {
-		await docClient.send(new UpdateCommand(params));
-		return true;
-	} catch (error) {
-		console.error("Error updating DynamoDB:", error);
-		throw error;
-	}
+    try {
+        await docClient.send(new UpdateCommand(params));
+        return true;
+    } catch (error) {
+        console.error("Error updating DynamoDB:", error);
+        throw error;
+    }
 };
