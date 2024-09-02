@@ -1,14 +1,10 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import type { Metadata } from "next";
 import "@/app/globals.css";
-import { TopMenuDesktop } from "@/app/navmenu";
+import { TopMenuDesktop } from "@/components/navmenu/navmenuLayout";
 import localFont from "next/font/local";
 import { Toaster } from "@/components/ui/toaster";
-import UserStateProvider from "@/providers";
 import Footer from "@/app/footer";
-import { GoogleAnalytics } from "@next/third-parties/google";
-import { GoogleTagManager } from "@next/third-parties/google";
-import Link from "next/link";
 import ConsoleWarning from "@/components/consoleWarning";
 
 const Pretendard = localFont({
@@ -24,8 +20,7 @@ export const viewport = {
 
 export const metadata: Metadata = {
 	title: "Kite",
-	description:
-		"동인 행사 플랫폼",
+	description: "동인 행사 플랫폼",
 	icons: {
 		icon: [
 			{
@@ -91,15 +86,13 @@ export default function RootLayout({
 						enableSystem
 						disableTransitionOnChange
 					>
-						<UserStateProvider>
-							<TopMenuDesktop />
-							<main className="flex flex-col min-h-screen">{children}</main>
-							<ConsoleWarning />
-							<Toaster />
-							<footer className="footer">
-								<Footer />
-							</footer>
-						</UserStateProvider>
+						<TopMenuDesktop />
+						<main className="flex flex-col min-h-screen">{children}</main>
+						<ConsoleWarning />
+						<Toaster />
+						<footer className="footer">
+							<Footer />
+						</footer>
 					</ThemeProvider>
 				</body>
 			</html>
