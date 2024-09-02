@@ -329,7 +329,7 @@ function OptionFields({ productIndex }: { productIndex: number }) {
 																value="new"
 																className="[&[data-state=on]]:data-state-on w-full"
 															>
-																신간
+																신규
 															</ToggleGroupItem>
 															<ToggleGroupItem
 																value="rerun"

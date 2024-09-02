@@ -179,12 +179,12 @@ const NewRerunBadge = ({ data }: { data: Option | Option[] }) => {
 		);
 
 	const badges = [
-		renderBadge("new", "신간", "blue"),
+		renderBadge("new", "신규", "blue"),
 		renderBadge("rerun", "복각", "orange"),
 	];
 
 	const texts = [
-		renderText("new", "신간", "blue"),
+		renderText("new", "신규", "blue"),
 		renderText("rerun", "복각", "orange"),
 	];
 
