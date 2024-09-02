@@ -133,7 +133,7 @@ const MobileMenu = ({ session }: { session: any }) => {
 						{session ? (
 							<div className="flex flex-col gap-2 justify-between">
 								<p className="font-bold">{session?.user?.name}</p>
-								<p className="text-muted-foreground font-bold mb-4">{session?.user?.email}</p>
+								<p className="text-muted-foreground text-sm -mt-1 mb-4">{session?.user?.email}</p>
 								<BookmarksButton mobile />
 								<SettingsButton mobile />
 								<SignOutButton mobile />
