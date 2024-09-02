@@ -14,28 +14,31 @@ export default auth((req) => {
 	const currentPath = req.nextUrl.pathname;
 	if (currentPath === "/handshake" || (req.auth && currentPath === "/")) {
 		const next = req.nextUrl.searchParams.get("next");
-		if (next) {
-			const decodedNext = decodeURIComponent(next);
 
-			// URL 유효성 검증
+		const service = req.nextUrl.searchParams.get("service");
+		if (next && service) {
 			try {
-				const url = new URL(decodedNext);
-				if (
-					url.hostname.endsWith(process.env.NEXT_PUBLIC_BASE_URL || "localhost")
-				) {
-					return NextResponse.redirect(new URL(decodedNext, req.url));
-				}
+				const decodedNext = decodeURIComponent(next);
+				const decodedService = decodeURIComponent(service);
+				const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "localhost:3000";
+				const protocol = baseUrl.includes("localhost") ? "http" : "https";
+				const fullUrl = new URL(
+					decodedNext,
+					`${protocol}://${
+						decodedService === "kite" ? baseUrl : `${decodedService}.${baseUrl}`
+					}`,
+				);
+				return NextResponse.redirect(fullUrl);
 			} catch (error) {
 				console.error("Invalid URL:", error);
 			}
-			// 유효하지 않은 URL이거나 지정된 URL로 끝나지 않는 경우
 			return NextResponse.redirect(new URL("/", req.url));
 		}
 		return NextResponse.redirect(new URL(redirectPaths[currentPath], req.url));
 	}
-
 	return NextResponse.next();
 });
+
 export const config = {
 	matcher: [
 		"/",

@@ -16,34 +16,40 @@ export function SignIn({ provider }: { provider: string }) {
         const headersList = headers()
         const referer = headersList.get('referer')
         let next = ''
+        let service = ''
 
-				if (referer) {
-					try {
-						const url = new URL(referer);
-						next = url.searchParams.get("next") || "";
-					} catch (error) {
-						console.error("Invalid referer URL:", error);
-					}
-				}
+        if (referer) {
+          try {
+            const url = new URL(referer)
+            next = url.searchParams.get('next') || ''
+            service = url.searchParams.get('service') || ''
+          } catch (error) {
+            console.error('Invalid referer URL:', error)
+          }
+        }
 
-				await signIn(provider, {
-					redirectTo: `/handshake${
-						next ? `?next=${encodeURIComponent(next)}` : ""
-					}`,
-				});
-			}}
-		>
-			<Button size="lg" variant="secondary" className="w-full rounded-xl h-16">
-				<Image
-					src={provider === "google" ? GoogleLogo : XLogo}
-					alt={`${provider}로 계속하기`}
-					className={provider === "twitter" ? "dark:invert" : ""}
-					width={size}
-					height={size}
-				/>
-			</Button>
-		</form>
-	);
+        const queryParams = new URLSearchParams()
+        if (next) queryParams.set('next', encodeURIComponent(next))
+        if (service) queryParams.set('service', encodeURIComponent(service))
+
+        await signIn(provider, {
+          redirectTo: `/handshake${
+            queryParams.toString() ? `?${queryParams.toString()}` : ''
+          }`,
+        })
+      }}
+    >
+      <Button size="lg" variant="secondary" className="w-full rounded-xl h-16">
+        <Image
+          src={provider === 'google' ? GoogleLogo : XLogo}
+          alt={`${provider}로 계속하기`}
+          className={provider === 'twitter' ? 'dark:invert' : ''}
+          width={size}
+          height={size}
+        />
+      </Button>
+    </form>
+  )
 }
 
 export function Link({ provider }: { provider: string }) {
