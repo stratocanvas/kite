@@ -11,6 +11,7 @@ import {
 	UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
+import { nanoid } from "nanoid";
 
 const docClient = DynamoDBDocumentClient.from(client);
 const sqsClient = new SQSClient({
@@ -28,19 +29,22 @@ const sqsClient = new SQSClient({
  */
 
 export const initializeUser = async (id: string) => {
+	const email = nanoid(10);
 	const params = {
 		TableName: "next-auth",
 		Key: {
 			pk: `USER#${id}`,
 			sk: `USER#${id}`,
 		},
-		UpdateExpression: "SET #role = :role, createdAt = :createdAt",
+		UpdateExpression:
+			"SET #role = :role, createdAt = :createdAt, email = :email",
 		ExpressionAttributeNames: {
 			"#role": "role",
 		},
 		ExpressionAttributeValues: {
 			":role": "user",
 			":createdAt": new Date().toISOString(),
+			":email": email,
 		},
 	};
 
@@ -51,7 +55,6 @@ export const initializeUser = async (id: string) => {
 		// 사용자 초기화 후 메시지 암호화 및 전송
 		const encryptedMessage = await encryptMessage(id, "create");
 		await sendSQSMessage(encryptedMessage);
-		console.log(encryptedMessage);
 		return { success: true, message: "User initialized and message sent" };
 	} catch (error) {
 		console.error("Error initializing user in DynamoDB:", error);
@@ -114,7 +117,6 @@ const sendSQSMessage = async (messageBody: string) => {
 
 	try {
 		await sqsClient.send(command);
-		console.log("Message sent successfully");
 	} catch (error) {
 		console.error("Error sending message to SQS:", error);
 		throw error;
@@ -316,3 +318,40 @@ export async function handleSignOut(): Promise<void> {
 		signOut({ redirectTo: "/" }).then(resolve).catch(reject);
 	});
 }
+
+export const editProfile = async (
+	id: string,
+	name: string,
+): Promise<boolean> => {
+	const sanitizedName = name
+		.trim()
+		.slice(0, 50)
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#39;");
+
+	const params = {
+		TableName: "next-auth", // DynamoDB 테이블 이름
+		Key: {
+			pk: `USER#${id}`,
+			sk: `USER#${id}`,
+		},
+		UpdateExpression: "SET #name = :name",
+		ExpressionAttributeNames: {
+			"#name": "name",
+		},
+		ExpressionAttributeValues: {
+			":name": sanitizedName,
+		},
+	};
+
+	try {
+		await docClient.send(new UpdateCommand(params));
+		return true;
+	} catch (error) {
+		console.error("Error updating DynamoDB:", error);
+		throw error;
+	}
+};

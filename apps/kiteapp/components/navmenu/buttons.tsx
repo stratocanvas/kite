@@ -109,11 +109,11 @@ export function SettingsButton({ mobile }: { mobile?: boolean }) {
 			{mobile ? (
 				<div className="flex items-center w-full">
 					<Settings className="h-4 w-4 mr-3 text-muted-foreground" />
-					<span className="font-bold">계정 설정</span>
+					<span className="font-bold">설정</span>
 				</div>
 			) : (
 				<DropdownMenuItem className="flex justify-between items-center">
-					<span>계정 설정</span>
+					<span>설정</span>
 					<Settings className="h-4 w-4" />
 				</DropdownMenuItem>
 			)}
