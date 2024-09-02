@@ -165,6 +165,8 @@ const DesktopMenu = ({ session }: { session: any }) => {
 								<p className="text-muted-foreground">{session?.user?.email}</p>
 							</DropdownMenuLabel>
 							<DropdownMenuSeparator />
+							<BookmarksButton />
+							<SettingsButton />
 							<SignOutButton />
 						</>
 					)}
