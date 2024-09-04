@@ -12,7 +12,7 @@ import {
 	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogIn, LogOut, Settings, Bookmark } from "lucide-react";
+import { LogIn, LogOut, Settings, Bookmark, PencilLine } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { handleSignOut } from "./actions";
@@ -115,6 +115,24 @@ export function SettingsButton({ mobile }: { mobile?: boolean }) {
 				<DropdownMenuItem className="flex justify-between items-center">
 					<span>설정</span>
 					<Settings className="h-4 w-4" />
+				</DropdownMenuItem>
+			)}
+		</Link>
+	);
+}
+
+export function WriteButton({ mobile }: { mobile?: boolean }) {
+	return (
+		<Link href="/write">
+			{mobile ? (
+				<div className="flex items-center w-full">
+					<PencilLine className="h-4 w-4 mr-3 text-muted-foreground" />
+					<span className="font-bold">부스 등록</span>
+				</div>
+			) : (
+				<DropdownMenuItem className="flex justify-between items-center">
+					<span>부스 등록</span>
+					<PencilLine className="h-4 w-4" />
 				</DropdownMenuItem>
 			)}
 		</Link>
