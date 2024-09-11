@@ -24,7 +24,7 @@ module.exports = {
 		remotePatterns: [
 			{
 				protocol: "https",
-				hostname: "api.kitebooth.com",
+				hostname: "cvyhfxujgfmkjngufwpb.supabase.co",
 				port: "",
 				pathname: "/storage/v1/object/public/**",
 			},
