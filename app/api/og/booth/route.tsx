@@ -60,7 +60,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
                         position: 'relative',
                     }}
                 >
-                    <img src={`https://api.kitebooth.com/storage/v1/render/image/public/booth/thumbnails/${thumbnailId}?width=1200&height=630&quality=75`} alt="thumbnail" width={1200} height={630} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={`https://cvyhfxujgfmkjngufwpb.supabase.co/storage/v1/render/image/public/booth/thumbnails/${thumbnailId}?width=1200&height=630&quality=75`} alt="thumbnail" width={1200} height={630} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                     <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: `linear-gradient(to top, ${bgcolor}ff 15%, ${bgcolor}dd 45%, ${bgcolor}99 100%)` }} />
                     <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <div tw="flex flex-col w-full items-start justify-center text-left pl-20">
