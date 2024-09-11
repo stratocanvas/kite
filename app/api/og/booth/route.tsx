@@ -9,10 +9,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
     const [pretendardRegular, pretendardBold] =
         await Promise.all([
-            fetch(new URL('../../../../assets/pretendardregular.woff', import.meta.url)).then((res) =>
+            fetch(new URL('../../../../assets/pretendardregular.woff2', import.meta.url)).then((res) =>
                 res.arrayBuffer()
             ),
-            fetch(new URL('../../../../assets/pretendardblack.woff', import.meta.url)).then((res) =>
+            fetch(new URL('../../../../assets/pretendardblack.woff2', import.meta.url)).then((res) =>
                 res.arrayBuffer()
             ),
         ]);
