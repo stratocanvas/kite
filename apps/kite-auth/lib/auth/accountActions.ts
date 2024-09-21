@@ -12,6 +12,7 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { nanoid } from "nanoid";
+import { auth } from '@/lib/auth/auth'
 
 const docClient = DynamoDBDocumentClient.from(client);
 const sqsClient = new SQSClient({
@@ -126,22 +127,19 @@ const sendSQSMessage = async (messageBody: string) => {
 /**
  * OAuth 연결을 해제합니다.
  *
- * @param id - 사용자의 UID
  * @param provider - 해제할 OAuth 제공자
- * @param providerId - 해제할 OAuth 제공자의 id
  */
 export const unlinkProfile = async (
-	id: string,
 	provider: string,
-	providerId: string,
 ): Promise<boolean> => {
+	const session = await auth()
 	const transactItems = [
 		{
 			Update: {
 				TableName: "next-auth",
 				Key: {
-					pk: `USER#${id}`,
-					sk: `USER#${id}`,
+					pk: `USER#${session?.user.id}`,
+					sk: `USER#${session?.user.id}`,
 				},
 				UpdateExpression: "REMOVE #provider",
 				ExpressionAttributeNames: {
@@ -153,8 +151,8 @@ export const unlinkProfile = async (
 			Delete: {
 				TableName: "next-auth",
 				Key: {
-					pk: `USER#${id}`,
-					sk: `ACCOUNT#${provider}#${providerId}`,
+					pk: `USER#${session?.user.id}`,
+					sk: `ACCOUNT#${provider}#${session?.user[provider].id}`,
 				},
 			},
 		},
@@ -176,7 +174,6 @@ export const unlinkProfile = async (
 /**
  * 사용자의 프로필을 연결합니다.
  *
- * @param id - 사용자의 UID
  * @param provider - 연결할 OAuth 제공자
  * @param profile - OAuth 프로필
  */
@@ -257,13 +254,13 @@ interface TwitterProfile {
 /**
  * 사용자의 계정을 삭제합니다.
  *
- * @param id - 사용자 UID
  * @returns 삭제 성공 여부
  */
 
-export const deleteAccount = async (id: string): Promise<boolean> => {
+export const deleteAccount = async (): Promise<boolean> => {
+	const session = await auth()
 	const tableName = "next-auth";
-	const pk = `USER#${id}`;
+	const pk = `USER#${session?.user.id}`;
 
 	try {
 		// 1. Query items with the same partition key
@@ -278,7 +275,7 @@ export const deleteAccount = async (id: string): Promise<boolean> => {
 		const { Items } = await docClient.send(new QueryCommand(queryParams));
 
 		if (!Items || Items.length === 0) {
-			console.error(`No items found for account ${id}. This is unexpected.`);
+			console.error(`No items found for account ${session?.user.id}. This is unexpected.`);
 			return false;
 		}
 
@@ -298,7 +295,7 @@ export const deleteAccount = async (id: string): Promise<boolean> => {
 		};
 
 		await docClient.send(new BatchWriteCommand(batchWriteParams));
-		const encryptedMessage = await encryptMessage(id, "delete");
+		const encryptedMessage = await encryptMessage(session?.user.id, "delete");
 		await sendSQSMessage(encryptedMessage);
 		console.log(encryptedMessage);
 		return true;
@@ -320,9 +317,9 @@ export async function handleSignOut(): Promise<void> {
 }
 
 export const editProfile = async (
-	id: string,
 	name: string,
 ): Promise<boolean> => {
+	const session = await auth()
 	const sanitizedName = name
 		.trim()
 		.slice(0, 50)
@@ -335,8 +332,8 @@ export const editProfile = async (
 	const params = {
 		TableName: "next-auth", // DynamoDB 테이블 이름
 		Key: {
-			pk: `USER#${id}`,
-			sk: `USER#${id}`,
+			pk: `USER#${session?.user.id}`,
+			sk: `USER#${session?.user.id}`,
 		},
 		UpdateExpression: "SET #name = :name",
 		ExpressionAttributeNames: {
