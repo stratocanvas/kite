@@ -35,7 +35,7 @@ export default async function Profile() {
           </div>
         </div>
         <QueryProvider>
-          <EditProfile/>
+          <EditProfile initialName={session.user.name} initialEmail={session.user.email}/>
         </QueryProvider>
       </div>
       <Card>

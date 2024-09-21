@@ -224,11 +224,11 @@ export function SignOut() {
   )
 }
 
-export function EditProfile() {
+export function EditProfile({ initialName, initialEmail }: { initialName: string; initialEmail: string }) {
   const router = useRouter()
-  const [name, setName] = React.useState('')
-  const [email, setEmail] = React.useState('')
-  const [input, setInput] = React.useState('')
+  const [name, setName] = React.useState(initialName)
+  const [email, setEmail] = React.useState(initialEmail)
+  const [input, setInput] = React.useState(initialEmail)
   const [open, setOpen] = React.useState(false)
 
   const isDesktop = useMediaQuery({ query: '(min-width:768px)' })
