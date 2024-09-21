@@ -63,11 +63,18 @@ export const initializeUser = async (id: string) => {
 	}
 };
 
+interface UpdateMessageBody {
+	nickname?: string,
+	username?: string,
+	image?: string
+}
+
 const encryptMessage = async (
 	userId: string,
-	action: "create" | "delete",
+	action: "create" | "delete" | "update",
+	body?: UpdateMessageBody
 ): Promise<string> => {
-	const payload = JSON.stringify({ userId, action });
+	const payload = JSON.stringify({ userId, action, body });
 	const encodedPayload = new TextEncoder().encode(payload);
 
 	const hexToUint8Array = (hexString: string): Uint8Array => {
@@ -341,9 +348,16 @@ export const editProfile = async (
 			":GSI1SK": `USER#${sanitizedEmail}`,
 		},
 	};
+	
+	const messageBody = {
+		nickname: sanitizedName,
+		username: sanitizedEmail
+	}
 
 	try {
 		await docClient.send(new UpdateCommand(params));
+		const encryptedMessage = await encryptMessage(session?.user.id, "update", messageBody);
+		await sendSQSMessage(encryptedMessage);
 		return true;
 	} catch (error) {
 		console.error("Error updating DynamoDB:", error);
