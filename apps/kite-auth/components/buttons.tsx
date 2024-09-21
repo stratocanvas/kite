@@ -230,11 +230,10 @@ export function EditProfile({ initialName, initialEmail }: { initialName: string
   const [email, setEmail] = React.useState(initialEmail)
   const [input, setInput] = React.useState(initialEmail)
   const [open, setOpen] = React.useState(false)
-
   const isDesktop = useMediaQuery({ query: '(min-width:768px)' })
 
   const edit = async () => {
-    const success = await editProfile(name)
+    const success = await editProfile(name, email)
     if (!success) {
       throw new Error()
     }
@@ -253,7 +252,6 @@ export function EditProfile({ initialName, initialEmail }: { initialName: string
           error: '변경 실패',
         })
         setOpen(false)
-        setName('')
       }}
     >
       <div className="flex flex-col gap-2">
@@ -274,7 +272,7 @@ export function EditProfile({ initialName, initialEmail }: { initialName: string
           }}
           value={input}
         />
-        {email &&
+        {email !== initialEmail &&
           (data?.available ? (
             <div className="flex gap-2 text-sm items-center">
               <Check className="h-4 w-4 text-green-500" strokeWidth={4} />
@@ -287,7 +285,7 @@ export function EditProfile({ initialName, initialEmail }: { initialName: string
             </div>
           ))}
       </div>
-      <Button type="submit" disabled={!data?.available}>
+      <Button type="submit" disabled={(!data?.available) && (email !== initialEmail)}>
         변경
       </Button>
     </form>
