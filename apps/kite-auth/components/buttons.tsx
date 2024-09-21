@@ -241,7 +241,7 @@ export function EditProfile() {
     router.refresh()
   }
   const debouncedSetEmail = React.useCallback(debounce(setEmail, 500), [])
-  const { data } = checkUID(email)
+  const { data } = checkUID(email, initialEmail)
   const formContent = (
     <form
       className="flex flex-col gap-4"

@@ -318,9 +318,11 @@ export async function handleSignOut(): Promise<void> {
 
 export const editProfile = async (
 	name: string,
+	email: string
 ): Promise<boolean> => {
 	const session = await auth()
 	const sanitizedName = sanitizeInput(name, 50);
+	const sanitizedEmail = sanitizeInput(email, 320).toLowerCase();
 
 	const params = {
 		TableName: "next-auth", // DynamoDB 테이블 이름
@@ -328,12 +330,15 @@ export const editProfile = async (
 			pk: `USER#${session?.user.id}`,
 			sk: `USER#${session?.user.id}`,
 		},
-		UpdateExpression: "SET #name = :name",
+		UpdateExpression: "SET #name = :name, email = :email, GSI1PK = :GSI1PK, GSI1SK = :GSI1SK",
 		ExpressionAttributeNames: {
 			"#name": "name",
 		},
 		ExpressionAttributeValues: {
 			":name": sanitizedName,
+			":email": sanitizedEmail,
+			":GSI1PK": `USER#${sanitizedEmail}`,
+			":GSI1SK": `USER#${sanitizedEmail}`,
 		},
 	};
 
@@ -345,6 +350,7 @@ export const editProfile = async (
 		throw error;
 	}
 };
+
 function sanitizeInput(input: string, maxLength: number): string {
 	return input
 		.trim()
