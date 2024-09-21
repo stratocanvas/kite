@@ -320,14 +320,7 @@ export const editProfile = async (
 	name: string,
 ): Promise<boolean> => {
 	const session = await auth()
-	const sanitizedName = name
-		.trim()
-		.slice(0, 50)
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;")
-		.replace(/"/g, "&quot;")
-		.replace(/'/g, "&#39;");
+	const sanitizedName = sanitizeInput(name, 50);
 
 	const params = {
 		TableName: "next-auth", // DynamoDB 테이블 이름
@@ -352,3 +345,13 @@ export const editProfile = async (
 		throw error;
 	}
 };
+function sanitizeInput(input: string, maxLength: number): string {
+	return input
+		.trim()
+		.slice(0, maxLength)
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#39;");
+}
