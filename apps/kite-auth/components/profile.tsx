@@ -35,7 +35,7 @@ export default async function Profile() {
           </div>
         </div>
         <QueryProvider>
-          <EditProfile id={session.user.id} />
+          <EditProfile initialName={session.user.name} initialEmail={session.user.email}/>
         </QueryProvider>
       </div>
       <Card>
@@ -52,7 +52,7 @@ export default async function Profile() {
         <AccordionItem value="item-1" className="border-none">
           <AccordionTrigger>위험 구역</AccordionTrigger>
           <AccordionContent className="w-full">
-            <DeleteAccount id={session.user.id} />
+            <DeleteAccount />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
@@ -84,9 +84,7 @@ const ConnectedAccounts = async ({ provider }: { provider: string }) => {
       </div>
       {session.user?.google && session.user?.twitter && (
         <Unlink
-          id={session.user.id}
           provider={provider}
-          providerId={session.user?.[provider].id}
         />
       )}
       {!session.user?.[provider] && <Link provider={provider} />}

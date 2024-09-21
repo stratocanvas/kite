@@ -44,18 +44,10 @@ import { Label } from './ui/label'
 import { debounce } from 'es-toolkit'
 import { checkUID } from '@/app/api/checkUID/query'
 
-export function Unlink({
-  id,
-  provider,
-  providerId,
-}: {
-  id: string
-  provider: string
-  providerId: string
-}) {
+export function Unlink({ provider }: { provider: string }) {
   const router = useRouter()
   const unlink = async () => {
-    const res = await unlinkProfile(id, provider, providerId)
+    const res = await unlinkProfile(provider)
     if (res) {
       router.refresh()
     }
@@ -76,7 +68,7 @@ export function Unlink({
   )
 }
 
-export function DeleteAccount({ id }: { id: string }) {
+export function DeleteAccount() {
   const [input, setInput] = React.useState('')
   const challenge = '회원 탈퇴'
   const isDesktop: boolean = useMediaQuery({
@@ -84,7 +76,7 @@ export function DeleteAccount({ id }: { id: string }) {
   })
   const router = useRouter()
   const goodbye = async () => {
-    const success = await deleteAccount(id)
+    const success = await deleteAccount()
     if (!success) {
       throw new Error()
     }
@@ -232,24 +224,23 @@ export function SignOut() {
   )
 }
 
-export function EditProfile({ id }: { id: string }) {
+export function EditProfile({ initialName, initialEmail }: { initialName: string; initialEmail: string }) {
   const router = useRouter()
-  const [name, setName] = React.useState('')
-  const [email, setEmail] = React.useState('')
-  const [input, setInput] = React.useState('')
+  const [name, setName] = React.useState(initialName)
+  const [email, setEmail] = React.useState(initialEmail)
+  const [input, setInput] = React.useState(initialEmail)
   const [open, setOpen] = React.useState(false)
-
   const isDesktop = useMediaQuery({ query: '(min-width:768px)' })
 
   const edit = async () => {
-    const success = await editProfile(id, name)
+    const success = await editProfile(name, email)
     if (!success) {
       throw new Error()
     }
     router.refresh()
   }
   const debouncedSetEmail = React.useCallback(debounce(setEmail, 500), [])
-  const { data } = checkUID(email)
+  const { data } = checkUID(email, initialEmail)
   const formContent = (
     <form
       className="flex flex-col gap-4"
@@ -261,7 +252,6 @@ export function EditProfile({ id }: { id: string }) {
           error: '변경 실패',
         })
         setOpen(false)
-        setName('')
       }}
     >
       <div className="flex flex-col gap-2">
@@ -282,27 +272,20 @@ export function EditProfile({ id }: { id: string }) {
           }}
           value={input}
         />
-        {email && (
-          <>
-            {data?.available ? (
-              <>
-                <div className="flex gap-2 text-sm items-center">
-                  <Check className="h-4 w-4 text-green-500" strokeWidth={4} />
-                  <p>사용 가능한 아이디입니다.</p>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex gap-2 text-sm items-center">
-                  <X className="h-4 w-4 text-red-500" strokeWidth={4} />
-                  <p>{data?.cause}</p>
-                </div>
-              </>
-            )}
-          </>
-        )}
+        {email !== initialEmail &&
+          (data?.available ? (
+            <div className="flex gap-2 text-sm items-center">
+              <Check className="h-4 w-4 text-green-500" strokeWidth={4} />
+              <p>사용 가능한 아이디입니다.</p>
+            </div>
+          ) : (
+            <div className="flex gap-2 text-sm items-center">
+              <X className="h-4 w-4 text-red-500" strokeWidth={4} />
+              <p>{data?.cause}</p>
+            </div>
+          ))}
       </div>
-      <Button type="submit" disabled={!data?.available}>
+      <Button type="submit" disabled={(!data?.available) && (email !== initialEmail)}>
         변경
       </Button>
     </form>

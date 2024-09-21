@@ -8,11 +8,12 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
 	const query = req.nextUrl.searchParams.get("query")?.toLowerCase();
+	const initial = req.nextUrl.searchParams.get("initial")?.toLowerCase();
 	// Validate username
 	if (!query || query.trim() === "") {
 		return NextResponse.json({
 			available: false,
-			cause: "Username is required.",
+			cause: "아이디를 입력하세요.",
 		});
 	}
 
@@ -50,7 +51,7 @@ export async function GET(req: NextRequest) {
 	};
 	try {
 		const { Items } = await docClient.send(new QueryCommand(params));
-		if (Items && Items.length > 0) {
+		if (Items && Items.length > 0 && query !== initial) {
 			return NextResponse.json({
 				available: false,
 				cause: "이미 사용중인 아이디입니다.",

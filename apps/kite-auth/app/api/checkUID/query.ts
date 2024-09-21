@@ -5,12 +5,12 @@ interface SearchResult {
 	cause: string;
 }
 
-export const checkUID = (query: string) => {
+export const checkUID = (query: string, initial:string) => {
 	return useQuery<SearchResult>({
 		queryKey: ["checkUID", query],
 		queryFn: async () => {
 			const response = await fetch(
-				`/api/checkUID?query=${encodeURIComponent(query)}`,
+				`/api/checkUID?query=${encodeURIComponent(query)}&initial=${encodeURIComponent(initial)}`,
 			);
 			if (!response.ok) {
 				throw new Error("Network response was not ok");
