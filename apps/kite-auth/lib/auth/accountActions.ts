@@ -9,6 +9,7 @@ import {
 	type QueryCommandInput,
 	TransactWriteCommand,
 	UpdateCommand,
+	type UpdateCommandInput
 } from "@aws-sdk/lib-dynamodb";
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { nanoid } from "nanoid";
@@ -31,7 +32,8 @@ const sqsClient = new SQSClient({
 
 export const initializeUser = async (id: string) => {
 	const email = nanoid(10);
-	const params = {
+
+	const params: UpdateCommandInput = {
 		TableName: "next-auth",
 		Key: {
 			pk: `USER#${id}`,
@@ -331,7 +333,7 @@ export const editProfile = async (
 	const sanitizedName = sanitizeInput(name, 50);
 	const sanitizedEmail = sanitizeInput(email, 320).toLowerCase();
 
-	const params = {
+	const params: UpdateCommandInput = {
 		TableName: "next-auth", // DynamoDB 테이블 이름
 		Key: {
 			pk: `USER#${session?.user.id}`,
