@@ -72,11 +72,11 @@ interface UpdateMessageBody {
 }
 
 const encryptMessage = async (
-	userId: string,
+	uid: string,
 	action: "create" | "delete" | "update",
-	body?: UpdateMessageBody
+	data?: UpdateMessageBody
 ): Promise<string> => {
-	const payload = JSON.stringify({ userId, action, body });
+	const payload = JSON.stringify({ uid, action, data });
 	const encodedPayload = new TextEncoder().encode(payload);
 
 	const hexToUint8Array = (hexString: string): Uint8Array => {
@@ -268,8 +268,9 @@ interface TwitterProfile {
 
 export const deleteAccount = async (): Promise<boolean> => {
 	const session = await auth()
+	const uid = session?.user.id
 	const tableName = "next-auth";
-	const pk = `USER#${session?.user.id}`;
+	const pk = `USER#${uid}`;
 
 	try {
 		// 1. Query items with the same partition key
@@ -284,7 +285,7 @@ export const deleteAccount = async (): Promise<boolean> => {
 		const { Items } = await docClient.send(new QueryCommand(queryParams));
 
 		if (!Items || Items.length === 0) {
-			console.error(`No items found for account ${session?.user.id}. This is unexpected.`);
+			console.error(`No items found for account ${uid}. This is unexpected.`);
 			return false;
 		}
 
@@ -304,7 +305,7 @@ export const deleteAccount = async (): Promise<boolean> => {
 		};
 
 		await docClient.send(new BatchWriteCommand(batchWriteParams));
-		const encryptedMessage = await encryptMessage(session?.user.id, "delete");
+		const encryptedMessage = await encryptMessage(uid, "delete");
 		await sendSQSMessage(encryptedMessage);
 		console.log(encryptedMessage);
 		return true;
@@ -336,8 +337,8 @@ export const editProfile = async (
 	const params: UpdateCommandInput = {
 		TableName: "next-auth", // DynamoDB 테이블 이름
 		Key: {
-			pk: `USER#${session?.user.id}`,
-			sk: `USER#${session?.user.id}`,
+			pk: `USER#${uid}`,
+			sk: `USER#${uid}`,
 		},
 		UpdateExpression: "SET #name = :name, email = :email, GSI1PK = :GSI1PK, GSI1SK = :GSI1SK",
 		ExpressionAttributeNames: {
