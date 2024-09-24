@@ -49,14 +49,22 @@ export const initializeUser = async (id: string) => {
 			":createdAt": new Date().toISOString(),
 			":email": email,
 		},
+		ProjectionExpression: "image, name",
+		ReturnValues: "ALL_NEW"
 	};
 
 	try {
 		const command = new UpdateCommand(params);
-		await docClient.send(command);
+		const result = await docClient.send(command);
 
+		const userData = {
+			username: email,
+			nickname: result.Attributes?.name,
+			image: result.Attributes?.image
+		}
+		console.log(userData)
 		// 사용자 초기화 후 메시지 암호화 및 전송
-		const encryptedMessage = await encryptMessage(id, "create");
+		const encryptedMessage = await encryptMessage(id, "create", userData);
 		await sendSQSMessage(encryptedMessage);
 		return { success: true, message: "User initialized and message sent" };
 	} catch (error) {
@@ -331,6 +339,7 @@ export const editProfile = async (
 	email: string
 ): Promise<boolean> => {
 	const session = await auth()
+	const uid = session?.user.id
 	const sanitizedName = sanitizeInput(name, 50);
 	const sanitizedEmail = sanitizeInput(email, 320).toLowerCase();
 
@@ -350,16 +359,20 @@ export const editProfile = async (
 			":GSI1PK": `USER#${sanitizedEmail}`,
 			":GSI1SK": `USER#${sanitizedEmail}`,
 		},
+		ProjectionExpression: "image, name, email",
+		ReturnValues: "ALL_NEW"
 	};
 	
-	const messageBody = {
-		nickname: sanitizedName,
-		username: sanitizedEmail
-	}
+
 
 	try {
-		await docClient.send(new UpdateCommand(params));
-		const encryptedMessage = await encryptMessage(session?.user.id, "update", messageBody);
+		const result = await docClient.send(new UpdateCommand(params));
+		const userData = {
+			nickname: result.Attributes?.name,
+			username: result.Attributes?.email,
+			image: result.Attributes?.image
+		}
+		const encryptedMessage = await encryptMessage(uid, "update", userData);
 		await sendSQSMessage(encryptedMessage);
 		return true;
 	} catch (error) {
