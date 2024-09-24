@@ -9,6 +9,7 @@ import {
 	type QueryCommandInput,
 	TransactWriteCommand,
 	UpdateCommand,
+	type UpdateCommandInput
 } from "@aws-sdk/lib-dynamodb";
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { nanoid } from "nanoid";
@@ -31,7 +32,8 @@ const sqsClient = new SQSClient({
 
 export const initializeUser = async (id: string) => {
 	const email = nanoid(10);
-	const params = {
+
+	const params: UpdateCommandInput = {
 		TableName: "next-auth",
 		Key: {
 			pk: `USER#${id}`,
@@ -47,14 +49,22 @@ export const initializeUser = async (id: string) => {
 			":createdAt": new Date().toISOString(),
 			":email": email,
 		},
+		ProjectionExpression: "image, name",
+		ReturnValues: "ALL_NEW"
 	};
 
 	try {
 		const command = new UpdateCommand(params);
-		await docClient.send(command);
+		const result = await docClient.send(command);
 
+		const userData = {
+			username: email,
+			nickname: result.Attributes?.name,
+			image: result.Attributes?.image
+		}
+		console.log(userData)
 		// 사용자 초기화 후 메시지 암호화 및 전송
-		const encryptedMessage = await encryptMessage(id, "create");
+		const encryptedMessage = await encryptMessage(id, "create", userData);
 		await sendSQSMessage(encryptedMessage);
 		return { success: true, message: "User initialized and message sent" };
 	} catch (error) {
@@ -70,11 +80,11 @@ interface UpdateMessageBody {
 }
 
 const encryptMessage = async (
-	userId: string,
+	uid: string,
 	action: "create" | "delete" | "update",
-	body?: UpdateMessageBody
+	data?: UpdateMessageBody
 ): Promise<string> => {
-	const payload = JSON.stringify({ userId, action, body });
+	const payload = JSON.stringify({ uid, action, data });
 	const encodedPayload = new TextEncoder().encode(payload);
 
 	const hexToUint8Array = (hexString: string): Uint8Array => {
@@ -266,8 +276,9 @@ interface TwitterProfile {
 
 export const deleteAccount = async (): Promise<boolean> => {
 	const session = await auth()
+	const uid = session?.user.id
 	const tableName = "next-auth";
-	const pk = `USER#${session?.user.id}`;
+	const pk = `USER#${uid}`;
 
 	try {
 		// 1. Query items with the same partition key
@@ -282,7 +293,7 @@ export const deleteAccount = async (): Promise<boolean> => {
 		const { Items } = await docClient.send(new QueryCommand(queryParams));
 
 		if (!Items || Items.length === 0) {
-			console.error(`No items found for account ${session?.user.id}. This is unexpected.`);
+			console.error(`No items found for account ${uid}. This is unexpected.`);
 			return false;
 		}
 
@@ -302,7 +313,7 @@ export const deleteAccount = async (): Promise<boolean> => {
 		};
 
 		await docClient.send(new BatchWriteCommand(batchWriteParams));
-		const encryptedMessage = await encryptMessage(session?.user.id, "delete");
+		const encryptedMessage = await encryptMessage(uid, "delete");
 		await sendSQSMessage(encryptedMessage);
 		console.log(encryptedMessage);
 		return true;
@@ -328,14 +339,15 @@ export const editProfile = async (
 	email: string
 ): Promise<boolean> => {
 	const session = await auth()
+	const uid = session?.user.id
 	const sanitizedName = sanitizeInput(name, 50);
 	const sanitizedEmail = sanitizeInput(email, 320).toLowerCase();
 
-	const params = {
+	const params: UpdateCommandInput = {
 		TableName: "next-auth", // DynamoDB 테이블 이름
 		Key: {
-			pk: `USER#${session?.user.id}`,
-			sk: `USER#${session?.user.id}`,
+			pk: `USER#${uid}`,
+			sk: `USER#${uid}`,
 		},
 		UpdateExpression: "SET #name = :name, email = :email, GSI1PK = :GSI1PK, GSI1SK = :GSI1SK",
 		ExpressionAttributeNames: {
@@ -347,16 +359,20 @@ export const editProfile = async (
 			":GSI1PK": `USER#${sanitizedEmail}`,
 			":GSI1SK": `USER#${sanitizedEmail}`,
 		},
+		ProjectionExpression: "image, name, email",
+		ReturnValues: "ALL_NEW"
 	};
 	
-	const messageBody = {
-		nickname: sanitizedName,
-		username: sanitizedEmail
-	}
+
 
 	try {
-		await docClient.send(new UpdateCommand(params));
-		const encryptedMessage = await encryptMessage(session?.user.id, "update", messageBody);
+		const result = await docClient.send(new UpdateCommand(params));
+		const userData = {
+			nickname: result.Attributes?.name,
+			username: result.Attributes?.email,
+			image: result.Attributes?.image
+		}
+		const encryptedMessage = await encryptMessage(uid, "update", userData);
 		await sendSQSMessage(encryptedMessage);
 		return true;
 	} catch (error) {
