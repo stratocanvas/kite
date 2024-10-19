@@ -65,7 +65,7 @@ export const initializeUser = async (id: string) => {
 		console.log(userData)
 		// 사용자 초기화 후 메시지 암호화 및 전송
 		const encryptedMessage = await encryptMessage(id, "create", userData);
-		await sendSQSMessage(encryptedMessage);
+		await sendSQSMessage(JSON.stringify(encryptedMessage));
 		return { success: true, message: "User initialized and message sent" };
 	} catch (error) {
 		console.error("Error initializing user in DynamoDB:", error);
@@ -134,7 +134,8 @@ const sendSQSMessage = async (messageBody: string) => {
 	});
 
 	try {
-		await sqsClient.send(command);
+		const result = await sqsClient.send(command);
+		console.log(result)
 	} catch (error) {
 		console.error("Error sending message to SQS:", error);
 		throw error;
@@ -314,7 +315,7 @@ export const deleteAccount = async (): Promise<boolean> => {
 
 		await docClient.send(new BatchWriteCommand(batchWriteParams));
 		const encryptedMessage = await encryptMessage(uid, "delete");
-		await sendSQSMessage(encryptedMessage);
+		await sendSQSMessage(JSON.stringify(encryptedMessage));
 		console.log(encryptedMessage);
 		return true;
 	} catch (error) {
@@ -373,7 +374,8 @@ export const editProfile = async (
 			image: result.Attributes?.image
 		}
 		const encryptedMessage = await encryptMessage(uid, "update", userData);
-		await sendSQSMessage(encryptedMessage);
+		console.log(encryptedMessage)
+		await sendSQSMessage(JSON.stringify(encryptedMessage));
 		return true;
 	} catch (error) {
 		console.error("Error updating DynamoDB:", error);
