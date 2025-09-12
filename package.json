@@ -96,7 +96,7 @@
     "@vercel/analytics": "^1.2.2",
     "@vercel/og": "^0.6.2",
     "@vercel/speed-insights": "^1.0.10",
-    "axios": "^1.6.7",
+    "axios": "^1.12.0",
     "browser-image-compression": "^2.0.2",
     "canvas": "^2.11.2",
     "class-variance-authority": "^0.7.0",
